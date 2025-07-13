@@ -1,0 +1,49 @@
+{
+  "expo": {
+    "name": "Habit Hero",
+    "slug": "habit-hero",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/icon-heart.png",
+    "iconWidth": 100,
+    "scheme": "habit-hero",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/images/adaptive-icon.png",
+        "backgroundColor": "#ffffff"
+      },
+      "edgeToEdgeEnabled": true,
+      "package": "com.devzaine.habithero"
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "static",
+      "favicon": "./assets/images/favicon.png"
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/images/icon-heart.png",
+          "imageWidth": 200,
+          "resizeMode": "contain"
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "be86e26c-3853-4c6e-b129-ef96fede04e2"
+      }
+    }
+  }
+}
