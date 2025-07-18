@@ -26,9 +26,8 @@ export const Colors = {
 };
 
 export const PookieColors = {
-  deepMagenta: '#B7438C',
-  mediumOrchid: '#C764A8',
-  lightOrchid: '#D88BC7',
-  pastelPink: '#E6A9D7',
-  veryLightPink: '#F7C6ED',
+  black: '#000000',
+  deepRed: '#CE114A',
+  hotPink: '#FF0B55',
+  palePink: '#FFDEDE',
 };

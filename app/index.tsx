@@ -1,6 +1,6 @@
 // screens/HabitHeroScreen.tsx
 import { PookieColors } from '@/constants/Colors';
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -242,75 +242,85 @@ export default function HabitHeroScreen() {
   }
 
   return (
-    <View style={styles.container}>
-
+    <View style={{ flex: 1, backgroundColor: PookieColors.palePink }}>
       <LinearGradient
-        colors={[PookieColors.veryLightPink, PookieColors.lightOrchid]}
-        style={styles.container}
+        colors={[PookieColors.palePink,"#fff"]}
+        style={styles.gradientBackground}
       >
         {/* Header */}
-        <View style={styles.header}>
-          <Text style={styles.title}>Habit Hero</Text>
+        <View style={styles.headerContainer}>
+          <Text style={styles.appTitle}>Habit Hero</Text>
+          <Text style={styles.appSubtitle}>Build your best self, one habit at a time</Text>
           <TouchableOpacity
             style={styles.addButton}
-            onPress={() => {
-              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-              setShowAddModal(true);
-            }}
+            onPress={() => setShowAddModal(true)}
           >
-            <Ionicons name="add" size={28} color="white" />
+            <Ionicons name="add" size={32} color={PookieColors.black} />
           </TouchableOpacity>
         </View>
 
         {/* Stats */}
-        <View style={styles.statsContainer}>
-          <View style={styles.statCard}>
-            <Text style={styles.statNumber}>{getCompletedCount()}</Text>
-            <Text style={styles.statLabel}>Completed</Text>
+        <View style={styles.statsRow}>
+          <View  style={styles.statCardModern}>
+            <MaterialCommunityIcons name="check-circle-outline" size={28} color={PookieColors.deepRed} />
+            <Text style={styles.statNumberModern}>{getCompletedCount()}</Text>
+            <Text style={styles.statLabelModern}>Completed</Text>
           </View>
-          <View style={styles.statCard}>
-            <Text style={styles.statNumber}>{habits.length}</Text>
-            <Text style={styles.statLabel}>Total Habits</Text>
+          <View  style={styles.statCardModern}>
+            <MaterialCommunityIcons name="format-list-bulleted" size={28} color={PookieColors.hotPink} />
+            <Text style={styles.statNumberModern}>{habits.length}</Text>
+            <Text style={styles.statLabelModern}>Total</Text>
           </View>
-          <View style={styles.statCard}>
-            <Text style={styles.statNumber}>{getTotalStreak()}</Text>
-            <Text style={styles.statLabel}>Total Streak</Text>
+          <View style={styles.statCardModern}>
+            <MaterialCommunityIcons name="fire" size={28} color={PookieColors.deepRed} />
+            <Text style={styles.statNumberModern}>{getTotalStreak()}</Text>
+            <Text style={styles.statLabelModern}>Streak</Text>
           </View>
         </View>
 
         {/* Progress */}
-        <View style={styles.progressContainer}>
-          <Text style={styles.progressLabel}>Today's Progress</Text>
-          <View style={styles.progressBarBackground}>
-            <View style={[styles.progressBarFill, { width: `${getCompletionRate() * 100}%` }]} />
+        <View style={styles.progressContainerModern}>
+          <Text style={styles.progressLabelModern}>Today's Progress</Text>
+          <View style={styles.progressBarBackgroundModern}>
+            <LinearGradient
+              colors={[PookieColors.deepRed, PookieColors.hotPink]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
+              style={[styles.progressBarFillModern, { width: `${getCompletionRate() * 100}%` }]}
+            />
           </View>
         </View>
 
         {/* Habits List */}
-        {habits.length === 0 ? (
-          <View style={styles.emptyContainer}>
-            <Ionicons name="list-outline" size={64} color={PookieColors.mediumOrchid} />
-            <Text style={styles.emptyTitle}>No habits yet</Text>
-            <Text style={styles.emptySubtitle}>
-              Tap the + button to add your first habit and become a hero!
-            </Text>
-          </View>
-        ) : (
-          <FlatList
-            data={habits}
-            keyExtractor={(item) => item.id}
-            renderItem={({ item }) => (
-              <HabitCard
-                habit={item}
-                isCompletedToday={isHabitCompletedToday(item)}
-                onToggleCompletion={toggleHabitCompletion}
-                onDelete={deleteHabit}
-              />
-            )}
-            style={styles.habitsList}
-            showsVerticalScrollIndicator={false}
-          />
-        )}
+        <View style={{ flex: 1, marginTop: 10 }}>
+          {habits.length === 0 ? (
+            <View style={styles.emptyContainerModern}>
+              <MaterialCommunityIcons name="emoticon-sad-outline" size={72} color={PookieColors.deepRed} />
+              <Text style={styles.emptyTitleModern}>No habits yet</Text>
+              <Text style={styles.emptySubtitleModern}>
+                Tap the + button to add your first habit and become a hero!
+              </Text>
+            </View>
+          ) : (
+            <FlatList
+              data={habits}
+              keyExtractor={(item) => item.id}
+              renderItem={({ item }) => (
+                <View  style={styles.habitCardModern}>
+                  <HabitCard
+                    habit={item}
+                    isCompletedToday={isHabitCompletedToday(item)}
+                    onToggleCompletion={toggleHabitCompletion}
+                    onDelete={deleteHabit}
+                  />
+                </View>
+              )}
+              style={styles.habitsListModern}
+              showsVerticalScrollIndicator={false}
+              contentContainerStyle={{ paddingBottom: 40 }}
+            />
+          )}
+        </View>
 
         <AddHabitModal
           visible={showAddModal}
@@ -325,16 +335,17 @@ export default function HabitHeroScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingTop: 40
+    paddingTop: 40,
+    backgroundColor : "#fff"
   },
   loadingContainer: {
     flex: 1,
-    backgroundColor: PookieColors.veryLightPink,
+    backgroundColor:PookieColors.palePink,
     justifyContent: 'center',
     alignItems: 'center',
   },
   loadingText: {
-    color: PookieColors.deepMagenta,
+    color: PookieColors.deepRed,
     fontSize: 18,
     fontWeight: '600',
   },
@@ -348,13 +359,13 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 32,
     fontWeight: 'bold',
-    color: PookieColors.deepMagenta,
+    color: PookieColors.deepRed,
     textShadowColor: 'rgba(0, 0, 0, 0.1)',
     textShadowOffset: { width: -1, height: 1 },
     textShadowRadius: 2,
   },
   addButton: {
-    backgroundColor: PookieColors.deepMagenta,
+    backgroundColor: PookieColors.deepRed,
     width: 48,
     height: 48,
     borderRadius: 24,
@@ -368,26 +379,26 @@ const styles = StyleSheet.create({
   },
   statsContainer: {
     flexDirection: 'row',
-    paddingHorizontal: 16,
+    // paddingHorizontal: 16,
     marginBottom: 20,
   },
   statCard: {
     flex: 1,
-    backgroundColor: PookieColors.pastelPink,
-    borderRadius: 16,
-    padding: 16,
-    marginHorizontal: 4,
-    alignItems: 'center',
-    elevation: 3,
+    // backgroundColor: PookieColors.palePink,
+    // borderRadius: 60,
+    // padding: 16,
+    // marginHorizontal: 4,
+    // alignItems: 'center',
+    // elevation: 3,
   },
   statNumber: {
     fontSize: 26,
     fontWeight: 'bold',
-    color: PookieColors.deepMagenta,
+    color: PookieColors.black,
   },
   statLabel: {
     fontSize: 13,
-    color: PookieColors.deepMagenta,
+    color: PookieColors.black,
     marginTop: 4,
     fontWeight: '600',
   },
@@ -398,7 +409,7 @@ const styles = StyleSheet.create({
   progressLabel: {
     fontSize: 16,
     fontWeight: '600',
-    color: PookieColors.deepMagenta,
+    color: PookieColors.deepRed,
     marginBottom: 8,
   },
   progressBarBackground: {
@@ -409,7 +420,7 @@ const styles = StyleSheet.create({
   },
   progressBarFill: {
     height: '100%',
-    backgroundColor: PookieColors.deepMagenta,
+    backgroundColor: PookieColors.deepRed,
     borderRadius: 5,
   },
   habitsList: {
@@ -425,13 +436,119 @@ const styles = StyleSheet.create({
   emptyTitle: {
     fontSize: 22,
     fontWeight: '600',
-    color: PookieColors.deepMagenta,
+    color: PookieColors.deepRed,
     marginTop: 16,
     marginBottom: 8,
   },
   emptySubtitle: {
     fontSize: 16,
-    color: PookieColors.mediumOrchid,
+    color: PookieColors.hotPink,
+    textAlign: 'center',
+    lineHeight: 24,
+  },
+  gradientBackground: {
+    flex: 1,
+    paddingTop: 0,
+  },
+  headerContainer: {
+    alignItems: 'center',
+    marginTop: 40,
+    marginBottom: 24,
+    paddingHorizontal: 20,
+  },
+  appTitle: {
+    fontSize: 40,
+    fontWeight: 'bold',
+    color: PookieColors.deepRed,
+    letterSpacing: 1,
+    textShadowColor: 'rgba(123,47,242,0.08)',
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 8,
+  },
+  appSubtitle: {
+    fontSize: 16,
+    color: PookieColors.hotPink,
+    marginTop: 4,
+    marginBottom: 12,
+    fontWeight: '500',
+  },
+  statsRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginHorizontal: 16,
+    marginBottom: 18,
+  },
+  statCardModern: {
+    flex: 1,
+    marginHorizontal: 6,
+    borderRadius : 20,
+    padding: 18,
+    alignItems: 'center',
+    backgroundColor :"#fff"
+  },
+  statNumberModern: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: PookieColors.deepRed,
+    marginTop: 6,
+  },
+  statLabelModern: {
+    fontSize: 13,
+    color: PookieColors.hotPink,
+    marginTop: 2,
+    fontWeight: '600',
+  },
+  progressContainerModern: {
+    paddingHorizontal: 24,
+    marginBottom: 18,
+  },
+  progressLabelModern: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: PookieColors.deepRed,
+    marginBottom: 8,
+  },
+  progressBarBackgroundModern: {
+    height: 14,
+    backgroundColor: 'rgba(255,255,255,0.4)',
+    borderRadius: 7,
+    overflow: 'hidden',
+  },
+  progressBarFillModern: {
+    height: '100%',
+    borderRadius: 7,
+  },
+  habitsListModern: {
+    flex: 1,
+    paddingHorizontal: 12,
+  },
+  habitCardModern: {
+    marginBottom: 16,
+    borderRadius: 18,
+    overflow: 'hidden',
+    backgroundColor: 'rgba(255,255,255,0.7)',
+    shadowColor: PookieColors.deepRed,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  emptyContainerModern: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 40,
+  },
+  emptyTitleModern: {
+    fontSize: 24,
+    fontWeight: '700',
+    color: PookieColors.deepRed,
+    marginTop: 18,
+    marginBottom: 8,
+  },
+  emptySubtitleModern: {
+    fontSize: 16,
+    color: PookieColors.hotPink,
     textAlign: 'center',
     lineHeight: 24,
   },

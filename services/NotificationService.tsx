@@ -33,7 +33,9 @@ export async function scheduleHabitReminder(habitId: string, habitName: string, 
     triggerDate.setHours(hours);
     triggerDate.setMinutes(minutes);
     triggerDate.setSeconds(0);
-    // If the time has already passed today, schedule for tomorrow
+    // Subtract 1 minute for the notification
+    triggerDate.setTime(triggerDate.getTime() - 60 * 1000);
+    // If the notification time has already passed today, schedule for tomorrow
     if (triggerDate <= now) {
       triggerDate.setDate(triggerDate.getDate() + 1);
     }
@@ -44,12 +46,14 @@ export async function scheduleHabitReminder(habitId: string, habitName: string, 
       trigger = { seconds, repeats: true } as any;
     } else {
       // iOS supports calendar-based triggers
-      trigger = { hour: hours, minute: minutes, repeats: true } as any;
+      let notifHour = triggerDate.getHours();
+      let notifMinute = triggerDate.getMinutes();
+      trigger = { hour: notifHour, minute: notifMinute, repeats: true } as any;
     }
     const notificationId = await Notifications.scheduleNotificationAsync({
       content: {
         title: `Habit Reminder: ${habitName}`,
-        body: `It's time for your habit!`,
+        body: `It's almost time for your habit!`,
         data: { habitId },
       },
       trigger,

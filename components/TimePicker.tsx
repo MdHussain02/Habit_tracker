@@ -62,9 +62,9 @@ export default function TimePicker({ value, onTimeChange, enabled, onToggle }: T
             style={styles.timeButton}
             onPress={() => setShowPicker(true)}
           >
-            <Ionicons name="time-outline" size={20} color={PookieColors.deepMagenta} />
+            <Ionicons name="time-outline" size={20} color={PookieColors.deepRed} />
             <Text style={styles.timeText}>{formatDisplayTime(value)}</Text>
-            <Ionicons name="chevron-down" size={20} color={PookieColors.mediumOrchid} />
+            <Ionicons name="chevron-down" size={20} color={PookieColors.hotPink} />
           </TouchableOpacity>
 
           {showPicker && (
@@ -96,18 +96,18 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 16,
     fontWeight: '600',
-    color: PookieColors.mediumOrchid,
+    color: PookieColors.hotPink,
   },
   toggle: {
     width: 50,
     height: 30,
     borderRadius: 15,
-    backgroundColor: PookieColors.lightOrchid,
+    backgroundColor: PookieColors.palePink,
     padding: 2,
     justifyContent: 'center',
   },
   toggleActive: {
-    backgroundColor: PookieColors.deepMagenta,
+    backgroundColor: PookieColors.deepRed,
   },
   toggleCircle: {
     width: 26,
@@ -129,17 +129,17 @@ const styles = StyleSheet.create({
   timeButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: PookieColors.pastelPink,
+    backgroundColor: PookieColors.palePink,
     borderRadius: 8,
     padding: 16,
     borderWidth: 1,
-    borderColor: PookieColors.deepMagenta,
+    borderColor: PookieColors.deepRed,
   },
   timeText: {
     flex: 1,
     marginLeft: 12,
     fontSize: 16,
-    color: PookieColors.deepMagenta,
+    color: PookieColors.deepRed,
     fontWeight: '500',
   },
   picker: {

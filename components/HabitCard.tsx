@@ -40,7 +40,7 @@ export default function HabitCard({
         <Ionicons 
           name={isCompletedToday ? 'checkmark-circle' : 'ellipse-outline'} 
           size={28} 
-          color={isCompletedToday ? PookieColors.deepMagenta : PookieColors.mediumOrchid} 
+          color={isCompletedToday ? PookieColors.deepRed : PookieColors.hotPink} 
         />
       </TouchableOpacity>
       
@@ -50,12 +50,12 @@ export default function HabitCard({
             {habit.name}
           </Text>
           {habit.icon && (
-            <View style={styles.icon}>{renderIcon(habit.icon, 22, PookieColors.deepMagenta)}</View>
+            <View style={styles.icon}>{renderIcon(habit.icon, 22, PookieColors.deepRed)}</View>
           )}
         </View>
         
         <View style={styles.streakContainer}>
-          <Ionicons name="flame" size={16} color={PookieColors.mediumOrchid} />
+          <Ionicons name="flame" size={16} color={PookieColors.hotPink} />
           <Text style={styles.streakText}>
             {habit.streak} day{habit.streak !== 1 ? 's' : ''} streak
           </Text>
@@ -67,7 +67,7 @@ export default function HabitCard({
           style={styles.deleteButton}
           onPress={() => onDelete(habit.id)}
         >
-          <Ionicons name="trash-outline" size={20} color={PookieColors.deepMagenta} />
+          <Ionicons name="trash-outline" size={20} color={PookieColors.deepRed} />
         </TouchableOpacity>
       )}
     </View>
@@ -78,11 +78,11 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: PookieColors.pastelPink,
+    backgroundColor: PookieColors.palePink,
     borderRadius: 20,
     padding: 18,
     marginBottom: 14,
-    shadowColor: PookieColors.lightOrchid,
+    shadowColor: PookieColors.deepRed,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.13,
     shadowRadius: 8,
@@ -90,7 +90,7 @@ const styles = StyleSheet.create({
   },
   checkbox: {
     marginRight: 16,
-    backgroundColor: PookieColors.veryLightPink,
+    backgroundColor: PookieColors.palePink,
     borderRadius: 16,
     padding: 6,
     alignItems: 'center',
@@ -107,17 +107,17 @@ const styles = StyleSheet.create({
   name: {
     fontSize: 17,
     fontWeight: '700',
-    color: PookieColors.deepMagenta,
+    color: PookieColors.deepRed,
     flex: 1,
     letterSpacing: 0.5,
   },
   completedName: {
     textDecorationLine: 'line-through',
-    color: PookieColors.mediumOrchid,
+    color: PookieColors.deepRed,
   },
   icon: {
     marginLeft: 10,
-    backgroundColor: PookieColors.veryLightPink,
+    backgroundColor: PookieColors.palePink,
     borderRadius: 12,
     padding: 4,
     marginTop:26
@@ -129,14 +129,14 @@ const styles = StyleSheet.create({
   },
   streakText: {
     fontSize: 14,
-    color: PookieColors.mediumOrchid,
+    color: PookieColors.hotPink,
     marginLeft: 6,
     fontWeight: '600',
   },
   deleteButton: {
     padding: 8,
     marginLeft: 8,
-    backgroundColor: PookieColors.veryLightPink,
+    backgroundColor: PookieColors.palePink,
     borderRadius: 16,
   },
 }); 
