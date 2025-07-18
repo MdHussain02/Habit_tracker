@@ -1,9 +1,10 @@
-
+// screens/HabitHeroScreen.tsx
 import { PookieColors } from '@/constants/Colors';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
+import * as Notifications from 'expo-notifications';
 import React, { useEffect, useState } from 'react';
 import {
   Alert,
@@ -15,6 +16,11 @@ import {
 } from 'react-native';
 import AddHabitModal from '../components/AddHabitModal';
 import HabitCard from '../components/HabitCard';
+import {
+  requestPermissions,
+  scheduleHabitReminder,
+  scheduleTestNotification,
+} from '../services/NotificationService';
 import { Habit, HabitFormData } from '../types/habit';
 
 const HABITS_STORAGE_KEY = '@habit_hero_habits';
@@ -24,10 +30,26 @@ export default function HabitHeroScreen() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  // Load habits on app start
   useEffect(() => {
-    loadHabits();
+    initializeApp();
+    const subscription = setupNotificationHandler();
+    return () => subscription.remove();
   }, []);
+
+  const initializeApp = async () => {
+    await requestPermissions();
+    await loadHabits();
+  };
+
+  const setupNotificationHandler = () => {
+    const subscription = Notifications.addNotificationResponseReceivedListener(response => {
+      const { habitId } = response.notification.request.content.data;
+      if (habitId) {
+        console.log('Notification tapped for habit:', habitId);
+      }
+    });
+    return subscription;
+  };
 
   const loadHabits = async () => {
     try {
@@ -58,7 +80,28 @@ export default function HabitHeroScreen() {
       createdAt: Date.now(),
       streak: 0,
       completedDates: [],
+      reminder: habitData.reminder,
     };
+
+    if (habitData.reminder?.enabled) {
+      const notificationId = await scheduleHabitReminder(
+        newHabit.id,
+        newHabit.name,
+        habitData.reminder.time
+      );
+
+      if (notificationId) {
+        newHabit.reminder = {
+          ...habitData.reminder,
+          notificationId,
+        };
+      } else {
+        Alert.alert(
+          'Reminder Not Set',
+          'Could not set up reminder for this habit. Please check your notification settings.'
+        );
+      }
+    }
 
     const updatedHabits = [...habits, newHabit];
     await saveHabits(updatedHabits);
@@ -72,10 +115,9 @@ export default function HabitHeroScreen() {
         const isCompletedToday = habit.completedDates.includes(today);
 
         if (isCompletedToday) {
-          // Remove today from completed dates
           const newCompletedDates = habit.completedDates.filter(date => date !== today);
           const newLastCompletedDate = newCompletedDates[newCompletedDates.length - 1];
-          
+
           return {
             ...habit,
             completedDates: newCompletedDates,
@@ -83,10 +125,9 @@ export default function HabitHeroScreen() {
             streak: calculateStreak(newCompletedDates),
           };
         } else {
-          // Add today to completed dates
           Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
           const newCompletedDates = [...habit.completedDates, today];
-          
+
           return {
             ...habit,
             completedDates: newCompletedDates,
@@ -102,6 +143,8 @@ export default function HabitHeroScreen() {
   };
 
   const deleteHabit = (habitId: string) => {
+    const habitToDelete = habits.find(h => h.id === habitId);
+
     Alert.alert(
       'Delete Habit',
       'Are you sure you want to delete this habit?',
@@ -112,6 +155,11 @@ export default function HabitHeroScreen() {
           style: 'destructive',
           onPress: async () => {
             Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+
+            if (habitToDelete?.reminder?.notificationId) {
+              await Notifications.cancelScheduledNotificationAsync(habitToDelete.reminder.notificationId);
+            }
+
             const updatedHabits = habits.filter(habit => habit.id !== habitId);
             await saveHabits(updatedHabits);
           },
@@ -130,29 +178,26 @@ export default function HabitHeroScreen() {
     let streak = 0;
     let currentDate = today;
 
-    if (sortedDates.length > 0) {
-      const mostRecentDate = sortedDates[0];
-      mostRecentDate.setHours(0, 0, 0, 0);
-      const diffTime = Math.abs(currentDate.getTime() - mostRecentDate.getTime());
-      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    const mostRecentDate = sortedDates[0];
+    mostRecentDate.setHours(0, 0, 0, 0);
+    const diffTime = Math.abs(currentDate.getTime() - mostRecentDate.getTime());
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-      if (diffDays <= 1) {
-        streak++;
-        currentDate = mostRecentDate;
-        for (let i = 1; i < sortedDates.length; i++) {
-          const date = sortedDates[i];
-          date.setHours(0, 0, 0, 0);
-          const prevDate = sortedDates[i - 1];
-          prevDate.setHours(0, 0, 0, 0);
-          
-          const diffTime = Math.abs(prevDate.getTime() - date.getTime());
-          const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    if (diffDays <= 1) {
+      streak++;
+      for (let i = 1; i < sortedDates.length; i++) {
+        const date = sortedDates[i];
+        date.setHours(0, 0, 0, 0);
+        const prevDate = sortedDates[i - 1];
+        prevDate.setHours(0, 0, 0, 0);
 
-          if (diffDays === 1) {
-            streak++;
-          } else {
-            break;
-          }
+        const diff = Math.abs(prevDate.getTime() - date.getTime());
+        const days = Math.ceil(diff / (1000 * 60 * 60 * 24));
+
+        if (days === 1) {
+          streak++;
+        } else {
+          break;
         }
       }
     }
@@ -187,81 +232,96 @@ export default function HabitHeroScreen() {
   }
 
   return (
-    <LinearGradient
-      colors={[PookieColors.veryLightPink, PookieColors.lightOrchid]}
-      style={styles.container}
-    >
-      {/* Header */}
-      <View style={styles.header}>
-        <Text style={styles.title}>Habit Hero</Text>
-        <TouchableOpacity
-          style={styles.addButton}
-          onPress={() => {
-            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-            setShowAddModal(true);
-          }}
-        >
-          <Ionicons name="add" size={28} color="white" />
-        </TouchableOpacity>
-      </View>
+    <View style={styles.container}>
+      <TouchableOpacity
+        style={{ backgroundColor: '#007AFF', padding: 12, borderRadius: 8, margin: 10 }}
+        onPress={async () => {
+          const id = await scheduleTestNotification();
+          if (id) {
+            Alert.alert('Test notification scheduled!', 'You should receive a notification every 10 seconds.');
+          } else {
+            Alert.alert('Error', 'Failed to schedule test notification.');
+          }
+        }}
+      >
+        <Text style={{ color: 'white', fontWeight: 'bold', textAlign: 'center' }}>Test Notification</Text>
+      </TouchableOpacity>
 
-      {/* Stats */}
-      <View style={styles.statsContainer}>
-        <View style={styles.statCard}>
-          <Text style={styles.statNumber}>{getCompletedCount()}</Text>
-          <Text style={styles.statLabel}>Completed</Text>
+      <LinearGradient
+        colors={[PookieColors.veryLightPink, PookieColors.lightOrchid]}
+        style={styles.container}
+      >
+        {/* Header */}
+        <View style={styles.header}>
+          <Text style={styles.title}>Habit Hero</Text>
+          <TouchableOpacity
+            style={styles.addButton}
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+              setShowAddModal(true);
+            }}
+          >
+            <Ionicons name="add" size={28} color="white" />
+          </TouchableOpacity>
         </View>
-        <View style={styles.statCard}>
-          <Text style={styles.statNumber}>{habits.length}</Text>
-          <Text style={styles.statLabel}>Total Habits</Text>
-        </View>
-        <View style={styles.statCard}>
-          <Text style={styles.statNumber}>{getTotalStreak()}</Text>
-          <Text style={styles.statLabel}>Total Streak</Text>
-        </View>
-      </View>
 
-      {/* Progress Bar */}
-      <View style={styles.progressContainer}>
-        <Text style={styles.progressLabel}>Today's Progress</Text>
-        <View style={styles.progressBarBackground}>
-          <View style={[styles.progressBarFill, { width: `${getCompletionRate() * 100}%` }]} />
+        {/* Stats */}
+        <View style={styles.statsContainer}>
+          <View style={styles.statCard}>
+            <Text style={styles.statNumber}>{getCompletedCount()}</Text>
+            <Text style={styles.statLabel}>Completed</Text>
+          </View>
+          <View style={styles.statCard}>
+            <Text style={styles.statNumber}>{habits.length}</Text>
+            <Text style={styles.statLabel}>Total Habits</Text>
+          </View>
+          <View style={styles.statCard}>
+            <Text style={styles.statNumber}>{getTotalStreak()}</Text>
+            <Text style={styles.statLabel}>Total Streak</Text>
+          </View>
         </View>
-      </View>
 
-      {/* Habits List */}
-      {habits.length === 0 ? (
-        <View style={styles.emptyContainer}>
-          <Ionicons name="list-outline" size={64} color={PookieColors.mediumOrchid} />
-          <Text style={styles.emptyTitle}>No habits yet</Text>
-          <Text style={styles.emptySubtitle}>
-            Tap the + button to add your first habit and become a hero!
-          </Text>
+        {/* Progress */}
+        <View style={styles.progressContainer}>
+          <Text style={styles.progressLabel}>Today's Progress</Text>
+          <View style={styles.progressBarBackground}>
+            <View style={[styles.progressBarFill, { width: `${getCompletionRate() * 100}%` }]} />
+          </View>
         </View>
-      ) : (
-        <FlatList
-          data={habits}
-          keyExtractor={(item) => item.id}
-          renderItem={({ item }) => (
-            <HabitCard
-              habit={item}
-              isCompletedToday={isHabitCompletedToday(item)}
-              onToggleCompletion={toggleHabitCompletion}
-              onDelete={deleteHabit}
-            />
-          )}
-          style={styles.habitsList}
-          showsVerticalScrollIndicator={false}
+
+        {/* Habits List */}
+        {habits.length === 0 ? (
+          <View style={styles.emptyContainer}>
+            <Ionicons name="list-outline" size={64} color={PookieColors.mediumOrchid} />
+            <Text style={styles.emptyTitle}>No habits yet</Text>
+            <Text style={styles.emptySubtitle}>
+              Tap the + button to add your first habit and become a hero!
+            </Text>
+          </View>
+        ) : (
+          <FlatList
+            data={habits}
+            keyExtractor={(item) => item.id}
+            renderItem={({ item }) => (
+              <HabitCard
+                habit={item}
+                isCompletedToday={isHabitCompletedToday(item)}
+                onToggleCompletion={toggleHabitCompletion}
+                onDelete={deleteHabit}
+              />
+            )}
+            style={styles.habitsList}
+            showsVerticalScrollIndicator={false}
+          />
+        )}
+
+        <AddHabitModal
+          visible={showAddModal}
+          onClose={() => setShowAddModal(false)}
+          onAddHabit={addHabit}
         />
-      )}
-
-      {/* Add Habit Modal */}
-      <AddHabitModal
-        visible={showAddModal}
-        onClose={() => setShowAddModal(false)}
-        onAddHabit={addHabit}
-      />
-    </LinearGradient>
+      </LinearGradient>
+    </View>
   );
 }
 
@@ -316,15 +376,11 @@ const styles = StyleSheet.create({
   },
   statCard: {
     flex: 1,
-    backgroundColor: 'rgba(255, 255, 255, 0.3)',
+    backgroundColor: PookieColors.pastelPink,
     borderRadius: 16,
     padding: 16,
     marginHorizontal: 4,
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
     elevation: 3,
   },
   statNumber: {
@@ -383,4 +439,3 @@ const styles = StyleSheet.create({
     lineHeight: 24,
   },
 });
-

@@ -1,3 +1,4 @@
+// components/AddHabitModal.tsx
 import { PookieColors } from '@/constants/Colors';
 import { FontAwesome, Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { default as React, useState } from 'react';
@@ -11,7 +12,8 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import { HabitFormData, HabitIcon } from '../types/habit';
+import { HabitFormData, HabitIcon, HabitReminder } from '../types/habit';
+import TimePicker from './TimePicker';
 
 const SUGGESTED_ICONS: HabitIcon[] = [
   { set: 'Ionicons', name: 'water' },
@@ -48,6 +50,10 @@ interface AddHabitModalProps {
 export default function AddHabitModal({ visible, onClose, onAddHabit }: AddHabitModalProps) {
   const [habitName, setHabitName] = useState('');
   const [selectedIcon, setSelectedIcon] = useState<HabitIcon | undefined>(undefined);
+  const [reminder, setReminder] = useState<HabitReminder>({
+    enabled: false,
+    time: '09:00', // Default to 9:00 AM
+  });
 
   const handleAddHabit = () => {
     if (!habitName.trim()) {
@@ -58,18 +64,29 @@ export default function AddHabitModal({ visible, onClose, onAddHabit }: AddHabit
     onAddHabit({
       name: habitName.trim(),
       icon: selectedIcon,
+      reminder: reminder.enabled ? reminder : undefined,
     });
 
     // Reset form
     setHabitName('');
     setSelectedIcon(undefined);
+    setReminder({ enabled: false, time: '09:00' });
     onClose();
   };
 
   const handleClose = () => {
     setHabitName('');
     setSelectedIcon(undefined);
+    setReminder({ enabled: false, time: '09:00' });
     onClose();
+  };
+
+  const handleReminderToggle = (enabled: boolean) => {
+    setReminder(prev => ({ ...prev, enabled }));
+  };
+
+  const handleTimeChange = (time: string) => {
+    setReminder(prev => ({ ...prev, time }));
   };
 
   return (
@@ -125,6 +142,15 @@ export default function AddHabitModal({ visible, onClose, onAddHabit }: AddHabit
                 );
               })}
             </View>
+          </View>
+
+          <View style={styles.section}>
+            <TimePicker
+              value={reminder.time}
+              onTimeChange={handleTimeChange}
+              enabled={reminder.enabled}
+              onToggle={handleReminderToggle}
+            />
           </View>
         </ScrollView>
 
@@ -188,7 +214,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
-    margin:10
+    margin: 10,
   },
   iconButton: {
     width: 50,
@@ -223,4 +249,4 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
   },
-}); 
+});

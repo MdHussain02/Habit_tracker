@@ -1,6 +1,13 @@
+// types/habit.ts
 export interface HabitIcon {
   set: 'Ionicons' | 'MaterialIcons' | 'FontAwesome';
   name: string;
+}
+
+export interface HabitReminder {
+  enabled: boolean;
+  time: string; // HH:MM format
+  notificationId?: string;
 }
 
 export interface Habit {
@@ -9,11 +16,13 @@ export interface Habit {
   icon?: HabitIcon;
   createdAt: number;
   streak: number;
-  lastCompletedDate?: string; // YYYY-MM-DD format
-  completedDates: string[]; // Array of YYYY-MM-DD dates
+  completedDates: string[];
+  lastCompletedDate?: string;
+  reminder?: HabitReminder;
 }
 
 export interface HabitFormData {
   name: string;
   icon?: HabitIcon;
-} 
+  reminder?: HabitReminder;
+}
