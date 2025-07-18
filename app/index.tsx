@@ -18,10 +18,20 @@ import AddHabitModal from '../components/AddHabitModal';
 import HabitCard from '../components/HabitCard';
 import {
   requestPermissions,
-  scheduleHabitReminder,
-  scheduleTestNotification,
+  scheduleHabitReminder
 } from '../services/NotificationService';
 import { Habit, HabitFormData } from '../types/habit';
+
+// Show notifications as popups even when app is in foreground
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowAlert: true,
+    shouldPlaySound: true,
+    shouldSetBadge: false,
+    shouldShowBanner: true,
+    shouldShowList: true,
+  }),
+});
 
 const HABITS_STORAGE_KEY = '@habit_hero_habits';
 
@@ -233,19 +243,6 @@ export default function HabitHeroScreen() {
 
   return (
     <View style={styles.container}>
-      <TouchableOpacity
-        style={{ backgroundColor: '#007AFF', padding: 12, borderRadius: 8, margin: 10 }}
-        onPress={async () => {
-          const id = await scheduleTestNotification();
-          if (id) {
-            Alert.alert('Test notification scheduled!', 'You should receive a notification every 10 seconds.');
-          } else {
-            Alert.alert('Error', 'Failed to schedule test notification.');
-          }
-        }}
-      >
-        <Text style={{ color: 'white', fontWeight: 'bold', textAlign: 'center' }}>Test Notification</Text>
-      </TouchableOpacity>
 
       <LinearGradient
         colors={[PookieColors.veryLightPink, PookieColors.lightOrchid]}
@@ -328,11 +325,11 @@ export default function HabitHeroScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingTop: 60,
+    paddingTop: 40
   },
   loadingContainer: {
     flex: 1,
-    backgroundColor: '#1A1A1A',
+    backgroundColor: PookieColors.veryLightPink,
     justifyContent: 'center',
     alignItems: 'center',
   },
