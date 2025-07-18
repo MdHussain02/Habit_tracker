@@ -4,7 +4,9 @@ import { FontAwesome, Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { default as React, useState } from 'react';
 import {
   Alert,
+  Keyboard,
   Modal,
+  Platform,
   ScrollView,
   StyleSheet,
   Text,
@@ -52,6 +54,16 @@ export default function AddHabitModal({ visible, onClose, onAddHabit }: AddHabit
     enabled: false,
     time: '09:00', // Default to 9:00 AM
   });
+  const [keyboardOpen, setKeyboardOpen] = useState(false);
+
+  React.useEffect(() => {
+    const showSub = Keyboard.addListener('keyboardDidShow', () => setKeyboardOpen(true));
+    const hideSub = Keyboard.addListener('keyboardDidHide', () => setKeyboardOpen(false));
+    return () => {
+      showSub.remove();
+      hideSub.remove();
+    };
+  }, []);
 
   const handleAddHabit = () => {
     if (!habitName.trim()) {
@@ -96,7 +108,12 @@ export default function AddHabitModal({ visible, onClose, onAddHabit }: AddHabit
       onRequestClose={handleClose}
     >
       <View style={styles.overlay}>
-        <View  style={styles.bottomSheet}>
+        <View
+          style={[
+            styles.bottomSheet,
+            Platform.OS === 'android' && keyboardOpen ? { maxHeight: 400 } : {},
+          ]}
+        >
           <View style={styles.dragIndicator} />
           <View style={styles.headerModern}>
             <Text style={styles.titleModern}>Add New Habit</Text>

@@ -81,12 +81,7 @@ const styles = StyleSheet.create({
     backgroundColor: PookieColors.palePink,
     borderRadius: 20,
     padding: 18,
-    marginBottom: 14,
-    shadowColor: PookieColors.deepRed,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.13,
-    shadowRadius: 8,
-    elevation: 3,
+    marginBottom: 14
   },
   checkbox: {
     marginRight: 16,

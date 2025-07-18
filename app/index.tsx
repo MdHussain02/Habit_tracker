@@ -251,12 +251,6 @@ export default function HabitHeroScreen() {
         <View style={styles.headerContainer}>
           <Text style={styles.appTitle}>Habit Hero</Text>
           <Text style={styles.appSubtitle}>Build your best self, one habit at a time</Text>
-          <TouchableOpacity
-            style={styles.addButton}
-            onPress={() => setShowAddModal(true)}
-          >
-            <Ionicons name="add" size={32} color={PookieColors.black} />
-          </TouchableOpacity>
         </View>
 
         {/* Stats */}
@@ -291,6 +285,8 @@ export default function HabitHeroScreen() {
           </View>
         </View>
 
+      
+
         {/* Habits List */}
         <View style={{ flex: 1, marginTop: 10 }}>
           {habits.length === 0 ? (
@@ -321,6 +317,14 @@ export default function HabitHeroScreen() {
             />
           )}
         </View>
+        {/* Floating Add Button */}
+        <TouchableOpacity
+          style={styles.fab}
+          onPress={() => setShowAddModal(true)}
+        >
+          <Ionicons name="add" size={32} color={PookieColors.black} />
+        </TouchableOpacity>
+        
 
         <AddHabitModal
           visible={showAddModal}
@@ -526,12 +530,6 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     borderRadius: 18,
     overflow: 'hidden',
-    backgroundColor: 'rgba(255,255,255,0.7)',
-    shadowColor: PookieColors.deepRed,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
-    elevation: 2,
   },
   emptyContainerModern: {
     flex: 1,
@@ -551,5 +549,23 @@ const styles = StyleSheet.create({
     color: PookieColors.hotPink,
     textAlign: 'center',
     lineHeight: 24,
+  },
+  fab: {
+    position: 'absolute',
+    right: 24,
+    bottom: 36,
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: PookieColors.palePink,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: PookieColors.deepRed,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.18,
+    shadowRadius: 8,
+    elevation: 6,
+    borderWidth: 2,
+    borderColor: PookieColors.deepRed,
   },
 });
