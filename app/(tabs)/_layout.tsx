@@ -9,14 +9,12 @@ export default function TabLayout() {
       screenOptions={{
         headerShown: false,
         tabBarStyle: {
-          backgroundColor: '#1a1a1a',
-          height: 80,
-          borderBlockColor : "000",
-          // paddingBottom: ,
-          paddingTop: 10
+          height: 72,
+          paddingBottom: 14,
+          paddingTop: 8
         },
         tabBarActiveTintColor: PookieColors?.hotPink || '#FF1972',
-        tabBarInactiveTintColor: '#666',
+        // tabBarInactiveTintColor: '#666',
         tabBarLabelStyle: {
           fontSize: 12,
           fontWeight: '600',
