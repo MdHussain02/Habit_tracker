@@ -466,4 +466,13 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontSize: 15,
   },
+  logoutButton: {
+    backgroundColor: '#FF5A5F',
+    borderRadius: 16,
+    paddingVertical: 14,
+    paddingHorizontal: 32,
+    alignItems: 'center',
+    minWidth: 120,
+    marginTop: 32,
+  },
 }); 

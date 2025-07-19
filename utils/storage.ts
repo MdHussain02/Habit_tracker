@@ -10,3 +10,7 @@ export async function isUserRegistered() {
 export async function setUserRegistered() {
   await AsyncStorage.setItem(REGISTRATION_KEY, 'true');
 }
+
+export async function logoutUser() {
+  await AsyncStorage.removeItem(REGISTRATION_KEY);
+}
