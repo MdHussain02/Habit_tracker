@@ -461,7 +461,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   appTitle: {
-    fontSize: 40,
+    fontSize: 20,
     fontWeight: 'bold',
     color: PookieColors.deepRed,
     letterSpacing: 1,
@@ -470,7 +470,7 @@ const styles = StyleSheet.create({
     textShadowRadius: 8,
   },
   appSubtitle: {
-    fontSize: 16,
+    fontSize: 10,
     color: PookieColors.hotPink,
     marginTop: 4,
     marginBottom: 12,

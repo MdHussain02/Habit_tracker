@@ -78,7 +78,7 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: PookieColors.palePink,
+    backgroundColor: "#fff",
     borderRadius: 20,
     padding: 18,
     marginBottom: 14
