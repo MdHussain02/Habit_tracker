@@ -1,13 +1,15 @@
 import { PookieColors } from '@/constants/Colors';
 import { Ionicons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { LinearGradient } from 'expo-linear-gradient';
 import React, { useState } from 'react';
 import {
-    ScrollView,
-    StyleSheet,
-    Switch,
-    Text,
-    View
+  ScrollView,
+  StyleSheet,
+  Switch,
+  Text,
+  TouchableOpacity,
+  View
 } from 'react-native';
 
 export default function SettingsScreen() {
@@ -132,6 +134,19 @@ export default function SettingsScreen() {
               {section.items.map(renderSettingItem)}
             </View>
           ))}
+          <TouchableOpacity
+            style={styles.logoutButton}
+            onPress={async () => {
+              await AsyncStorage.removeItem('onboardingDone');
+              await AsyncStorage.removeItem('userRegistered');
+              // Reload the app to trigger onboarding flow
+              if (typeof window !== 'undefined') {
+                window.location.reload();
+              }
+            }}
+          >
+            <Text style={styles.logoutButtonText}>Log Out</Text>
+          </TouchableOpacity>
         </ScrollView>
       </LinearGradient>
     </View>
@@ -223,5 +238,18 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#fff',
     fontWeight: '500',
+  },
+  logoutButton: {
+    backgroundColor: '#FF1972',
+    borderRadius: 8,
+    paddingVertical: 14,
+    alignItems: 'center',
+    marginTop: 24,
+    marginBottom: 40,
+  },
+  logoutButtonText: {
+    color: '#fff',
+    fontWeight: 'bold',
+    fontSize: 16,
   },
 }); 
