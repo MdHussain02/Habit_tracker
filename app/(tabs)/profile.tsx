@@ -4,6 +4,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { Alert, Image, Modal, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { getUserData } from '../../utils/storage';
 
 const PROFILE_KEY = 'userProfile';
 
@@ -28,54 +29,36 @@ export default function ProfileScreen() {
     quote: '',
   });
 
-  // Mock data for demo
-  const habits = [
-    { name: 'Morning Meditation', percent: 75 },
-    { name: 'Drink 8 Glasses of Water', percent: 90 },
-    { name: 'Daily Workout', percent: 50 },
-    { name: 'Read for 30 Minutes', percent: 100 },
-  ];
-  const achievements = [
-    { icon: <MaterialCommunityIcons name="chat-processing" size={36} color="#FF7A7A" />, title: 'Streak Starter', subtitle: 'Achieved 7-day streak' },
-    { icon: <MaterialCommunityIcons name="snowflake" size={36} color="#7A7AFF" />, title: 'Habit Master', subtitle: 'Completed 10 habits' },
-    { icon: <MaterialCommunityIcons name="meditation" size={36} color="#FF7A7A" />, title: 'Zen Warrior', subtitle: 'Meditated for 30 days' },
-    { icon: <MaterialCommunityIcons name="water" size={36} color="#7A7AFF" />, title: 'Hydration Hero', subtitle: 'Drank water for 60 days' },
-  ];
-  const stats = [
-    { icon: <AntDesign name="checkcircleo" size={28} color="#7A7AFF" />, label: 'Overall Completion', value: '78%' },
-    { icon: <MaterialCommunityIcons name="water" size={28} color="#7A7AFF" />, label: 'Current Streak Days', value: '35' },
-    { icon: <MaterialCommunityIcons name="target" size={28} color="#7A7AFF" />, label: 'Active Habits', value: '12' },
-  ];
-
   useEffect(() => {
     loadProfile();
   }, []);
 
   const loadProfile = async () => {
     try {
-      const data = await AsyncStorage.getItem(PROFILE_KEY);
-      if (data) {
-        setProfile(JSON.parse(data));
+      // Load registration data from storage
+      const user = await getUserData();
+      if (user) {
+        setProfile((prev) => ({
+          ...prev,
+          name: user.name || '',
+          email: user.email || '',
+          height: user.height || '',
+          weight: user.weight || '',
+          age: user.age || '',
+          gender: user.gender || '',
+        }));
       } else {
-        // Try to load registration data for first time
-        const name = await AsyncStorage.getItem('userName');
-        const email = await AsyncStorage.getItem('userEmail');
-        const height = await AsyncStorage.getItem('userHeight');
-        const weight = await AsyncStorage.getItem('userWeight');
-        const age = await AsyncStorage.getItem('userAge');
-        const gender = await AsyncStorage.getItem('userGender');
-        setProfile({
-          name: name || '',
-          email: email || '',
-          height: height || '',
-          weight: weight || '',
-          age: age || '',
-          gender: gender || '',
-          avatar: '',
-          level: '12', // Default level
-          quote: 'Consistency is key to lasting change.', // Default quote
-        });
+        setProfile((prev) => ({
+          ...prev,
+          name: '',
+          email: '',
+          height: '',
+          weight: '',
+          age: '',
+          gender: '',
+        }));
       }
+      // Avatar, level, quote remain editable in this screen only
     } catch (e) {
       Alert.alert('Error', 'Could not load profile');
     } finally {
@@ -157,34 +140,38 @@ export default function ProfileScreen() {
             <Text style={styles.editProfileBtnText}>Edit Profile</Text>
           </TouchableOpacity>
         </View>
+        {/* Personal Details Tile */}
+        <TouchableOpacity
+          style={styles.personalDetailsTile}
+          onPress={() => router.push('/profile/details')}
+          activeOpacity={0.85}
+        >
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <MaterialCommunityIcons name="account-details" size={24} color="#7066F6" style={{ marginRight: 12 }} />
+            <View>
+              <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 16 }}>Personal Details</Text>
+              <Text style={{ color: '#aaa', fontSize: 13 }}>{profile.email ? profile.email : 'Add your details'}</Text>
+            </View>
+          </View>
+          <AntDesign name="right" size={20} color="#aaa" />
+        </TouchableOpacity>
+        {/* Achievements Tile */}
+        <TouchableOpacity
+          style={styles.achievementsTile}
+          onPress={() => router.push('/profile/achievements')}
+          activeOpacity={0.85}
+        >
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <MaterialCommunityIcons name="trophy-award" size={24} color="#FFD93D" style={{ marginRight: 12 }} />
+            <View>
+              <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 16 }}>Achievements</Text>
+              <Text style={{ color: '#aaa', fontSize: 13 }}>View your badges</Text>
+            </View>
+          </View>
+          <AntDesign name="right" size={20} color="#aaa" />
+        </TouchableOpacity>
       </View>
       <ScrollView contentContainerStyle={{ alignItems: 'center', paddingBottom: 40 }}>
-        {/* Achievements */}
-        <View style={styles.sectionBox}>
-          <Text style={styles.sectionTitle}>Achievements</Text>
-          <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between' }}>
-            {achievements.map((ach, idx) => (
-              <View key={idx} style={styles.achievementBadge}>
-                {ach.icon}
-                <Text style={styles.achievementTitle}>{ach.title}</Text>
-                <Text style={styles.achievementSubtitle}>{ach.subtitle}</Text>
-              </View>
-            ))}
-          </View>
-        </View>
-        {/* Statistics Overview */}
-        <View style={styles.sectionBox}>
-          <Text style={styles.sectionTitle}>Statistics Overview</Text>
-          <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between' }}>
-            {stats.map((stat, idx) => (
-              <View key={idx} style={styles.statBox}>
-                {stat.icon}
-                <Text style={styles.statValue}>{stat.value}</Text>
-                <Text style={styles.statLabel}>{stat.label}</Text>
-              </View>
-            ))}
-          </View>
-        </View>
         {/* Edit Profile Modal */}
         <Modal
           visible={editModalVisible}
@@ -474,5 +461,27 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     minWidth: 120,
     marginTop: 32,
+  },
+  personalDetailsTile: {
+    backgroundColor: '#23232b',
+    borderRadius: 12,
+    padding: 16,
+    marginTop: 18,
+    marginBottom: 0,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    width: '100%',
+  },
+  achievementsTile: {
+    backgroundColor: '#23232b',
+    borderRadius: 12,
+    padding: 16,
+    marginTop: 14,
+    marginBottom: 0,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    width: '100%',
   },
 }); 

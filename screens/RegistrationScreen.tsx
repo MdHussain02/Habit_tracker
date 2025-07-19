@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { KeyboardAvoidingView, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { saveUserData } from '../utils/storage';
 
 const steps = [
   'Personal Info',
@@ -29,9 +30,12 @@ export default function RegistrationScreen({ onRegister }: { onRegister: (user: 
     return true;
   };
 
-  const nextStep = () => {
+  const nextStep = async () => {
     if (step < steps.length - 1) setStep(step + 1);
-    else onRegister(form);
+    else {
+      await saveUserData(form);
+      onRegister(form);
+    }
   };
 
   const prevStep = () => {

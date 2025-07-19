@@ -3,22 +3,19 @@ import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import React, { useState } from 'react';
 import {
-    Dimensions,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  Dimensions,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from 'react-native';
-
 const { width } = Dimensions.get('window');
-
 export default function AnalyticsScreen() {
   const [selectedPeriod, setSelectedPeriod] = useState<'week' | 'month'>('week');
 
   const completionData = {
     week: [65, 80, 90, 85, 70, 75, 95],
-    month: [65, 80, 90, 85, 70, 75, 95, 80, 85, 90, 75, 80, 85, 90, 95, 80, 85, 90, 75, 80, 85, 90, 95, 80, 85, 90, 75, 80, 85, 90],
   };
 
   const longestStreaks = [
@@ -72,7 +69,7 @@ export default function AnalyticsScreen() {
   };
 
   const renderGraph = () => {
-    const data = completionData[selectedPeriod];
+    const data = completionData.week;
     const maxValue = Math.max(...data);
     const barWidth = (width - 80) / data.length;
 
@@ -85,7 +82,7 @@ export default function AnalyticsScreen() {
               <View key={index} style={styles.barContainer}>
                 <View style={[styles.bar, { height, width: barWidth - 4 }]} />
                 <Text style={styles.barLabel}>
-                  {selectedPeriod === 'week' ? ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'][index] : `${index + 1}`}
+                  {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'][index]}
                 </Text>
               </View>
             );
@@ -111,36 +108,6 @@ export default function AnalyticsScreen() {
           <View style={styles.section}>
             <View style={styles.sectionHeader}>
               <Text style={styles.sectionTitle}>Completion Rate</Text>
-              <View style={styles.periodSelector}>
-                <TouchableOpacity
-                  style={[
-                    styles.periodButton,
-                    selectedPeriod === 'week' && styles.periodButtonActive,
-                  ]}
-                  onPress={() => setSelectedPeriod('week')}
-                >
-                  <Text style={[
-                    styles.periodButtonText,
-                    selectedPeriod === 'week' && styles.periodButtonTextActive,
-                  ]}>
-                    Week
-                  </Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={[
-                    styles.periodButton,
-                    selectedPeriod === 'month' && styles.periodButtonActive,
-                  ]}
-                  onPress={() => setSelectedPeriod('month')}
-                >
-                  <Text style={[
-                    styles.periodButtonText,
-                    selectedPeriod === 'month' && styles.periodButtonTextActive,
-                  ]}>
-                    Month
-                  </Text>
-                </TouchableOpacity>
-              </View>
             </View>
             
             {renderGraph()}

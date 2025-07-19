@@ -6,7 +6,7 @@ import { View } from 'react-native';
 import { useColorScheme } from '../hooks/useColorScheme';
 import OnboardingScreen from '../screens/OnboardingScreen';
 import RegistrationScreen from '../screens/RegistrationScreen';
-import { isUserRegistered, setUserRegistered } from '../utils/storage';
+import { getUserData, setUserRegistered } from '../utils/storage';
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
@@ -16,8 +16,8 @@ export default function RootLayout() {
 
   useEffect(() => {
     (async () => {
-      const registered = await isUserRegistered();
-      if (!registered) {
+      const user = await getUserData();
+      if (!user) {
         setShowOnboarding(true);
       }
       setLoading(false);

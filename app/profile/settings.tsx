@@ -4,13 +4,14 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { LinearGradient } from 'expo-linear-gradient';
 import React, { useState } from 'react';
 import {
-    ScrollView,
-    StyleSheet,
-    Switch,
-    Text,
-    TouchableOpacity,
-    View
+  ScrollView,
+  StyleSheet,
+  Switch,
+  Text,
+  TouchableOpacity,
+  View
 } from 'react-native';
+import { removeUserData } from '../../utils/storage';
 
 export default function SettingsScreen() {
   const [darkMode, setDarkMode] = useState(true);
@@ -139,6 +140,7 @@ export default function SettingsScreen() {
             onPress={async () => {
               await AsyncStorage.removeItem('onboardingDone');
               await AsyncStorage.removeItem('userRegistered');
+              await removeUserData();
               // Reload the app to trigger onboarding flow
               if (typeof window !== 'undefined') {
                 window.location.reload();
