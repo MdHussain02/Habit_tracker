@@ -9,6 +9,7 @@ import React, { useEffect, useState } from "react";
 import {
   Alert,
   FlatList,
+  ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -39,6 +40,10 @@ export default function HabitHeroScreen() {
   const [habits, setHabits] = useState<Habit[]>([]);
   const [showAddModal, setShowAddModal] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [selectedDayIdx, setSelectedDayIdx] = useState(() => {
+    // Default to today
+    return (new Date().getDay() + 6) % 7; // Monday=0, Sunday=6
+  });
 
   useEffect(() => {
     initializeApp();
@@ -258,27 +263,27 @@ export default function HabitHeroScreen() {
         </View>
 
         {/* Day Selector */}
-        <View style={styles.daySelectorContainer}>
+        <ScrollView
+          style={styles.daySelectorContainer}
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={{ paddingHorizontal: 12 }}
+        >
           {["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"].map((day, idx) => {
-            const todayIdx = (new Date().getDay() + 6) % 7; // Monday=0, Sunday=6
-            const isToday = idx === todayIdx;
+            const isSelected = idx === selectedDayIdx;
             return (
-              <View
+              <TouchableOpacity
                 key={day}
-                style={[styles.dayPill, isToday && styles.dayPillSelected]}
+                style={[styles.dayPill, isSelected && styles.dayPillSelected]}
+                onPress={() => setSelectedDayIdx(idx)}
               >
-                <Text
-                  style={[
-                    styles.dayPillText,
-                    isToday && styles.dayPillTextSelected,
-                  ]}
-                >
+                <Text style={[styles.dayPillText, isSelected && styles.dayPillTextSelected]}>
                   {day}
                 </Text>
-              </View>
+              </TouchableOpacity>
             );
           })}
-        </View>
+        </ScrollView>
         {/* Quote Card */}
         <LinearGradient
           colors={[PookieColors.hotPink, PookieColors.deepRed]}
@@ -526,28 +531,44 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     marginBottom: 20,
   },
-  daySelectorContainer: {
-    flexDirection: "row",
-    justifyContent: "space-around",
-    marginHorizontal: 16,
-    marginBottom: 18,
-  },
   dayPill: {
-    paddingVertical: 8,
+    marginHorizontal: 6,
+    paddingVertical: 10,
     paddingHorizontal: 16,
     borderRadius: 20,
     backgroundColor: "rgba(255, 255, 255, 0.1)",
+    minWidth: 50,
+    maxHeight :50,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.2)',
   },
   dayPillSelected: {
     backgroundColor: PookieColors.hotPink,
+    borderColor: PookieColors.hotPink,
+    shadowColor: PookieColors.hotPink,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 3,
+    borderRadius: 20,
   },
   dayPillText: {
-    fontSize: 14,
+    fontSize: 12,
     fontWeight: "600",
-    color: "#ccc",
+    color: "#aaa",
   },
   dayPillTextSelected: {
     color: "#fff",
+    fontWeight: "700",
+  },
+  
+  // Also update the daySelectorContainer style:
+  daySelectorContainer: {
+    flexDirection: "row",
+    marginHorizontal: 16,
+    maxHeight :60
   },
   quoteCard: {
     marginHorizontal: 16,
