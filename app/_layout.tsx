@@ -7,6 +7,10 @@ import 'react-native-reanimated';
 
 import { PookieColors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import React, { useEffect, useState } from 'react';
+import OnboardingScreen from '../screens/OnboardingScreen';
+import RegistrationScreen from '../screens/RegistrationScreen';
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
@@ -14,8 +18,46 @@ export default function RootLayout() {
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
   });
 
-  if (!loaded) {
+  const [isLoading, setIsLoading] = useState(true);
+  const [showOnboarding, setShowOnboarding] = useState(false);
+  const [showRegistration, setShowRegistration] = useState(false);
+
+  useEffect(() => {
+    async function checkFirstLaunch() {
+      const onboardingDone = await AsyncStorage.getItem('onboardingDone');
+      const userRegistered = await AsyncStorage.getItem('userRegistered');
+      if (!onboardingDone) {
+        setShowOnboarding(true);
+      } else if (!userRegistered) {
+        setShowRegistration(true);
+      }
+      setIsLoading(false);
+    }
+    checkFirstLaunch();
+  }, []);
+
+  const handleOnboardingComplete = async () => {
+    await AsyncStorage.setItem('onboardingDone', 'true');
+    setShowOnboarding(false);
+    setShowRegistration(true);
+  };
+
+  const handleRegister = async (user: { name: string; email: string; password: string }) => {
+    // Save user data as needed
+    await AsyncStorage.setItem('userRegistered', 'true');
+    setShowRegistration(false);
+  };
+
+  if (!loaded || isLoading) {
     return null;
+  }
+
+  if (showOnboarding) {
+    return <OnboardingScreen onComplete={handleOnboardingComplete} />;
+  }
+
+  if (showRegistration) {
+    return <RegistrationScreen onRegister={handleRegister} />;
   }
 
   return (
