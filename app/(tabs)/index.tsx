@@ -14,13 +14,13 @@ import {
   TouchableOpacity,
   View
 } from 'react-native';
-import AddHabitModal from '../components/AddHabitModal';
-import HabitCard from '../components/HabitCard';
+import AddHabitModal from '../../components/AddHabitModal';
+import HabitCard from '../../components/HabitCard';
 import {
   requestPermissions,
   scheduleHabitReminder
-} from '../services/NotificationService';
-import { Habit, HabitFormData } from '../types/habit';
+} from '../../services/NotificationService';
+import { Habit, HabitFormData } from '../../types/habit';
 
 // Show notifications as popups even when app is in foreground
 Notifications.setNotificationHandler({
