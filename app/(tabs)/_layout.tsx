@@ -10,11 +10,10 @@ export default function TabLayout() {
         headerShown: false,
         tabBarStyle: {
           backgroundColor: '#1a1a1a',
-          borderTopColor: '#333',
-          borderTopWidth: 1,
           height: 80,
-          paddingBottom: 10,
-          paddingTop: 10,
+          borderBlockColor : "000",
+          // paddingBottom: ,
+          paddingTop: 10
         },
         tabBarActiveTintColor: PookieColors?.hotPink || '#FF1972',
         tabBarInactiveTintColor: '#666',
