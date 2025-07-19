@@ -1,48 +1,13 @@
 // app/_layout.tsx
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import * as BackgroundTask from 'expo-background-task';
 import * as Notifications from 'expo-notifications';
 import { Stack } from 'expo-router';
-import * as TaskManager from 'expo-task-manager';
 import React, { useEffect, useState } from 'react';
 import { Button, Text, View } from 'react-native';
 import { useColorScheme } from '../hooks/useColorScheme';
 import OnboardingScreen from '../screens/OnboardingScreen';
 import RegistrationScreen from '../screens/RegistrationScreen';
-import { Habit } from '../types/habit';
 import { getUserData, setUserRegistered } from '../utils/storage';
-
-TaskManager.defineTask('habit-notification-task', async () => {
-  try {
-    const habitsJson = await AsyncStorage.getItem('@habit_hero_habits');
-    const habits: Habit[] = habitsJson ? JSON.parse(habitsJson) : [];
-    const now = new Date();
-    const NOTIFY_SECONDS_BEFORE = 10;
-    const nowSeconds = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
-
-    for (const habit of habits) {
-      if (habit.reminder?.enabled && habit.reminder?.time) {
-        const [hours, minutes] = habit.reminder.time.split(':').map(Number);
-        const habitSeconds = hours * 3600 + minutes * 60;
-        // If the habit time is within the next 10 seconds
-        if (habitSeconds - nowSeconds > 0 && habitSeconds - nowSeconds <= NOTIFY_SECONDS_BEFORE) {
-          await Notifications.scheduleNotificationAsync({
-            content: {
-              title: `Upcoming Habit: ${habit.name}`,
-              body: `Your habit is coming up at ${habit.reminder.time}!`,
-              data: { habitId: habit.id },
-            },
-            trigger: null, // Send immediately
-          });
-        }
-      }
-    }
-    return true;
-  } catch (error) {
-    return false;
-  }
-});
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
@@ -58,18 +23,6 @@ export default function RootLayout() {
         setShowOnboarding(true);
       }
       setLoading(false);
-    })();
-  }, []);
-
-  useEffect(() => {
-    (async () => {
-      try {
-        await BackgroundTask.registerTaskAsync('habit-notification-task', {
-          minimumInterval: 15, // minutes (minimum allowed on Android)
-        });
-      } catch (err) {
-        console.log('[BackgroundTask] failed to register', err);
-      }
     })();
   }, []);
 
@@ -100,17 +53,6 @@ export default function RootLayout() {
         <OnboardingScreen onComplete={handleOnboardingComplete} />
         <RegistrationScreen onRegister={handleRegister} />
         <Stack screenOptions={{ headerShown: false }} />
-        <Button
-          title="Test Background Task Now"
-          onPress={async () => {
-            try {
-              await BackgroundTask.triggerTaskWorkerForTestingAsync();
-              alert('Background task triggered!');
-            } catch (e) {
-              alert('Failed to trigger background task.');
-            }
-          }}
-        />
         <Button
           title="Push Notification Now"
           onPress={async () => {
@@ -193,17 +135,6 @@ export default function RootLayout() {
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
       <View style={{ flex: 1, backgroundColor: colorScheme === 'dark' ? '#000' : '#fff' }}>
         <Stack screenOptions={{ headerShown: false }} />
-        <Button
-          title="Test Background Task Now"
-          onPress={async () => {
-            try {
-              await BackgroundTask.triggerTaskWorkerForTestingAsync();
-              alert('Background task triggered!');
-            } catch (e) {
-              alert('Failed to trigger background task.');
-            }
-          }}
-        />
         <Button
           title="Push Notification Now"
           onPress={async () => {
