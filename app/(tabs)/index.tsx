@@ -1,26 +1,26 @@
 // screens/HabitHeroScreen.tsx
-import { PookieColors } from '@/constants/Colors';
-import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import * as Haptics from 'expo-haptics';
-import { LinearGradient } from 'expo-linear-gradient';
-import * as Notifications from 'expo-notifications';
-import React, { useEffect, useState } from 'react';
+import { PookieColors } from "@/constants/Colors";
+import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as Haptics from "expo-haptics";
+import { LinearGradient } from "expo-linear-gradient";
+import * as Notifications from "expo-notifications";
+import React, { useEffect, useState } from "react";
 import {
   Alert,
   FlatList,
   StyleSheet,
   Text,
   TouchableOpacity,
-  View
-} from 'react-native';
-import AddHabitModal from '../../components/AddHabitModal';
-import HabitCard from '../../components/HabitCard';
+  View,
+} from "react-native";
+import AddHabitModal from "../../components/AddHabitModal";
+import HabitCard from "../../components/HabitCard";
 import {
   requestPermissions,
-  scheduleHabitReminder
-} from '../../services/NotificationService';
-import { Habit, HabitFormData } from '../../types/habit';
+  scheduleHabitReminder,
+} from "../../services/NotificationService";
+import { Habit, HabitFormData } from "../../types/habit";
 
 // Show notifications as popups even when app is in foreground
 Notifications.setNotificationHandler({
@@ -33,7 +33,7 @@ Notifications.setNotificationHandler({
   }),
 });
 
-const HABITS_STORAGE_KEY = '@habit_hero_habits';
+const HABITS_STORAGE_KEY = "@habit_hero_habits";
 
 export default function HabitHeroScreen() {
   const [habits, setHabits] = useState<Habit[]>([]);
@@ -52,12 +52,14 @@ export default function HabitHeroScreen() {
   };
 
   const setupNotificationHandler = () => {
-    const subscription = Notifications.addNotificationResponseReceivedListener(response => {
-      const { habitId } = response.notification.request.content.data;
-      if (habitId) {
-        console.log('Notification tapped for habit:', habitId);
+    const subscription = Notifications.addNotificationResponseReceivedListener(
+      (response) => {
+        const { habitId } = response.notification.request.content.data;
+        if (habitId) {
+          console.log("Notification tapped for habit:", habitId);
+        }
       }
-    });
+    );
     return subscription;
   };
 
@@ -67,7 +69,7 @@ export default function HabitHeroScreen() {
       const loadedHabits = habitsJson ? JSON.parse(habitsJson) : [];
       setHabits(loadedHabits);
     } catch (error) {
-      console.error('Error loading habits:', error);
+      console.error("Error loading habits:", error);
     } finally {
       setLoading(false);
     }
@@ -78,7 +80,7 @@ export default function HabitHeroScreen() {
       await AsyncStorage.setItem(HABITS_STORAGE_KEY, JSON.stringify(newHabits));
       setHabits(newHabits);
     } catch (error) {
-      console.error('Error saving habits:', error);
+      console.error("Error saving habits:", error);
     }
   };
 
@@ -107,8 +109,8 @@ export default function HabitHeroScreen() {
         };
       } else {
         Alert.alert(
-          'Reminder Not Set',
-          'Could not set up reminder for this habit. Please check your notification settings.'
+          "Reminder Not Set",
+          "Could not set up reminder for this habit. Please check your notification settings."
         );
       }
     }
@@ -119,14 +121,17 @@ export default function HabitHeroScreen() {
   };
 
   const toggleHabitCompletion = async (habitId: string) => {
-    const updatedHabits = habits.map(habit => {
+    const updatedHabits = habits.map((habit) => {
       if (habit.id === habitId) {
-        const today = new Date().toISOString().split('T')[0];
+        const today = new Date().toISOString().split("T")[0];
         const isCompletedToday = habit.completedDates.includes(today);
 
         if (isCompletedToday) {
-          const newCompletedDates = habit.completedDates.filter(date => date !== today);
-          const newLastCompletedDate = newCompletedDates[newCompletedDates.length - 1];
+          const newCompletedDates = habit.completedDates.filter(
+            (date) => date !== today
+          );
+          const newLastCompletedDate =
+            newCompletedDates[newCompletedDates.length - 1];
 
           return {
             ...habit,
@@ -153,35 +158,35 @@ export default function HabitHeroScreen() {
   };
 
   const deleteHabit = (habitId: string) => {
-    const habitToDelete = habits.find(h => h.id === habitId);
+    const habitToDelete = habits.find((h) => h.id === habitId);
 
-    Alert.alert(
-      'Delete Habit',
-      'Are you sure you want to delete this habit?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Delete',
-          style: 'destructive',
-          onPress: async () => {
-            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+    Alert.alert("Delete Habit", "Are you sure you want to delete this habit?", [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Delete",
+        style: "destructive",
+        onPress: async () => {
+          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
 
-            if (habitToDelete?.reminder?.notificationId) {
-              await Notifications.cancelScheduledNotificationAsync(habitToDelete.reminder.notificationId);
-            }
+          if (habitToDelete?.reminder?.notificationId) {
+            await Notifications.cancelScheduledNotificationAsync(
+              habitToDelete.reminder.notificationId
+            );
+          }
 
-            const updatedHabits = habits.filter(habit => habit.id !== habitId);
-            await saveHabits(updatedHabits);
-          },
+          const updatedHabits = habits.filter((habit) => habit.id !== habitId);
+          await saveHabits(updatedHabits);
         },
-      ]
-    );
+      },
+    ]);
   };
 
   const calculateStreak = (completedDates: string[]): number => {
     if (completedDates.length === 0) return 0;
 
-    const sortedDates = completedDates.map(d => new Date(d)).sort((a, b) => b.getTime() - a.getTime());
+    const sortedDates = completedDates
+      .map((d) => new Date(d))
+      .sort((a, b) => b.getTime() - a.getTime());
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
@@ -216,12 +221,12 @@ export default function HabitHeroScreen() {
   };
 
   const isHabitCompletedToday = (habit: Habit): boolean => {
-    const today = new Date().toISOString().split('T')[0];
+    const today = new Date().toISOString().split("T")[0];
     return habit.completedDates.includes(today);
   };
 
   const getCompletedCount = (): number => {
-    return habits.filter(habit => isHabitCompletedToday(habit)).length;
+    return habits.filter((habit) => isHabitCompletedToday(habit)).length;
   };
 
   const getTotalStreak = (): number => {
@@ -242,34 +247,57 @@ export default function HabitHeroScreen() {
   }
 
   return (
-    <View style={{ flex: 1, backgroundColor: '#1a1a1a' }}>
+    <View style={styles.container}>
       <LinearGradient
-        colors={['#1a1a1a', '#2a2a2a']}
+        colors={["#1a1a1a", "#2a2a2a"]}
         style={styles.gradientBackground}
       >
-        {/* Header */}
-        <View style={styles.headerContainer}>
-          <Text style={styles.headerTitle}>Today's Habits</Text>
+        {/* Custom Header Row */}
+        <View style={styles.topHeaderRow}>
+          <Text style={styles.headerTitleMain}>Today's Habits</Text>
         </View>
 
-        {/* Stats */}
-        <View style={styles.statsRow}>
-          <View style={styles.statCardModern}>
-            <MaterialCommunityIcons name="check-circle-outline" size={28} color="#4CAF50" />
-            <Text style={styles.statNumberModern}>{getCompletedCount()}</Text>
-            <Text style={styles.statLabelModern}>Completed</Text>
-          </View>
-          <View style={styles.statCardModern}>
-            <MaterialCommunityIcons name="format-list-bulleted" size={28} color={PookieColors.hotPink} />
-            <Text style={styles.statNumberModern}>{habits.length}</Text>
-            <Text style={styles.statLabelModern}>Total</Text>
-          </View>
-          <View style={styles.statCardModern}>
-            <MaterialCommunityIcons name="fire" size={28} color="#FF6B6B" />
-            <Text style={styles.statNumberModern}>{getTotalStreak()}</Text>
-            <Text style={styles.statLabelModern}>Streak</Text>
-          </View>
+        {/* Day Selector */}
+        <View style={styles.daySelectorContainer}>
+          {["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"].map((day, idx) => {
+            const todayIdx = (new Date().getDay() + 6) % 7; // Monday=0, Sunday=6
+            const isToday = idx === todayIdx;
+            return (
+              <View
+                key={day}
+                style={[styles.dayPill, isToday && styles.dayPillSelected]}
+              >
+                <Text
+                  style={[
+                    styles.dayPillText,
+                    isToday && styles.dayPillTextSelected,
+                  ]}
+                >
+                  {day}
+                </Text>
+              </View>
+            );
+          })}
         </View>
+        {/* Quote Card */}
+        <LinearGradient
+          colors={[PookieColors.hotPink, PookieColors.deepRed]}
+          style={styles.quoteCard}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+        >
+          <Text style={styles.quoteText}>
+            "The secret of your future is hidden in your daily routine."
+          </Text>
+          <View style={styles.quoteIconWrap}>
+            <MaterialCommunityIcons
+              name="star-four-points-outline"
+              size={24}
+              color="#fff"
+            />
+          </View>
+          <Text style={styles.quoteAuthor}>Mike Murdock</Text>
+        </LinearGradient>
 
         {/* Progress */}
         <View style={styles.progressContainerModern}>
@@ -279,18 +307,23 @@ export default function HabitHeroScreen() {
               colors={[PookieColors.deepRed, PookieColors.hotPink]}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 0 }}
-              style={[styles.progressBarFillModern, { width: `${getCompletionRate() * 100}%` }]}
+              style={[
+                styles.progressBarFillModern,
+                { width: `${getCompletionRate() * 100}%` },
+              ]}
             />
           </View>
         </View>
-
-      
 
         {/* Habits List */}
         <View style={{ flex: 1, marginTop: 10 }}>
           {habits.length === 0 ? (
             <View style={styles.emptyContainerModern}>
-              <MaterialCommunityIcons name="emoticon-sad-outline" size={72} color="#666" />
+              <MaterialCommunityIcons
+                name="emoticon-sad-outline"
+                size={72}
+                color="#666"
+              />
               <Text style={styles.emptyTitleModern}>No habits yet</Text>
               <Text style={styles.emptySubtitleModern}>
                 Tap the + button to add your first habit and become a hero!
@@ -301,7 +334,7 @@ export default function HabitHeroScreen() {
               data={habits}
               keyExtractor={(item) => item.id}
               renderItem={({ item }) => (
-                <View  style={styles.habitCardModern}>
+                <View style={styles.habitCardModern}>
                   <HabitCard
                     habit={item}
                     isCompletedToday={isHabitCompletedToday(item)}
@@ -323,7 +356,6 @@ export default function HabitHeroScreen() {
         >
           <Ionicons name="add" size={32} color="#fff" />
         </TouchableOpacity>
-        
 
         <AddHabitModal
           visible={showAddModal}
@@ -334,36 +366,36 @@ export default function HabitHeroScreen() {
     </View>
   );
 }
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingTop: 40,
-    backgroundColor : "#fff"
+    paddingTop: 60,
+    backgroundColor: "#1a1a1a"
   },
   loadingContainer: {
     flex: 1,
-    backgroundColor: '#1a1a1a',
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: "#1a1a1a",
+    justifyContent: "center",
+    alignItems: "center",
   },
   loadingText: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 18,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     paddingHorizontal: 20,
     marginBottom: 20,
+    marginTop : 40,
   },
   title: {
     fontSize: 32,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     color: PookieColors.deepRed,
-    textShadowColor: 'rgba(0, 0, 0, 0.1)',
+    textShadowColor: "rgba(0, 0, 0, 0.1)",
     textShadowOffset: { width: -1, height: 1 },
     textShadowRadius: 2,
   },
@@ -372,16 +404,16 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 24,
-    justifyContent: 'center',
-    alignItems: 'center',
-    shadowColor: '#000',
+    justifyContent: "center",
+    alignItems: "center",
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.2,
     shadowRadius: 4,
     elevation: 5,
   },
   statsContainer: {
-    flexDirection: 'row',
+    flexDirection: "row",
     // paddingHorizontal: 16,
     marginBottom: 20,
   },
@@ -396,14 +428,14 @@ const styles = StyleSheet.create({
   },
   statNumber: {
     fontSize: 26,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     color: PookieColors.black,
   },
   statLabel: {
     fontSize: 13,
     color: PookieColors.black,
     marginTop: 4,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   progressContainer: {
     paddingHorizontal: 20,
@@ -411,18 +443,18 @@ const styles = StyleSheet.create({
   },
   progressLabel: {
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: "600",
     color: PookieColors.deepRed,
     marginBottom: 8,
   },
   progressBarBackground: {
     height: 10,
-    backgroundColor: 'rgba(255, 255, 255, 0.3)',
+    backgroundColor: "rgba(255, 255, 255, 0.3)",
     borderRadius: 5,
-    overflow: 'hidden',
+    overflow: "hidden",
   },
   progressBarFill: {
-    height: '100%',
+    height: "100%",
     backgroundColor: PookieColors.deepRed,
     borderRadius: 5,
   },
@@ -432,13 +464,13 @@ const styles = StyleSheet.create({
   },
   emptyContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     paddingHorizontal: 40,
   },
   emptyTitle: {
     fontSize: 22,
-    fontWeight: '600',
+    fontWeight: "600",
     color: PookieColors.deepRed,
     marginTop: 16,
     marginBottom: 8,
@@ -446,7 +478,7 @@ const styles = StyleSheet.create({
   emptySubtitle: {
     fontSize: 16,
     color: PookieColors.hotPink,
-    textAlign: 'center',
+    textAlign: "center",
     lineHeight: 24,
   },
   gradientBackground: {
@@ -454,17 +486,17 @@ const styles = StyleSheet.create({
     paddingTop: 0,
   },
   headerContainer: {
-    alignItems: 'center',
+    alignItems: "center",
     marginTop: 40,
     marginBottom: 24,
     paddingHorizontal: 20,
   },
   appTitle: {
     fontSize: 20,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     color: PookieColors.deepRed,
     letterSpacing: 1,
-    textShadowColor: 'rgba(123,47,242,0.08)',
+    textShadowColor: "rgba(123,47,242,0.08)",
     textShadowOffset: { width: 0, height: 2 },
     textShadowRadius: 8,
   },
@@ -473,16 +505,87 @@ const styles = StyleSheet.create({
     color: PookieColors.hotPink,
     marginTop: 4,
     marginBottom: 12,
-    fontWeight: '500',
+    fontWeight: "500",
   },
   headerTitle: {
     fontSize: 24,
-    fontWeight: 'bold',
-    color: '#fff',
+    fontWeight: "bold",
+    color: "#fff",
+  },
+  headerTitleMain: {
+    fontSize: 24,
+    fontWeight: "bold",
+    color: "#fff",
+    flex: 1,
+    textAlign: "center",
+  },
+  topHeaderRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingHorizontal: 20,
+    marginBottom: 20,
+  },
+  daySelectorContainer: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    marginHorizontal: 16,
+    marginBottom: 18,
+  },
+  dayPill: {
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 20,
+    backgroundColor: "rgba(255, 255, 255, 0.1)",
+  },
+  dayPillSelected: {
+    backgroundColor: PookieColors.hotPink,
+  },
+  dayPillText: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#ccc",
+  },
+  dayPillTextSelected: {
+    color: "#fff",
+  },
+  quoteCard: {
+    marginHorizontal: 16,
+    marginBottom: 18,
+    padding: 24,
+    borderRadius: 20,
+    position: "relative",
+    overflow: "hidden",
+  },
+  quoteText: {
+    fontSize: 18,
+    fontStyle: "italic",
+    color: "#fff",
+    marginBottom: 12,
+    lineHeight: 26,
+  },
+  quoteIconWrap: {
+    position: "absolute",
+    top: 16,
+    right: 16,
+  },
+  quoteAuthor: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#fff",
+    textAlign: "right",
+  },
+  avatarCircle: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: PookieColors.hotPink,
+    justifyContent: "center",
+    alignItems: "center",
   },
   statsRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    justifyContent: "space-between",
     marginHorizontal: 16,
     marginBottom: 18,
   },
@@ -491,20 +594,20 @@ const styles = StyleSheet.create({
     marginHorizontal: 6,
     borderRadius: 20,
     padding: 18,
-    alignItems: 'center',
-    backgroundColor: '#2a2a2a',
+    alignItems: "center",
+    backgroundColor: "#2a2a2a",
   },
   statNumberModern: {
     fontSize: 28,
-    fontWeight: 'bold',
-    color: '#fff',
+    fontWeight: "bold",
+    color: "#fff",
     marginTop: 6,
   },
   statLabelModern: {
     fontSize: 13,
-    color: '#ccc',
+    color: "#ccc",
     marginTop: 2,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   progressContainerModern: {
     paddingHorizontal: 24,
@@ -512,18 +615,18 @@ const styles = StyleSheet.create({
   },
   progressLabelModern: {
     fontSize: 16,
-    fontWeight: '600',
-    color: '#fff',
+    fontWeight: "600",
+    color: "#fff",
     marginBottom: 8,
   },
   progressBarBackgroundModern: {
     height: 14,
-    backgroundColor: 'rgba(255,255,255,0.2)',
+    backgroundColor: "rgba(255,255,255,0.2)",
     borderRadius: 7,
-    overflow: 'hidden',
+    overflow: "hidden",
   },
   progressBarFillModern: {
-    height: '100%',
+    height: "100%",
     borderRadius: 7,
   },
   habitsListModern: {
@@ -533,38 +636,38 @@ const styles = StyleSheet.create({
   habitCardModern: {
     marginBottom: 16,
     borderRadius: 18,
-    overflow: 'hidden',
+    overflow: "hidden",
   },
   emptyContainerModern: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     paddingHorizontal: 40,
   },
   emptyTitleModern: {
     fontSize: 24,
-    fontWeight: '700',
-    color: '#fff',
+    fontWeight: "700",
+    color: "#fff",
     marginTop: 18,
     marginBottom: 8,
   },
   emptySubtitleModern: {
     fontSize: 16,
-    color: '#ccc',
-    textAlign: 'center',
+    color: "#ccc",
+    textAlign: "center",
     lineHeight: 24,
   },
   fab: {
-    position: 'absolute',
+    position: "absolute",
     right: 24,
     bottom: 36,
     width: 64,
     height: 64,
     borderRadius: 32,
     backgroundColor: PookieColors.hotPink,
-    justifyContent: 'center',
-    alignItems: 'center',
-    shadowColor: '#000',
+    justifyContent: "center",
+    alignItems: "center",
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,

@@ -45,9 +45,9 @@ export default function TimePicker({ value, onTimeChange, enabled, onToggle }: T
   };
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Daily Reminder</Text>
+    <View style={styles.cardContainer}>
+      <View style={styles.headerRow}>
+        <Text style={styles.cardTitle}>Daily Reminder</Text>
         <TouchableOpacity
           style={[styles.toggle, enabled && styles.toggleActive]}
           onPress={() => onToggle(!enabled)}
@@ -62,7 +62,7 @@ export default function TimePicker({ value, onTimeChange, enabled, onToggle }: T
             style={styles.timeButton}
             onPress={() => setShowPicker(true)}
           >
-            <Ionicons name="time-outline" size={20} color={PookieColors.deepRed} />
+            <Ionicons name="time-outline" size={20} color={PookieColors.hotPink} />
             <Text style={styles.timeText}>{formatDisplayTime(value)}</Text>
             <Ionicons name="chevron-down" size={20} color={PookieColors.hotPink} />
           </TouchableOpacity>
@@ -84,41 +84,54 @@ export default function TimePicker({ value, onTimeChange, enabled, onToggle }: T
 }
 
 const styles = StyleSheet.create({
-  container: {
-    marginBottom: 20,
+  cardContainer: {
+    backgroundColor: '#23232b',
+    borderRadius: 18,
+    padding: 20,
+    marginBottom: 24,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.18,
+    shadowRadius: 8,
+    elevation: 4,
   },
-  header: {
+  headerRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: 14,
   },
-  title: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: PookieColors.hotPink,
+  cardTitle: {
+    fontSize: 17,
+    fontWeight: 'bold',
+    color: '#fff',
+    letterSpacing: 0.2,
   },
   toggle: {
-    width: 50,
-    height: 30,
-    borderRadius: 15,
-    backgroundColor: PookieColors.palePink,
+    width: 48,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: '#39394a',
     padding: 2,
     justifyContent: 'center',
+    borderWidth: 1.5,
+    borderColor: '#444',
   },
   toggleActive: {
-    backgroundColor: PookieColors.deepRed,
+    backgroundColor: PookieColors.hotPink,
+    borderColor: PookieColors.hotPink,
   },
   toggleCircle: {
-    width: 26,
-    height: 26,
-    borderRadius: 13,
-    backgroundColor: 'white',
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    backgroundColor: '#fff',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.18,
     shadowRadius: 2,
     elevation: 2,
+    alignSelf: 'flex-start',
   },
   toggleCircleActive: {
     alignSelf: 'flex-end',
@@ -129,18 +142,25 @@ const styles = StyleSheet.create({
   timeButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: PookieColors.palePink,
-    borderRadius: 8,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: PookieColors.deepRed,
+    backgroundColor: '#181824',
+    borderRadius: 24,
+    paddingVertical: 14,
+    paddingHorizontal: 20,
+    borderWidth: 1.5,
+    borderColor: PookieColors.hotPink,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.12,
+    shadowRadius: 4,
+    elevation: 2,
   },
   timeText: {
     flex: 1,
-    marginLeft: 12,
-    fontSize: 16,
-    color: PookieColors.deepRed,
-    fontWeight: '500',
+    marginLeft: 14,
+    fontSize: 17,
+    color: '#fff',
+    fontWeight: '600',
+    letterSpacing: 0.2,
   },
   picker: {
     marginTop: 10,
