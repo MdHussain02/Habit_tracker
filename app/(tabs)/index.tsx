@@ -1,4 +1,3 @@
-// screens/HabitHeroScreen.tsx
 import { PookieColors } from "@/constants/Colors";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -17,10 +16,11 @@ import {
 } from "react-native";
 import AddHabitModal from "../../components/AddHabitModal";
 import HabitCard from "../../components/HabitCard";
-import {
-  requestPermissions,
-  scheduleHabitReminder,
-} from "../../services/NotificationService";
+import TimePicker from "../../components/TimePicker";
+// import {
+//   requestPermissions,
+//   scheduleHabitReminder,
+// } from "../../services/NotificationService";
 import { Habit, HabitFormData } from "../../types/habit";
 
 // Show notifications as popups even when app is in foreground
@@ -44,24 +44,32 @@ export default function HabitHeroScreen() {
     // Default to today
     return (new Date().getDay() + 6) % 7; // Monday=0, Sunday=6
   });
+  // Edit time modal state
+  const [editHabitId, setEditHabitId] = useState<string | null>(null);
+  const [editTime, setEditTime] = useState<string>("09:00");
+  const [showEditModal, setShowEditModal] = useState(false);
 
   useEffect(() => {
-    initializeApp();
-    const subscription = setupNotificationHandler();
-    return () => subscription.remove();
+    loadHabits();
   }, []);
 
-  const initializeApp = async () => {
-    await requestPermissions();
-    await loadHabits();
-  };
+  // const initializeApp = async () => {
+  //   await requestPermissions();
+  //   await loadHabits();
+  // };
 
   const setupNotificationHandler = () => {
     const subscription = Notifications.addNotificationResponseReceivedListener(
-      (response) => {
+      async (response) => {
         const { habitId } = response.notification.request.content.data;
-        if (habitId) {
-          console.log("Notification tapped for habit:", habitId);
+        const actionId = response.actionIdentifier;
+        if (habitId && typeof habitId === 'string') {
+          if (actionId === 'mark_done') {
+            await toggleHabitCompletion(habitId);
+          } else if (actionId === Notifications.DEFAULT_ACTION_IDENTIFIER) {
+            // User tapped the notification itself
+            await toggleHabitCompletion(habitId);
+          }
         }
       }
     );
@@ -100,26 +108,7 @@ export default function HabitHeroScreen() {
       reminder: habitData.reminder,
     };
 
-    if (habitData.reminder?.enabled) {
-      const notificationId = await scheduleHabitReminder(
-        newHabit.id,
-        newHabit.name,
-        habitData.reminder.time
-      );
-
-      if (notificationId) {
-        newHabit.reminder = {
-          ...habitData.reminder,
-          notificationId,
-        };
-      } else {
-        Alert.alert(
-          "Reminder Not Set",
-          "Could not set up reminder for this habit. Please check your notification settings."
-        );
-      }
-    }
-
+    // Remove notification scheduling logic from here
     const updatedHabits = [...habits, newHabit];
     await saveHabits(updatedHabits);
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
@@ -243,6 +232,31 @@ export default function HabitHeroScreen() {
     return getCompletedCount() / habits.length;
   };
 
+  // Handler to open edit modal
+  const handleEditTime = (habit: Habit) => {
+    setEditHabitId(habit.id);
+    setEditTime(habit.reminder?.time || "09:00");
+    setShowEditModal(true);
+  };
+
+  // Handler to save edited time
+  const handleSaveEditTime = async () => {
+    if (!editHabitId) return;
+    const updatedHabits = habits.map((habit) => {
+      if (habit.id === editHabitId) {
+        const updatedHabit = {
+          ...habit,
+          reminder: { ...habit.reminder, time: editTime, enabled: true },
+        };
+        return updatedHabit;
+      }
+      return habit;
+    });
+    await saveHabits(updatedHabits);
+    setShowEditModal(false);
+    setEditHabitId(null);
+  };
+
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
@@ -345,6 +359,7 @@ export default function HabitHeroScreen() {
                     isCompletedToday={isHabitCompletedToday(item)}
                     onToggleCompletion={toggleHabitCompletion}
                     onDelete={deleteHabit}
+                    onEditTime={handleEditTime}
                   />
                 </View>
               )}
@@ -354,6 +369,34 @@ export default function HabitHeroScreen() {
             />
           )}
         </View>
+        {/* Edit Time Modal */}
+        {showEditModal && (
+          <View style={{
+            position: 'absolute',
+            left: 0, right: 0, top: 0, bottom: 0,
+            backgroundColor: 'rgba(0,0,0,0.5)',
+            justifyContent: 'center', alignItems: 'center',
+            zIndex: 100,
+          }}>
+            <View style={{ backgroundColor: '#23232b', borderRadius: 20, padding: 24, width: 320 }}>
+              <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 18, marginBottom: 16 }}>Edit Habit Time</Text>
+              <TimePicker
+                value={editTime}
+                onTimeChange={setEditTime}
+                enabled={true}
+                onToggle={() => {}}
+              />
+              <View style={{ flexDirection: 'row', justifyContent: 'flex-end', marginTop: 16 }}>
+                <TouchableOpacity onPress={() => setShowEditModal(false)} style={{ marginRight: 16 }}>
+                  <Text style={{ color: '#ccc', fontSize: 16 }}>Cancel</Text>
+                </TouchableOpacity>
+                <TouchableOpacity onPress={handleSaveEditTime}>
+                  <Text style={{ color: PookieColors.hotPink, fontWeight: 'bold', fontSize: 16 }}>Save</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        )}
         {/* Floating Add Button */}
         <TouchableOpacity
           style={styles.fab}

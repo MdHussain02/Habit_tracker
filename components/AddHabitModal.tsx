@@ -3,16 +3,16 @@ import { PookieColors } from '@/constants/Colors';
 import { FontAwesome, Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { default as React, useState } from 'react';
 import {
-  Alert,
-  Keyboard,
-  Modal,
-  Platform,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
+    Alert,
+    Keyboard,
+    Modal,
+    Platform,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from 'react-native';
 import { HabitFormData, HabitIcon, HabitReminder } from '../types/habit';
 import TimePicker from './TimePicker';
@@ -51,7 +51,7 @@ export default function AddHabitModal({ visible, onClose, onAddHabit }: AddHabit
   const [habitName, setHabitName] = useState('');
   const [selectedIcon, setSelectedIcon] = useState<HabitIcon | undefined>(undefined);
   const [reminder, setReminder] = useState<HabitReminder>({
-    enabled: false,
+    enabled: true, // Always enabled
     time: '09:00', // Default to 9:00 AM
   });
   const [keyboardOpen, setKeyboardOpen] = useState(false);
@@ -70,29 +70,27 @@ export default function AddHabitModal({ visible, onClose, onAddHabit }: AddHabit
       Alert.alert('Error', 'Please enter a habit name');
       return;
     }
-
+    if (!reminder.time) {
+      Alert.alert('Error', 'Please select a time for your habit');
+      return;
+    }
     onAddHabit({
       name: habitName.trim(),
       icon: selectedIcon,
-      reminder: reminder.enabled ? reminder : undefined,
+      reminder: { enabled: true, time: reminder.time }, // Always include time
     });
-
     // Reset form
     setHabitName('');
     setSelectedIcon(undefined);
-    setReminder({ enabled: false, time: '09:00' });
+    setReminder({ enabled: true, time: '09:00' });
     onClose();
   };
 
   const handleClose = () => {
     setHabitName('');
     setSelectedIcon(undefined);
-    setReminder({ enabled: false, time: '09:00' });
+    setReminder({ enabled: true, time: '09:00' });
     onClose();
-  };
-
-  const handleReminderToggle = (enabled: boolean) => {
-    setReminder(prev => ({ ...prev, enabled }));
   };
 
   const handleTimeChange = (time: string) => {
@@ -159,11 +157,12 @@ export default function AddHabitModal({ visible, onClose, onAddHabit }: AddHabit
               </View>
             </View>
             <View style={styles.sectionModern}>
+              <Text style={styles.sectionTitleModern}>Habit Time</Text>
               <TimePicker
                 value={reminder.time}
                 onTimeChange={handleTimeChange}
-                enabled={reminder.enabled}
-                onToggle={handleReminderToggle}
+                enabled={true}
+                onToggle={() => {}}
               />
             </View>
           </ScrollView>

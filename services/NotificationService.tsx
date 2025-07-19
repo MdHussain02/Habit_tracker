@@ -1,62 +1,29 @@
-import * as Notifications from 'expo-notifications';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as Notifications from 'expo-notifications'; // or use native notifications
 
-export async function requestPermissions() {
-  const { status } = await Notifications.requestPermissionsAsync();
-  return status === 'granted';
-}
+export async function checkAndNotifyHabits() {
+  const habitsJson = await AsyncStorage.getItem('@habit_hero_habits');
+  const habits = habitsJson ? JSON.parse(habitsJson) : [];
+  const now = new Date();
 
-import { Platform } from 'react-native';
+  for (const habit of habits) {
+    if (!habit.reminder?.time) continue;
+    const [hours, minutes] = habit.reminder.time.split(':').map(Number);
+    const habitTime = new Date();
+    habitTime.setHours(hours, minutes, 0, 0);
 
-// Schedules a notification every 10 seconds for testing purposes
-export async function scheduleTestNotification(): Promise<string | null> {
-  try {
-    const notificationId = await Notifications.scheduleNotificationAsync({
-      content: {
-        title: 'Test Notification',
-        body: 'This is a test notification every 10 seconds.',
-        data: { test: true },
-      },
-      trigger: { seconds: 10, repeats: true } as any,
-    });
-    return notificationId as string;
-  } catch (error) {
-    console.error('Failed to schedule test notification:', error);
-    return null;
+    // If habit time is within the next 10 seconds
+    const diff = habitTime.getTime() - now.getTime();
+    if (diff > 0 && diff <= 10000) {
+      // Send notification
+      await Notifications.scheduleNotificationAsync({
+        content: {
+          title: `Habit Reminder: ${habit.name}`,
+          body: `It's almost time for your habit!`,
+          data: { habitId: habit.id },
+        },
+        trigger: null, // Send immediately
+      });
+    }
   }
-}
-
-export async function scheduleHabitReminder(habitId: string, habitName: string, time: string): Promise<string | null> {
-    // Parse time string (HH:MM)
-    const [hours, minutes] = time.split(':').map(Number);
-    const now = new Date();
-    let triggerDate = new Date(now);
-    triggerDate.setHours(hours);
-    triggerDate.setMinutes(minutes);
-    triggerDate.setSeconds(0);
-    // Subtract 1 minute for the notification
-    triggerDate.setTime(triggerDate.getTime() - 60 * 1000);
-    // If the notification time has already passed today, schedule for tomorrow
-    if (triggerDate <= now) {
-      triggerDate.setDate(triggerDate.getDate() + 1);
-    }
-    let trigger: any;
-    if (Platform.OS === 'android') {
-      // Calculate seconds until next occurrence
-      const seconds = Math.floor((triggerDate.getTime() - now.getTime()) / 1000);
-      trigger = { seconds, repeats: true } as any;
-    } else {
-      // iOS supports calendar-based triggers
-      let notifHour = triggerDate.getHours();
-      let notifMinute = triggerDate.getMinutes();
-      trigger = { hour: notifHour, minute: notifMinute, repeats: true } as any;
-    }
-    const notificationId = await Notifications.scheduleNotificationAsync({
-      content: {
-        title: `Habit Reminder: ${habitName}`,
-        body: `It's almost time for your habit!`,
-        data: { habitId },
-      },
-      trigger,
-    });
-    return notificationId as string;
 }

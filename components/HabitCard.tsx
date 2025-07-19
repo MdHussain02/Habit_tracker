@@ -22,13 +22,15 @@ interface HabitCardProps {
   isCompletedToday: boolean;
   onToggleCompletion: (habitId: string) => void;
   onDelete?: (habitId: string) => void;
+  onEditTime?: (habit: Habit) => void;
 } 
 
 export default function HabitCard({ 
   habit, 
   isCompletedToday, 
   onToggleCompletion,
-  onDelete 
+  onDelete,
+  onEditTime
 }: HabitCardProps) {
   return (
     <View style={styles.container}>
@@ -59,16 +61,31 @@ export default function HabitCard({
             {habit.streak} Days
           </Text>
         </View>
+        {habit.reminder?.time && (
+          <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 4 }}>
+            <Ionicons name="time-outline" size={16} color="#FF6B6B" style={{ marginRight: 4 }} />
+            <Text style={{ color: '#ccc', fontSize: 13 }}>Scheduled: {habit.reminder.time}</Text>
+          </View>
+        )}
       </View>
-      
-      {onDelete && (
-        <TouchableOpacity 
-          style={styles.deleteButton}
-          onPress={() => onDelete(habit.id)}
-        >
-          <Ionicons name="trash-outline" size={20} color="#ccc" />
-        </TouchableOpacity>
-      )}
+      <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+        {onEditTime && (
+          <TouchableOpacity 
+            style={styles.editButton}
+            onPress={() => onEditTime(habit)}
+          >
+            <Ionicons name="pencil-outline" size={20} color="#ccc" />
+          </TouchableOpacity>
+        )}
+        {onDelete && (
+          <TouchableOpacity 
+            style={styles.deleteButton}
+            onPress={() => onDelete(habit.id)}
+          >
+            <Ionicons name="trash-outline" size={20} color="#ccc" />
+          </TouchableOpacity>
+        )}
+      </View>
     </View>
   );
 }
@@ -130,6 +147,12 @@ const styles = StyleSheet.create({
   deleteButton: {
     padding: 8,
     marginLeft: 8,
+    backgroundColor: '#3a3a3a',
+    borderRadius: 16,
+  },
+  editButton: {
+    padding: 8,
+    marginLeft: 0,
     backgroundColor: '#3a3a3a',
     borderRadius: 16,
   },
