@@ -242,31 +242,30 @@ export default function HabitHeroScreen() {
   }
 
   return (
-    <View style={{ flex: 1, backgroundColor: PookieColors.palePink }}>
+    <View style={{ flex: 1, backgroundColor: '#1a1a1a' }}>
       <LinearGradient
-        colors={[PookieColors.palePink,"#fff"]}
+        colors={['#1a1a1a', '#2a2a2a']}
         style={styles.gradientBackground}
       >
         {/* Header */}
         <View style={styles.headerContainer}>
-          <Text style={styles.appTitle}>Habit Hero</Text>
-          <Text style={styles.appSubtitle}>Build your best self, one habit at a time</Text>
+          <Text style={styles.headerTitle}>Today's Habits</Text>
         </View>
 
         {/* Stats */}
         <View style={styles.statsRow}>
-          <View  style={styles.statCardModern}>
-            <MaterialCommunityIcons name="check-circle-outline" size={28} color={PookieColors.deepRed} />
+          <View style={styles.statCardModern}>
+            <MaterialCommunityIcons name="check-circle-outline" size={28} color="#4CAF50" />
             <Text style={styles.statNumberModern}>{getCompletedCount()}</Text>
             <Text style={styles.statLabelModern}>Completed</Text>
           </View>
-          <View  style={styles.statCardModern}>
+          <View style={styles.statCardModern}>
             <MaterialCommunityIcons name="format-list-bulleted" size={28} color={PookieColors.hotPink} />
             <Text style={styles.statNumberModern}>{habits.length}</Text>
             <Text style={styles.statLabelModern}>Total</Text>
           </View>
           <View style={styles.statCardModern}>
-            <MaterialCommunityIcons name="fire" size={28} color={PookieColors.deepRed} />
+            <MaterialCommunityIcons name="fire" size={28} color="#FF6B6B" />
             <Text style={styles.statNumberModern}>{getTotalStreak()}</Text>
             <Text style={styles.statLabelModern}>Streak</Text>
           </View>
@@ -291,7 +290,7 @@ export default function HabitHeroScreen() {
         <View style={{ flex: 1, marginTop: 10 }}>
           {habits.length === 0 ? (
             <View style={styles.emptyContainerModern}>
-              <MaterialCommunityIcons name="emoticon-sad-outline" size={72} color={PookieColors.deepRed} />
+              <MaterialCommunityIcons name="emoticon-sad-outline" size={72} color="#666" />
               <Text style={styles.emptyTitleModern}>No habits yet</Text>
               <Text style={styles.emptySubtitleModern}>
                 Tap the + button to add your first habit and become a hero!
@@ -322,7 +321,7 @@ export default function HabitHeroScreen() {
           style={styles.fab}
           onPress={() => setShowAddModal(true)}
         >
-          <Ionicons name="add" size={32} color={PookieColors.black} />
+          <Ionicons name="add" size={32} color="#fff" />
         </TouchableOpacity>
         
 
@@ -344,12 +343,12 @@ const styles = StyleSheet.create({
   },
   loadingContainer: {
     flex: 1,
-    backgroundColor:PookieColors.palePink,
+    backgroundColor: '#1a1a1a',
     justifyContent: 'center',
     alignItems: 'center',
   },
   loadingText: {
-    color: PookieColors.deepRed,
+    color: '#fff',
     fontSize: 18,
     fontWeight: '600',
   },
@@ -476,6 +475,11 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     fontWeight: '500',
   },
+  headerTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#fff',
+  },
   statsRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -485,20 +489,20 @@ const styles = StyleSheet.create({
   statCardModern: {
     flex: 1,
     marginHorizontal: 6,
-    borderRadius : 20,
+    borderRadius: 20,
     padding: 18,
     alignItems: 'center',
-    backgroundColor :"#fff"
+    backgroundColor: '#2a2a2a',
   },
   statNumberModern: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: PookieColors.deepRed,
+    color: '#fff',
     marginTop: 6,
   },
   statLabelModern: {
     fontSize: 13,
-    color: PookieColors.hotPink,
+    color: '#ccc',
     marginTop: 2,
     fontWeight: '600',
   },
@@ -509,12 +513,12 @@ const styles = StyleSheet.create({
   progressLabelModern: {
     fontSize: 16,
     fontWeight: '600',
-    color: PookieColors.deepRed,
+    color: '#fff',
     marginBottom: 8,
   },
   progressBarBackgroundModern: {
     height: 14,
-    backgroundColor: 'rgba(255,255,255,0.4)',
+    backgroundColor: 'rgba(255,255,255,0.2)',
     borderRadius: 7,
     overflow: 'hidden',
   },
@@ -540,13 +544,13 @@ const styles = StyleSheet.create({
   emptyTitleModern: {
     fontSize: 24,
     fontWeight: '700',
-    color: PookieColors.deepRed,
+    color: '#fff',
     marginTop: 18,
     marginBottom: 8,
   },
   emptySubtitleModern: {
     fontSize: 16,
-    color: PookieColors.hotPink,
+    color: '#ccc',
     textAlign: 'center',
     lineHeight: 24,
   },
@@ -557,15 +561,13 @@ const styles = StyleSheet.create({
     width: 64,
     height: 64,
     borderRadius: 32,
-    backgroundColor: PookieColors.palePink,
+    backgroundColor: PookieColors.hotPink,
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: PookieColors.deepRed,
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.18,
+    shadowOpacity: 0.3,
     shadowRadius: 8,
     elevation: 6,
-    borderWidth: 2,
-    borderColor: PookieColors.deepRed,
   },
 });

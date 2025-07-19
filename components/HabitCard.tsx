@@ -1,7 +1,6 @@
 import { FontAwesome, Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { default as React } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { PookieColors } from '../constants/Colors';
 import { Habit } from '../types/habit';
 
 function renderIcon(icon: Habit['icon'], size: number, color: string) {
@@ -40,7 +39,7 @@ export default function HabitCard({
         <Ionicons 
           name={isCompletedToday ? 'checkmark-circle' : 'ellipse-outline'} 
           size={28} 
-          color={isCompletedToday ? PookieColors.deepRed : PookieColors.hotPink} 
+          color={isCompletedToday ? '#4CAF50' : '#ccc'} 
         />
       </TouchableOpacity>
       
@@ -50,14 +49,14 @@ export default function HabitCard({
             {habit.name}
           </Text>
           {habit.icon && (
-            <View style={styles.icon}>{renderIcon(habit.icon, 22, PookieColors.deepRed)}</View>
+            <View style={styles.icon}>{renderIcon(habit.icon, 22, '#ccc')}</View>
           )}
         </View>
         
         <View style={styles.streakContainer}>
-          <Ionicons name="flame" size={16} color={PookieColors.hotPink} />
+          <Ionicons name="flame" size={16} color="#FF6B6B" />
           <Text style={styles.streakText}>
-            {habit.streak} day{habit.streak !== 1 ? 's' : ''} streak
+            {habit.streak} Days
           </Text>
         </View>
       </View>
@@ -67,7 +66,7 @@ export default function HabitCard({
           style={styles.deleteButton}
           onPress={() => onDelete(habit.id)}
         >
-          <Ionicons name="trash-outline" size={20} color={PookieColors.deepRed} />
+          <Ionicons name="trash-outline" size={20} color="#ccc" />
         </TouchableOpacity>
       )}
     </View>
@@ -78,14 +77,14 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: "#fff",
+    backgroundColor: "#2a2a2a",
     borderRadius: 20,
     padding: 18,
     marginBottom: 14
   },
   checkbox: {
     marginRight: 16,
-    backgroundColor: PookieColors.palePink,
+    backgroundColor: '#3a3a3a',
     borderRadius: 16,
     padding: 6,
     alignItems: 'center',
@@ -102,20 +101,20 @@ const styles = StyleSheet.create({
   name: {
     fontSize: 17,
     fontWeight: '700',
-    color: PookieColors.deepRed,
+    color: '#fff',
     flex: 1,
     letterSpacing: 0.5,
   },
   completedName: {
     textDecorationLine: 'line-through',
-    color: PookieColors.deepRed,
+    color: '#666',
   },
   icon: {
     marginLeft: 10,
-    backgroundColor: PookieColors.palePink,
+    backgroundColor: '#3a3a3a',
     borderRadius: 12,
     padding: 4,
-    marginTop:26
+    marginTop: 26
   },
   streakContainer: {
     flexDirection: 'row',
@@ -124,14 +123,14 @@ const styles = StyleSheet.create({
   },
   streakText: {
     fontSize: 14,
-    color: PookieColors.hotPink,
+    color: '#ccc',
     marginLeft: 6,
     fontWeight: '600',
   },
   deleteButton: {
     padding: 8,
     marginLeft: 8,
-    backgroundColor: PookieColors.palePink,
+    backgroundColor: '#3a3a3a',
     borderRadius: 16,
   },
 }); 

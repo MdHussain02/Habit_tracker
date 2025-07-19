@@ -116,10 +116,10 @@ export default function AddHabitModal({ visible, onClose, onAddHabit }: AddHabit
         >
           <View style={styles.dragIndicator} />
           <View style={styles.headerModern}>
-            <Text style={styles.titleModern}>Add New Habit</Text>
-            <TouchableOpacity onPress={handleClose} style={styles.closeButtonModern}>
-              <Ionicons name="close" size={28} color={PookieColors.palePink} />
+            <TouchableOpacity onPress={handleClose} style={styles.backButton}>
+              <Ionicons name="arrow-back" size={24} color="#fff" />
             </TouchableOpacity>
+            <Text style={styles.titleModern}>Add New Habit</Text>
           </View>
           <ScrollView style={styles.contentModern} showsVerticalScrollIndicator={false}>
             <View style={styles.sectionModern}>
@@ -128,8 +128,8 @@ export default function AddHabitModal({ visible, onClose, onAddHabit }: AddHabit
                 style={styles.inputModern}
                 value={habitName}
                 onChangeText={setHabitName}
-                placeholder="e.g., Drink Water, Read Book"
-                placeholderTextColor={PookieColors.deepRed}
+                placeholder="e.g., Meditate daily"
+                placeholderTextColor="#666"
                 autoFocus
               />
             </View>
@@ -152,7 +152,7 @@ export default function AddHabitModal({ visible, onClose, onAddHabit }: AddHabit
                         setSelectedIcon(isSelected ? undefined : icon)
                       }
                     >
-                      {renderIcon(icon, 32, isSelected ? PookieColors.palePink : PookieColors.deepRed)}
+                      {renderIcon(icon, 32, isSelected ? '#fff' : '#ccc')}
                     </TouchableOpacity>
                   );
                 })}
@@ -168,7 +168,7 @@ export default function AddHabitModal({ visible, onClose, onAddHabit }: AddHabit
             </View>
           </ScrollView>
           <TouchableOpacity style={styles.addButtonModern} onPress={handleAddHabit}>
-            <Text style={styles.addButtonTextModern}>Add Habit</Text>
+            <Text style={styles.addButtonTextModern}>Save Habit</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -182,19 +182,18 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   bottomSheet: {
-    borderTopLeftRadius: 52,
+    borderTopLeftRadius: 32,
     borderTopRightRadius: 32,
     paddingBottom: 32,
     paddingTop: 12,
     paddingHorizontal: 24,
     minHeight: 600,
-    shadowColor: PookieColors.deepRed,
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: -4 },
-    shadowOpacity: 0.12,
+    shadowOpacity: 0.3,
     shadowRadius: 16,
     elevation: 8,
-    backgroundColor : "#fff",
-    // backgroundColor: PookieColors.palePink,
+    backgroundColor: '#1a1a1a',
   },
   dragIndicator: {
     width: 48,
@@ -210,10 +209,13 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     marginBottom: 18,
   },
+  backButton: {
+    padding: 8,
+  },
   titleModern: {
     fontSize: 22,
     fontWeight: '700',
-    color: PookieColors.deepRed,
+    color: '#fff',
     flex: 1,
     textAlign: 'center',
   },
@@ -233,17 +235,17 @@ const styles = StyleSheet.create({
   sectionTitleModern: {
     fontSize: 15,
     fontWeight: '600',
-    color: PookieColors.hotPink,
+    color: '#fff',
     marginBottom: 10,
   },
   inputModern: {
-    backgroundColor: PookieColors.palePink,
+    backgroundColor: '#2a2a2a',
     borderRadius: 12,
     padding: 16,
     fontSize: 16,
-    color: PookieColors.deepRed,
+    color: '#fff',
     borderWidth: 1,
-    borderColor: PookieColors.deepRed,
+    borderColor: '#3a3a3a',
     marginBottom: 4,
   },
   iconGridModern: {
@@ -252,41 +254,41 @@ const styles = StyleSheet.create({
     margin: 20,
   },
   iconButtonModern: {
-    margin:10,
+    margin: 10,
     width: 54,
     height: 54,
     borderRadius: 27,
-    backgroundColor: PookieColors.palePink,
+    backgroundColor: '#2a2a2a',
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 12,
     borderWidth: 2,
     borderColor: 'transparent',
-    shadowColor: PookieColors.deepRed,
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
+    shadowOpacity: 0.2,
     shadowRadius: 8,
     elevation: 2,
   },
   selectedIconButtonModern: {
-    borderColor: PookieColors.deepRed,
-    backgroundColor: PookieColors.deepRed,
+    borderColor: PookieColors.hotPink,
+    backgroundColor: PookieColors.hotPink,
   },
   addButtonModern: {
-    backgroundColor: PookieColors.deepRed,
+    backgroundColor: PookieColors.hotPink,
     borderRadius: 24,
     paddingVertical: 16,
     alignItems: 'center',
     marginTop: 12,
     marginBottom: 8,
-    shadowColor: PookieColors.deepRed,
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.12,
+    shadowOpacity: 0.3,
     shadowRadius: 8,
     elevation: 3,
   },
   addButtonTextModern: {
-    color: PookieColors.palePink,
+    color: '#fff',
     fontSize: 18,
     fontWeight: '700',
     letterSpacing: 0.5,
