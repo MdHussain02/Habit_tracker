@@ -5,13 +5,13 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import {
-    ScrollView,
-    StyleSheet,
-    Switch,
-    Text,
-    TouchableOpacity,
-    View
+  ScrollView,
+  StyleSheet,
+  Switch,
+  Text,
+  View
 } from 'react-native';
+import Button from '../../components/ui/Button';
 import { removeUserData } from '../../utils/storage';
 
 export default function SettingsScreen() {
@@ -137,8 +137,8 @@ export default function SettingsScreen() {
               {section.items.map(renderSettingItem)}
             </View>
           ))}
-          <TouchableOpacity
-            style={styles.logoutButton}
+          <Button
+             type = 'primary'
             onPress={async () => {
               await AsyncStorage.removeItem('onboardingDone');
               await AsyncStorage.removeItem('userRegistered');
@@ -146,8 +146,8 @@ export default function SettingsScreen() {
               router.replace('/onboarding');
             }}
           >
-            <Text style={styles.logoutButtonText}>Log Out</Text>
-          </TouchableOpacity>
+            Log Out
+          </Button>
         </ScrollView>
       </LinearGradient>
     </View>

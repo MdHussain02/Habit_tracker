@@ -1,14 +1,13 @@
 import { PookieColors } from '@/constants/Colors';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
-import { LinearGradient } from 'expo-linear-gradient';
 import React from 'react';
 import {
-    Alert,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  Alert,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 
 export default function CoachScreen() {
@@ -76,10 +75,6 @@ export default function CoachScreen() {
 
   return (
     <View style={styles.container}>
-      <LinearGradient
-        colors={['#1a1a1a', '#2a2a2a']}
-        style={styles.gradientBackground}
-      >
         {/* Header */}
         <View style={styles.header}>
           <Text style={styles.headerTitle}>Smart Coach</Text>
@@ -166,7 +161,6 @@ export default function CoachScreen() {
             ))}
           </View>
         </ScrollView>
-      </LinearGradient>
     </View>
   );
 }
@@ -174,7 +168,7 @@ export default function CoachScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#1a1a1a',
+    backgroundColor: '#14141c',
   },
   gradientBackground: {
     flex: 1,
@@ -213,7 +207,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   tipCard: {
-    backgroundColor: '#2d1b69',
+    backgroundColor: '#22222b',
     borderRadius: 16,
     padding: 20,
     marginBottom: 12,
@@ -252,7 +246,7 @@ const styles = StyleSheet.create({
     lineHeight: 20,
   },
   warningCard: {
-    backgroundColor: '#4a1a1a',
+    backgroundColor: '#22222b',
     borderRadius: 16,
     padding: 20,
     marginBottom: 12,
@@ -287,7 +281,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
   },
   recommendationCard: {
-    backgroundColor: '#2a2a2a',
+    backgroundColor: '#22222b',
     borderRadius: 16,
     padding: 20,
     marginBottom: 12,

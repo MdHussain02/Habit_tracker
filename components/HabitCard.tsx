@@ -94,10 +94,10 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: "#2a2a2a",
+    backgroundColor: "#22222b",
     borderRadius: 20,
-    padding: 18,
-    marginBottom: 14
+    padding: 15,
+    marginBottom: 10
   },
   checkbox: {
     marginRight: 16,

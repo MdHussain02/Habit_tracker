@@ -1,6 +1,5 @@
 import { PookieColors } from '@/constants/Colors';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
-import { LinearGradient } from 'expo-linear-gradient';
 import React, { useState } from 'react';
 import {
   Dimensions,
@@ -94,10 +93,7 @@ export default function AnalyticsScreen() {
 
   return (
     <View style={styles.container}>
-      <LinearGradient
-        colors={['#1a1a1a', '#2a2a2a']}
-        style={styles.gradientBackground}
-      >
+    
         {/* Header */}
         <View style={styles.header}>
           <Text style={styles.headerTitle}>Analytics</Text>
@@ -174,7 +170,6 @@ export default function AnalyticsScreen() {
             </TouchableOpacity>
           </View>
         </ScrollView>
-      </LinearGradient>
     </View>
   );
 }
@@ -182,7 +177,7 @@ export default function AnalyticsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#1a1a1a',
+    backgroundColor: '#14141c',
   },
   gradientBackground: {
     flex: 1,
@@ -238,7 +233,7 @@ const styles = StyleSheet.create({
     color: '#fff',
   },
   graphContainer: {
-    backgroundColor: '#2a2a2a',
+    backgroundColor: '#22222b',
     borderRadius: 16,
     padding: 20,
   },
@@ -263,7 +258,7 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   streakCard: {
-    backgroundColor: '#2a2a2a',
+    backgroundColor: '#22222b',
     borderRadius: 16,
     padding: 20,
     marginBottom: 12,
@@ -311,7 +306,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   skippedCard: {
-    backgroundColor: '#2a2a2a',
+    backgroundColor: '#22222b',
     borderRadius: 16,
     padding: 20,
     marginBottom: 12,
@@ -347,7 +342,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   reviewButton: {
-    backgroundColor: '#000',
+    backgroundColor: '#636ae8',
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 8,

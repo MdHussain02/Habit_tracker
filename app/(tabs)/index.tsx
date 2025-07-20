@@ -1,9 +1,8 @@
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { LinearGradient } from 'expo-linear-gradient';
+import { useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { Alert, FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import AddHabitModal from '../../components/AddHabitModal';
 import HabitCard from '../../components/HabitCard';
 import TimePicker from '../../components/TimePicker';
 import { useHabitNotifications } from '../../hooks/useHabitNotifications';
@@ -13,11 +12,12 @@ const HABITS_STORAGE_KEY = '@habit_hero_habits';
 
 export default function HomeScreen() {
   const [habits, setHabits] = useState<Habit[]>([]);
-  const [showAddModal, setShowAddModal] = useState(false);
   const [loading, setLoading] = useState(true);
   const [editHabitId, setEditHabitId] = useState<string | null>(null);
   const [editTime, setEditTime] = useState<string>('09:00');
   const [showEditModal, setShowEditModal] = useState(false);
+
+  const router = useRouter();
 
   const { addHabitWithNotification, editHabitWithNotification, deleteHabitWithNotification } = useHabitNotifications(habits, setHabits);
 
@@ -74,10 +74,7 @@ export default function HomeScreen() {
 
   return (
     <View style={styles.container}>
-      <LinearGradient
-        colors={['#1a1a1a', '#2a2a2a']}
-        style={styles.gradientBackground}
-      >
+     
         <View style={styles.topHeaderRow}>
           <Text style={styles.headerTitleMain}>Today's Habits</Text>
         </View>
@@ -147,16 +144,10 @@ export default function HomeScreen() {
         {/* Floating Add Button */}
         <TouchableOpacity
           style={styles.fab}
-          onPress={() => setShowAddModal(true)}
+          onPress={() => router.push('/add-habit')}
         >
           <Ionicons name="add" size={32} color="#fff" />
         </TouchableOpacity>
-        <AddHabitModal
-          visible={showAddModal}
-          onClose={() => setShowAddModal(false)}
-          onAddHabit={addHabit}
-        />
-      </LinearGradient>
     </View>
   );
 }
@@ -165,11 +156,11 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingTop: 60,
-    backgroundColor: '#1a1a1a',
+    backgroundColor: '#14141c',
   },
   loadingContainer: {
     flex: 1,
-    backgroundColor: '#1a1a1a',
+    backgroundColor: '#14141c',
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -201,6 +192,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 40,
+    backgroundColor: '#14141c',
   },
   emptyTitleModern: {
     fontSize: 24,
@@ -235,9 +227,11 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     borderRadius: 18,
     overflow: 'hidden',
+    backgroundColor: '#23232b', // keep card slightly lighter for contrast
   },
   habitsListModern: {
     flex: 1,
     paddingHorizontal: 12,
+    backgroundColor: '#14141c',
   },
 });

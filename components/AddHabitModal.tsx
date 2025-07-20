@@ -3,16 +3,16 @@ import { PookieColors } from '@/constants/Colors';
 import { FontAwesome, Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { default as React, useState } from 'react';
 import {
-    Alert,
-    Keyboard,
-    Modal,
-    Platform,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  Alert,
+  Keyboard,
+  Modal,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 import { HabitFormData, HabitIcon, HabitReminder } from '../types/habit';
 import TimePicker from './TimePicker';
@@ -179,26 +179,28 @@ const styles = StyleSheet.create({
   overlay: {
     flex: 1,
     justifyContent: 'flex-end',
+    // marginTop:20,
+
   },
   bottomSheet: {
     borderTopLeftRadius: 32,
     borderTopRightRadius: 32,
-    paddingBottom: 32,
+    // paddingBottom: 32,
     paddingTop: 12,
     paddingHorizontal: 24,
     minHeight: 600,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: -4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 16,
-    elevation: 8,
-    backgroundColor: '#1a1a1a',
+    // shadowOffset: { width: 0, height: -4 },
+    // shadowOpacity: 0.3,
+    // shadowRadius: 16,
+    elevation: 2,
+    backgroundColor: '#404051',
   },
   dragIndicator: {
     width: 48,
     height: 6,
     borderRadius: 3,
-    backgroundColor: PookieColors.hotPink,
+    backgroundColor: "#636ae8",
     alignSelf: 'center',
     marginBottom: 12,
   },

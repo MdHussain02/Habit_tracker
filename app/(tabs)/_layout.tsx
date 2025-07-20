@@ -1,7 +1,6 @@
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { Tabs } from 'expo-router';
 import React from 'react';
-import { PookieColors } from '../../constants/Colors';
 
 export default function TabLayout() {
   return (
@@ -11,9 +10,10 @@ export default function TabLayout() {
         tabBarStyle: {
           height: 72,
           paddingBottom: 14,
-          paddingTop: 8
+          paddingTop: 8,
+          backgroundColor : "#1e1e2b"
         },
-        tabBarActiveTintColor: PookieColors?.hotPink || '#FF1972',
+        tabBarActiveTintColor:'#636ae8',
         // tabBarInactiveTintColor: '#666',
         tabBarLabelStyle: {
           fontSize: 12,
