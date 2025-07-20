@@ -290,8 +290,7 @@ export default function RegistrationScreen({ onRegister }: { onRegister: (user: 
             />
           </View>
         )}
-`
-        {/* Navigation Buttons */}`
+        {/* Navigation Buttons */}
         <View style={styles.buttonRow}>
           {step > 0 && (
             <TouchableOpacity style={[styles.button, styles.backButton]} onPress={prevStep}>
