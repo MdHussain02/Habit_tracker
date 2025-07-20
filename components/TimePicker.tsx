@@ -8,11 +8,20 @@ import { Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native
 interface TimePickerProps {
   value: string; // HH:MM format
   onTimeChange: (time: string) => void;
-  enabled: boolean;
-  onToggle: (enabled: boolean) => void;
+  title?: string;
+  enabled?: boolean;
+  onToggle?: (enabled: boolean) => void;
+  showToggle?: boolean;
 }
 
-export default function TimePicker({ value, onTimeChange, enabled, onToggle }: TimePickerProps) {
+export default function TimePicker({ 
+  value, 
+  onTimeChange, 
+  title = "Time", 
+  enabled = true, 
+  onToggle, 
+  showToggle = false 
+}: TimePickerProps) {
   const [showPicker, setShowPicker] = useState(false);
 
   const parseTime = (timeString: string): Date => {
@@ -47,13 +56,15 @@ export default function TimePicker({ value, onTimeChange, enabled, onToggle }: T
   return (
     <View style={styles.cardContainer}>
       <View style={styles.headerRow}>
-        <Text style={styles.cardTitle}>Daily Reminder</Text>
-        <TouchableOpacity
-          style={[styles.toggle, enabled && styles.toggleActive]}
-          onPress={() => onToggle(!enabled)}
-        >
-          <View style={[styles.toggleCircle, enabled && styles.toggleCircleActive]} />
-        </TouchableOpacity>
+        <Text style={styles.cardTitle}>{title}</Text>
+        {showToggle && onToggle && (
+          <TouchableOpacity
+            style={[styles.toggle, enabled && styles.toggleActive]}
+            onPress={() => onToggle(!enabled)}
+          >
+            <View style={[styles.toggleCircle, enabled && styles.toggleCircleActive]} />
+          </TouchableOpacity>
+        )}
       </View>
 
       {enabled && (
@@ -63,13 +74,15 @@ export default function TimePicker({ value, onTimeChange, enabled, onToggle }: T
             onPress={() => setShowPicker(true)}
           >
             <Ionicons name="time-outline" size={20} color={PookieColors.hotPink} />
-            <Text style={styles.timeText}>{formatDisplayTime(value)}</Text>
+            <Text style={styles.timeText}>
+              {value ? formatDisplayTime(value) : "Select Time"}
+            </Text>
             <Ionicons name="chevron-down" size={20} color={PookieColors.hotPink} />
           </TouchableOpacity>
 
           {showPicker && (
             <DateTimePicker
-              value={parseTime(value)}
+              value={value ? parseTime(value) : new Date()}
               mode="time"
               is24Hour={false}
               display={Platform.OS === 'ios' ? 'spinner' : 'default'}
