@@ -86,7 +86,11 @@ export default function Button({
           style={{ marginRight: 8 }}
         />
       ) : null}
-      <Text style={[styles.text, getTextStyle(type, isDisabled), textStyle]}>{children}</Text>
+      {typeof children === 'string' || typeof children === 'number' ? (
+        <Text style={[styles.text, getTextStyle(type, isDisabled), textStyle]}>{children}</Text>
+      ) : (
+        children
+      )}
       {type === 'primary' && !loading && (
         <Text style={{ color: TEXT_COLOR, fontSize: 20, fontWeight: 'bold', marginLeft: 8 }}>{'>'}</Text>
       )}
