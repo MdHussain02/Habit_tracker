@@ -3,7 +3,7 @@ import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native
 import * as Notifications from 'expo-notifications';
 import { Stack } from 'expo-router';
 import React, { useEffect, useState } from 'react';
-import { Button, Text, View } from 'react-native';
+import { Text, View } from 'react-native';
 import { useColorScheme } from '../hooks/useColorScheme';
 import OnboardingScreen from '../screens/OnboardingScreen';
 import RegistrationScreen from '../screens/RegistrationScreen';
@@ -53,25 +53,6 @@ export default function RootLayout() {
         <OnboardingScreen onComplete={handleOnboardingComplete} />
         <RegistrationScreen onRegister={handleRegister} />
         <Stack screenOptions={{ headerShown: false }} />
-        <Button
-          title="Push Notification Now"
-          onPress={async () => {
-            try {
-              const now = new Date();
-              await Notifications.scheduleNotificationAsync({
-                content: {
-                  title: 'Manual Notification Test',
-                  body: `Current time: ${now.toLocaleTimeString()}`,
-                  data: { test: true },
-                },
-                trigger: null,
-              });
-              alert('Notification pushed!');
-            } catch (e) {
-              alert('Failed to push notification.');
-            }
-          }}
-        />
         <View style={{ position: 'absolute', top: '50%', left: 0, right: 0, alignItems: 'center' }}>
           <View style={{ padding: 24, backgroundColor: '#222', borderRadius: 16 }}>
             <OnboardingScreen onComplete={handleOnboardingComplete} />
@@ -132,28 +113,9 @@ export default function RootLayout() {
     return <RegistrationScreen onRegister={handleRegister} />;
   }
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+    <ThemeProvider value={colorScheme === 'dark' ?DarkTheme  :  DefaultTheme}>
       <View style={{ flex: 1, backgroundColor: colorScheme === 'dark' ? '#000' : '#fff' }}>
         <Stack screenOptions={{ headerShown: false }} />
-        <Button
-          title="Push Notification Now"
-          onPress={async () => {
-            try {
-              const now = new Date();
-              await Notifications.scheduleNotificationAsync({
-                content: {
-                  title: 'Manual Notification Test',
-                  body: `Current time: ${now.toLocaleTimeString()}`,
-                  data: { test: true },
-                },
-                trigger: null,
-              });
-              alert('Notification pushed!');
-            } catch (e) {
-              alert('Failed to push notification.');
-            }
-          }}
-        />
       </View>
     </ThemeProvider>
   );
