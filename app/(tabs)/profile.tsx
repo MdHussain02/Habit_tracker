@@ -119,15 +119,15 @@ export default function ProfileScreen() {
       {/* Profile Header */}
       <View style={styles.profileHeaderBox}>
         <View style={{ alignItems: 'center' }}>
-          <TouchableOpacity onPress={pickAvatar} activeOpacity={0.8} style={{ marginBottom: 0 }}>
+          <View style={styles.avatarContainer}>
             <Image
               source={profile.avatar ? { uri: profile.avatar } : require('../../assets/images/heart.png')}
               style={styles.avatarLarge}
             />
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.editAvatarBtn} onPress={pickAvatar}>
-            <Text style={styles.editAvatarText}>Edit Avatar</Text>
-          </TouchableOpacity>
+            <TouchableOpacity style={styles.editAvatarBtn} onPress={pickAvatar}>
+              <AntDesign name="edit" size={14} color="#fff" />
+            </TouchableOpacity>
+          </View>
           <Text style={styles.profileName}>{profile.name || 'Jane Doe'}</Text>
           <Text style={styles.profileLevel}>Level {profile.level || '12'}: Habit Enthusiast</Text>
           <Text style={styles.profileQuote}>
@@ -135,10 +135,7 @@ export default function ProfileScreen() {
               "{profile.quote || 'Consistency is key to lasting change.'}"
             </Text>
           </Text>
-          <TouchableOpacity style={styles.editProfileBtn} onPress={openEditModal}>
-            <AntDesign name="edit" size={16} color="#7066F6" />
-            <Text style={styles.editProfileBtnText}>Edit Profile</Text>
-          </TouchableOpacity>
+
         </View>
         {/* Personal Details Tile */}
         <TouchableOpacity
@@ -262,11 +259,22 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontSize: 16,
   },
+  avatarContainer: {
+    position: 'relative',
+    marginBottom: 12,
+  },
   editAvatarBtn: {
+    position: 'absolute',
+    bottom: 0,
+    right: 0,
     backgroundColor: '#7066F6',
-    borderRadius: 16,
-    paddingVertical: 8,
-    paddingHorizontal: 20,
+    borderRadius: 12,
+    width: 24,
+    height: 24,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: '#23232b',
   },
   editAvatarText: {
     color: '#fff',

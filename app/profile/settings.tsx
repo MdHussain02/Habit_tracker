@@ -2,14 +2,15 @@ import { PookieColors } from '@/constants/Colors';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import {
-  ScrollView,
-  StyleSheet,
-  Switch,
-  Text,
-  TouchableOpacity,
-  View
+    ScrollView,
+    StyleSheet,
+    Switch,
+    Text,
+    TouchableOpacity,
+    View
 } from 'react-native';
 import { removeUserData } from '../../utils/storage';
 
@@ -19,6 +20,7 @@ export default function SettingsScreen() {
   const [coachTips, setCoachTips] = useState(true);
   const [achievementAlerts, setAchievementAlerts] = useState(false);
   const [promotionalUpdates, setPromotionalUpdates] = useState(false);
+  const router = useRouter();
 
   const settingsSections = [
     {
@@ -141,10 +143,7 @@ export default function SettingsScreen() {
               await AsyncStorage.removeItem('onboardingDone');
               await AsyncStorage.removeItem('userRegistered');
               await removeUserData();
-              // Reload the app to trigger onboarding flow
-              if (typeof window !== 'undefined') {
-                window.location.reload();
-              }
+              router.replace('/onboarding');
             }}
           >
             <Text style={styles.logoutButtonText}>Log Out</Text>

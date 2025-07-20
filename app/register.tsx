@@ -1,3 +1,4 @@
+import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import { Dimensions, FlatList, KeyboardAvoidingView, Modal, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import TimePicker from '../components/TimePicker';
@@ -128,9 +129,15 @@ export default function RegistrationScreen({ onRegister }: { onRegister: (user: 
     </Modal>
   );
 
+  const router = useRouter();
+
   return (
     <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <ScrollView contentContainerStyle={styles.scrollContainer} showsVerticalScrollIndicator={false}>
+        {/* Back Button */}
+        <TouchableOpacity style={styles.backNavBtn} onPress={() => router.back()}>
+          <Text style={styles.backNavBtnText}>{'< Back'}</Text>
+        </TouchableOpacity>
         {/* Progress Bar */}
         <View style={styles.progressContainer}>
           <View style={styles.progressBar}>
@@ -542,6 +549,20 @@ const styles = StyleSheet.create({
   },
   dropdownItemText: {
     color: '#fff',
+    fontSize: 16,
+  },
+  backNavBtn: {
+    alignSelf: 'flex-start',
+    marginBottom: 12,
+    marginTop: 4,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 8,
+    backgroundColor: '#23232b',
+  },
+  backNavBtnText: {
+    color: '#7066F6',
+    fontWeight: 'bold',
     fontSize: 16,
   },
 }); 
