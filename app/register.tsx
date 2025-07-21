@@ -1,5 +1,5 @@
 import { useRouter } from 'expo-router';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Dimensions, FlatList, KeyboardAvoidingView, Modal, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import TimePicker from '../components/TimePicker';
 import { saveUserData } from '../utils/storage';
@@ -36,9 +36,11 @@ export default function RegistrationScreen({ onRegister }: { onRegister: (user: 
     sleepTime: '',
     preferredWorkoutTime: '',
     notifications: true,
-    weeklyGoal: '',
     motivationLevel: '',
   });
+
+  
+  const API_BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL;
 
   // Dropdown states
   const [showGenderDropdown, setShowGenderDropdown] = useState(false);
@@ -58,9 +60,70 @@ export default function RegistrationScreen({ onRegister }: { onRegister: (user: 
     return true;
   };
 
+  const dummyRegisterApi = async (form: any) => {
+    // Format the payload as required by the backend
+    const payload = {
+      // username: form.username,
+      email: form.email,
+      password: form.password,
+      confirmPassword: form.confirmPassword,
+      profile: {
+        name: form.name,
+        age: Number(form.age),
+        gender: form.gender,
+        weight: Number(form.weight),
+        height: Number(form.height),
+        fitness_level: form.fitnessLevel,
+        motivation_level: form.motivationLevel,
+        notifications: form.notifications,
+        preferred_workout_time: form.preferredWorkoutTime,
+        primary_goal: form.primaryGoal,
+        sleep_time: form.sleepTime,
+        wake_up_time: form.wakeUpTime,
+        weekly_goal: Number(form.weeklyGoal),
+      },
+    };
+    try {
+      const response = await fetch(`${API_BASE_URL}/register`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      });
+      const data = await response.json();
+      console.log('API Response:', data);
+      return data;
+    } catch (error) {
+     return { success: false, error };
+    }
+  };
+
+  const dummyGetApi = async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/posts`); // Example GET endpoinPPPPt
+      const data = await response.json();
+      console.log('GET API Response:', data);
+      return data;
+    } catch (error) {
+      console.error('GET API Error:', error);
+      return { success: false, error };
+    }
+  };
+
+  // Optionally, call dummyGetApi on mount for demonstration
+  useEffect(() => {
+    dummyGetApi();
+  }, []);
+
+
   const nextStep = async () => {
     if (step < steps.length - 1) setStep(step + 1);
     else {
+      // Log registration data and post to dummy API
+      console.log('Registration Data:', form);
+      const apiResult = await dummyRegisterApi(form);
+      console.log('API Response:', apiResult);
       await saveUserData(form);
       onRegister(form);
     }
@@ -253,13 +316,6 @@ export default function RegistrationScreen({ onRegister }: { onRegister: (user: 
               value={form.primaryGoal}
               placeholder="Select Primary Goal"
               onPress={() => setShowGoalDropdown(true)}
-            />
-            <TextInput
-              style={styles.input}
-              placeholder="Weekly Goal (e.g., 3 workouts per week)"
-              placeholderTextColor="#aaa"
-              value={form.weeklyGoal}
-              onChangeText={v => handleChange('weeklyGoal', v)}
             />
           </View>
         )}
@@ -496,8 +552,10 @@ const styles = StyleSheet.create({
     backgroundColor: '#23232b',
     borderRadius: 16,
     padding: 18,
-    marginBottom: 16,
+    marginBottom: 10,
+    marginTop: 10,
     borderWidth: 1,
+    minHeight: 50,
     borderColor: '#333',
     flexDirection: 'row',
     justifyContent: 'space-between',

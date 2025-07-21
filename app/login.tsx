@@ -1,7 +1,7 @@
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import { Alert, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import { getUserData } from '../utils/storage';
+import { saveUserData } from '../utils/storage';
 
 export default function LoginScreen() {
   const [email, setEmail] = useState('');
@@ -9,15 +9,23 @@ export default function LoginScreen() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
+  const API_BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL;
+
   const handleLogin = async () => {
     setLoading(true);
     try {
-      const user = await getUserData();
-      if (user && user.email === email && user.password === password) {
+      const response = await fetch(`${API_BASE_URL}/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
+      const data = await response.json();
+      if (response.ok && data.success) {
+        await saveUserData(data.user || { email, ...data });
         Alert.alert('Success', 'Logged in successfully!');
         router.replace('/(tabs)');
       } else {
-        Alert.alert('Error', 'Invalid email or password');
+        Alert.alert('Error', data.message || 'Invalid email or password');
       }
     } catch (e) {
       Alert.alert('Error', 'Login failed');
