@@ -14,12 +14,19 @@ const steps = [
   'Preferences',
 ];
 
-// Dropdown options
-const genderOptions = ['Male', 'Female', 'Non-binary', 'Prefer not to say'];
-const fitnessLevelOptions = ['Beginner', 'Intermediate', 'Advanced'];
-const primaryGoalOptions = ['Weight Loss', 'Muscle Gain', 'General Fitness', 'Endurance', 'Flexibility'];
-const workoutTimeOptions = ['Early Morning (5-7 AM)', 'Morning (7-9 AM)', 'Late Morning (9-11 AM)', 'Afternoon (12-3 PM)', 'Late Afternoon (3-5 PM)', 'Evening (5-7 PM)', 'Night (7-9 PM)'];
-const motivationLevelOptions = ['1 - Very Low', '2', '3', '4', '5 - Moderate', '6', '7', '8', '9', '10 - Very High'];
+// Interface for API choices
+interface ChoiceOption {
+  value: string;
+  label: string;
+}
+
+interface ApiChoices {
+  gender: ChoiceOption[];
+  fitness_level: ChoiceOption[];
+  motivation_level: ChoiceOption[];
+  preferred_workout_time: ChoiceOption[];
+  primary_goal: ChoiceOption[];
+}
 
 export default function RegistrationScreen({ onRegister }: { onRegister: (user: any) => void }) {
   const [step, setStep] = useState(0);
@@ -41,6 +48,9 @@ export default function RegistrationScreen({ onRegister }: { onRegister: (user: 
     motivationLevel: '',
   });
 
+  // API choices state
+  const [apiChoices, setApiChoices] = useState<ApiChoices | null>(null);
+  const [choicesLoading, setChoicesLoading] = useState(true);
   
   const API_BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL;
   const { fetchPost, fetchGet, loading } = useApi();
@@ -95,15 +105,25 @@ export default function RegistrationScreen({ onRegister }: { onRegister: (user: 
 
   const getProfileChoices = async () => {
     try {
+      setChoicesLoading(true);
       const data = await fetchGet(`${API_BASE_URL}/profile/choices`, false);
-      return data;
+      if (data.success !== false) {
+        setApiChoices(data);
+      } else {
+        showToast('Failed to load form options', 'error');
+      }
     } catch (error: any) {
-      return { success: false, error: error.message };
+      showToast('Failed to load form options', 'error');
+      console.error('Profile choices error:', error);
+    } finally {
+      setChoicesLoading(false);
     }
   };
-useEffect(() => {
-  getProfileChoices();
-}, []);
+
+  useEffect(() => {
+    getProfileChoices();
+  }, []);
+
   const nextStep = async () => {
     if (step < steps.length - 1) setStep(step + 1);
     else {
@@ -118,7 +138,6 @@ useEffect(() => {
     }
   };
 
-
   const prevStep = () => {
     if (step > 0) setStep(step - 1);
   };
@@ -129,16 +148,22 @@ useEffect(() => {
     value, 
     placeholder, 
     onPress, 
-    style 
+    style,
+    disabled = false
   }: { 
     value: string; 
     placeholder: string; 
     onPress: () => void; 
     style?: any;
+    disabled?: boolean;
   }) => (
-    <TouchableOpacity style={[styles.dropdownButton, style]} onPress={onPress}>
+    <TouchableOpacity 
+      style={[styles.dropdownButton, style, disabled && styles.buttonDisabled]} 
+      onPress={onPress}
+      disabled={disabled}
+    >
       <Text style={[styles.dropdownButtonText, !value && styles.placeholderText]}>
-        {value || placeholder}
+        {disabled ? 'Loading...' : (value || placeholder)}
       </Text>
       <Text style={styles.dropdownArrow}>▼</Text>
     </TouchableOpacity>
@@ -153,7 +178,7 @@ useEffect(() => {
   }: { 
     visible: boolean; 
     onClose: () => void; 
-    options: string[]; 
+    options: ChoiceOption[]; 
     onSelect: (value: string) => void; 
     title: string;
   }) => (
@@ -163,16 +188,16 @@ useEffect(() => {
           <Text style={styles.modalTitle}>{title}</Text>
           <FlatList
             data={options}
-            keyExtractor={(item) => item}
+            keyExtractor={(item) => item.value}
             renderItem={({ item }) => (
               <TouchableOpacity
                 style={styles.dropdownItem}
                 onPress={() => {
-                  onSelect(item);
+                  onSelect(item.value);
                   onClose();
                 }}
               >
-                <Text style={styles.dropdownItemText}>{item}</Text>
+                <Text style={styles.dropdownItemText}>{item.label}</Text>
               </TouchableOpacity>
             )}
             style={styles.dropdownList}
@@ -184,6 +209,11 @@ useEffect(() => {
 
   const router = useRouter();
 
+  // Helper function to get options safely
+  const getOptions = (key: keyof ApiChoices): ChoiceOption[] => {
+    return apiChoices?.[key] || [];
+  };
+
   return (
     <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <ScrollView contentContainerStyle={styles.scrollContainer} showsVerticalScrollIndicator={false}>
@@ -191,6 +221,7 @@ useEffect(() => {
         <TouchableOpacity style={styles.backNavBtn} onPress={() => router.back()}>
           <Text style={styles.backNavBtnText}>{'< Back'}</Text>
         </TouchableOpacity>
+        
         {/* Progress Bar */}
         <View style={styles.progressContainer}>
           <View style={styles.progressBar}>
@@ -295,17 +326,20 @@ useEffect(() => {
                 placeholder="Select Gender"
                 onPress={() => setShowGenderDropdown(true)}
                 style={styles.halfInput}
+                disabled={choicesLoading}
               />
             </View>
             <DropdownButton
               value={form.fitnessLevel}
               placeholder="Select Fitness Level"
               onPress={() => setShowFitnessDropdown(true)}
+              disabled={choicesLoading}
             />
             <DropdownButton
               value={form.primaryGoal}
               placeholder="Select Primary Goal"
               onPress={() => setShowGoalDropdown(true)}
+              disabled={choicesLoading}
             />
           </View>
         )}
@@ -328,14 +362,17 @@ useEffect(() => {
               value={form.preferredWorkoutTime}
               placeholder="Select Preferred Workout Time"
               onPress={() => setShowWorkoutTimeDropdown(true)}
+              disabled={choicesLoading}
             />
             <DropdownButton
               value={form.motivationLevel}
               placeholder="Select Motivation Level"
               onPress={() => setShowMotivationDropdown(true)}
+              disabled={choicesLoading}
             />
           </View>
         )}
+        
         {/* Navigation Buttons */}
         <View style={styles.buttonRow}>
           {step > 0 && (
@@ -357,35 +394,35 @@ useEffect(() => {
       <DropdownModal
         visible={showGenderDropdown}
         onClose={() => setShowGenderDropdown(false)}
-        options={genderOptions}
+        options={getOptions('gender')}
         onSelect={(value) => handleChange('gender', value)}
         title="Select Gender"
       />
       <DropdownModal
         visible={showFitnessDropdown}
         onClose={() => setShowFitnessDropdown(false)}
-        options={fitnessLevelOptions}
+        options={getOptions('fitness_level')}
         onSelect={(value) => handleChange('fitnessLevel', value)}
         title="Select Fitness Level"
       />
       <DropdownModal
         visible={showGoalDropdown}
         onClose={() => setShowGoalDropdown(false)}
-        options={primaryGoalOptions}
+        options={getOptions('primary_goal')}
         onSelect={(value) => handleChange('primaryGoal', value)}
         title="Select Primary Goal"
       />
       <DropdownModal
         visible={showWorkoutTimeDropdown}
         onClose={() => setShowWorkoutTimeDropdown(false)}
-        options={workoutTimeOptions}
+        options={getOptions('preferred_workout_time')}
         onSelect={(value) => handleChange('preferredWorkoutTime', value)}
         title="Select Preferred Workout Time"
       />
       <DropdownModal
         visible={showMotivationDropdown}
         onClose={() => setShowMotivationDropdown(false)}
-        options={motivationLevelOptions}
+        options={getOptions('motivation_level')}
         onSelect={(value) => handleChange('motivationLevel', value)}
         title="Select Motivation Level"
       />
@@ -612,4 +649,4 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontSize: 16,
   },
-}); 
+});
