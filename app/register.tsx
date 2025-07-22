@@ -1,5 +1,5 @@
 import { useRouter } from 'expo-router';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Dimensions, FlatList, KeyboardAvoidingView, Modal, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import TimePicker from '../components/TimePicker';
 import { useApi } from '../hooks/useApi';
@@ -43,7 +43,7 @@ export default function RegistrationScreen({ onRegister }: { onRegister: (user: 
 
   
   const API_BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL;
-  const { fetchPost, loading } = useApi();
+  const { fetchPost, fetchGet, loading } = useApi();
   const { showToast } = useToast();
 
   // Dropdown states
@@ -86,26 +86,24 @@ export default function RegistrationScreen({ onRegister }: { onRegister: (user: 
       },
     };
     try {
-      const data = await fetchPost(`${API_BASE_URL}/register`, payload);
+      const data = await fetchPost(`${API_BASE_URL}/register`, payload, false);
       return data;
     } catch (error: any) {
       return { success: false, error: error.message };
     }
   };
 
-  // const dummyGetApi = async () => {
-  //   try {
-  //     const response = await fetch(`${API_BASE_URL}/posts`); // Example GET endpoinPPPPt
-  //     const data = await response.json();
-  //     console.log('GET API Response:', data);
-  //     return data;
-  //   } catch (error) {
-  //     console.error('GET API Error:', error);
-  //     return { success: false, error };
-  //   }
-  // };
-
-
+  const getProfileChoices = async () => {
+    try {
+      const data = await fetchGet(`${API_BASE_URL}/profile/choices`, false);
+      return data;
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  };
+useEffect(() => {
+  getProfileChoices();
+}, []);
   const nextStep = async () => {
     if (step < steps.length - 1) setStep(step + 1);
     else {
@@ -119,6 +117,7 @@ export default function RegistrationScreen({ onRegister }: { onRegister: (user: 
       }
     }
   };
+
 
   const prevStep = () => {
     if (step > 0) setStep(step - 1);

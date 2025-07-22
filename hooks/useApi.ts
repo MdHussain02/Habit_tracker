@@ -14,23 +14,25 @@ export function useApi() {
     return refresh ? { Authorization: `Bearer ${refresh}` } : undefined;
   };
 
-  const fetchApi = useCallback(async (url: string, options: RequestInit = {}) => {
+  const fetchApi = useCallback(async (url: string, options: RequestInit = {}, requireAuth: boolean = true) => {
     setLoading(true);
     setError(null);
     try {
-      const authHeaders = await getAuthHeaders();
       let headers: Record<string, string> = {
         'Content-Type': 'application/json',
       };
       if (isPlainObject(options.headers)) {
         headers = { ...headers, ...options.headers };
       }
-      if (authHeaders && authHeaders.Authorization) {
-        headers['Authorization'] = authHeaders.Authorization;
+      if (requireAuth) {
+        const authHeaders = await getAuthHeaders();
+        if (authHeaders && authHeaders.Authorization) {
+          headers['Authorization'] = authHeaders.Authorization;
+        }
       }
       const response = await fetch(url, { ...options, headers });
       const data = await response.json();
-      if (!response.ok) throw new Error(data.message || 'API error');
+      if (!response.ok) throw new Error(data.error);
       return data;
     } catch (err: any) {
       setError(err.message || 'API error');
@@ -40,10 +42,10 @@ export function useApi() {
     }
   }, []);
 
-  const fetchGet = useCallback((url: string) => fetchApi(url, { method: 'GET' }), [fetchApi]);
-  const fetchPost = useCallback((url: string, body: any) => fetchApi(url, { method: 'POST', body: JSON.stringify(body) }), [fetchApi]);
-  const fetchPut = useCallback((url: string, body: any) => fetchApi(url, { method: 'PUT', body: JSON.stringify(body) }), [fetchApi]);
-  const fetchDelete = useCallback((url: string) => fetchApi(url, { method: 'DELETE' }), [fetchApi]);
+  const fetchGet = useCallback((url: string, requireAuth: boolean = true) => fetchApi(url, { method: 'GET' }, requireAuth), [fetchApi]);
+  const fetchPost = useCallback((url: string, body: any, requireAuth: boolean = true) => fetchApi(url, { method: 'POST', body: JSON.stringify(body) }, requireAuth), [fetchApi]);
+  const fetchPut = useCallback((url: string, body: any, requireAuth: boolean = true) => fetchApi(url, { method: 'PUT', body: JSON.stringify(body) }, requireAuth), [fetchApi]);
+  const fetchDelete = useCallback((url: string, requireAuth: boolean = true) => fetchApi(url, { method: 'DELETE' }, requireAuth), [fetchApi]);
 
   return { fetchGet, fetchPost, fetchPut, fetchDelete, loading, error };
 } 

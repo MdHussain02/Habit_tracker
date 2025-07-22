@@ -17,7 +17,7 @@ export default function LoginScreen() {
 
   const handleLogin = async () => {
     try {
-      const data = await fetchPost(`${API_BASE_URL}/login`, { email, password });
+      const data = await fetchPost(`${API_BASE_URL}/login`, { username: email, password }, false);
       if (data && (data.success || data.access)) {
         await saveUserData(data.user || { email, ...data });
         if (data.access && data.refresh) {
@@ -26,7 +26,7 @@ export default function LoginScreen() {
         showToast('Logged in successfully!', 'success');
         router.replace('/(tabs)');
       } else {
-        showToast(data?.message || 'Invalid email or password', 'error');
+        showToast(data?.error || 'Invalid email or password', 'error');
       }
     } catch (e: any) {
       showToast(e.message || 'Login failed', 'error');
