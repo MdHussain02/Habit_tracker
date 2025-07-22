@@ -41,11 +41,11 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 const styles = StyleSheet.create({
   toast: {
     position: 'absolute',
-    bottom: 60,
+    bottom: 20,
     left: 24,
     right: 24,
-    paddingVertical: 16,
-    paddingHorizontal: 24,
+    paddingVertical: 10,
+    paddingHorizontal: 15,
     borderRadius: 16,
     zIndex: 9999,
     alignItems: 'center',
@@ -57,7 +57,7 @@ const styles = StyleSheet.create({
   },
   toastText: {
     color: '#fff',
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: 'bold',
     textAlign: 'center',
   },

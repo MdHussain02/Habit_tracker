@@ -1,10 +1,20 @@
+import { useToast } from '@/hooks/useToast';
 import { AntDesign, MaterialCommunityIcons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
-import { Alert, Image, Modal, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import { getUserData } from '../../utils/storage';
+import {
+  Image,
+  Modal,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View
+} from 'react-native';
+import { useApi } from '../../hooks/useApi';
 
 const PROFILE_KEY = 'userProfile';
 
@@ -17,11 +27,11 @@ export default function ProfileScreen() {
     age: '',
     gender: '',
     avatar: '',
-    level: '', // Added for editable level
-    quote: '', // Added for editable quote
+    level: '',
+    quote: '',
   });
+
   const [loading, setLoading] = useState(true);
-  const router = useRouter();
   const [editModalVisible, setEditModalVisible] = useState(false);
   const [editProfile, setEditProfile] = useState({
     name: '',
@@ -29,42 +39,42 @@ export default function ProfileScreen() {
     quote: '',
   });
 
-  useEffect(() => {
-    loadProfile();
-  }, []);
+  const router = useRouter();
+  const { fetchGet } = useApi();
+  const { showToast } = useToast();
 
-  const loadProfile = async () => {
+  const API_BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL;
+
+  const getProfileDetails = async () => {
     try {
-      // Load registration data from storage
-      const user = await getUserData();
-      if (user) {
-        setProfile((prev) => ({
-          ...prev,
-          name: user.name || '',
-          email: user.email || '',
-          height: user.height || '',
-          weight: user.weight || '',
-          age: user.age || '',
-          gender: user.gender || '',
-        }));
+      setLoading(true);
+      const data = await fetchGet(`${API_BASE_URL}/profile`);
+      if (data?.profile) {
+        setProfile({
+          name: data.profile.name || '',
+          email: data.email || '',
+          height: data.profile.height?.toString() || '',
+          weight: data.profile.weight?.toString() || '',
+          age: data.profile.age?.toString() || '',
+          gender: data.profile.gender || '',
+          avatar: '', // Update if API provides avatar
+          level: data.profile.fitness_level || '',
+          quote: data.profile.motivation_level || '',
+        });
       } else {
-        setProfile((prev) => ({
-          ...prev,
-          name: '',
-          email: '',
-          height: '',
-          weight: '',
-          age: '',
-          gender: '',
-        }));
+        showToast('Failed to load profile', 'error');
       }
-      // Avatar, level, quote remain editable in this screen only
-    } catch (e) {
-      Alert.alert('Error', 'Could not load profile');
+    } catch (error: any) {
+      showToast('Failed to load profile', 'error');
+      console.error('Profile error:', error);
     } finally {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    getProfileDetails();
+  }, []);
 
   const pickAvatar = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
@@ -81,15 +91,15 @@ export default function ProfileScreen() {
     }
   };
 
-  // Add edit modal handlers
   const openEditModal = () => {
     setEditProfile({
       name: profile.name || '',
-      level: profile.level || '12',
+      level: profile.level || 'Beginner',
       quote: profile.quote || 'Consistency is key to lasting change.',
     });
     setEditModalVisible(true);
   };
+
   const saveEditProfile = async () => {
     const newProfile = { ...profile, ...editProfile };
     setProfile(newProfile);
@@ -107,7 +117,6 @@ export default function ProfileScreen() {
 
   return (
     <View style={styles.container}>
-      {/* Header Row with Settings Button */}
       <View style={styles.headerRow}>
         <TouchableOpacity
           style={styles.settingsBtn}
@@ -116,12 +125,16 @@ export default function ProfileScreen() {
           <AntDesign name="setting" size={24} color="#fff" />
         </TouchableOpacity>
       </View>
-      {/* Profile Header */}
+
       <View style={styles.profileHeaderBox}>
         <View style={{ alignItems: 'center' }}>
           <View style={styles.avatarContainer}>
             <Image
-              source={profile.avatar ? { uri: profile.avatar } : require('../../assets/images/heart.png')}
+              source={
+                profile.avatar
+                  ? { uri: profile.avatar }
+                  : require('../../assets/images/heart.png')
+              }
               style={styles.avatarLarge}
             />
             <TouchableOpacity style={styles.editAvatarBtn} onPress={pickAvatar}>
@@ -129,47 +142,62 @@ export default function ProfileScreen() {
             </TouchableOpacity>
           </View>
           <Text style={styles.profileName}>{profile.name || 'Jane Doe'}</Text>
-          <Text style={styles.profileLevel}>Level {profile.level || '12'}: Habit Enthusiast</Text>
+          <Text style={styles.profileLevel}>
+            Level: {profile.level || 'Beginner'}
+          </Text>
           <Text style={styles.profileQuote}>
             <Text style={{ fontStyle: 'italic', color: '#aaa' }}>
               "{profile.quote || 'Consistency is key to lasting change.'}"
             </Text>
           </Text>
-
         </View>
-        {/* Personal Details Tile */}
+
         <TouchableOpacity
           style={styles.personalDetailsTile}
           onPress={() => router.push('/profile/details')}
           activeOpacity={0.85}
         >
           <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-            <MaterialCommunityIcons name="account-details" size={24} color="#7066F6" style={{ marginRight: 12 }} />
+            <MaterialCommunityIcons
+              name="account-details"
+              size={24}
+              color="#7066F6"
+              style={{ marginRight: 12 }}
+            />
             <View>
-              <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 16 }}>Personal Details</Text>
-              <Text style={{ color: '#aaa', fontSize: 13 }}>{profile.email ? profile.email : 'Add your details'}</Text>
+              <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 16 }}>
+                Personal Details
+              </Text>
+              <Text style={{ color: '#aaa', fontSize: 13 }}>{profile.email}</Text>
             </View>
           </View>
           <AntDesign name="right" size={20} color="#aaa" />
         </TouchableOpacity>
-        {/* Achievements Tile */}
+
         <TouchableOpacity
           style={styles.achievementsTile}
           onPress={() => router.push('/profile/achievements')}
           activeOpacity={0.85}
         >
           <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-            <MaterialCommunityIcons name="trophy-award" size={24} color="#FFD93D" style={{ marginRight: 12 }} />
+            <MaterialCommunityIcons
+              name="trophy-award"
+              size={24}
+              color="#FFD93D"
+              style={{ marginRight: 12 }}
+            />
             <View>
-              <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 16 }}>Achievements</Text>
+              <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 16 }}>
+                Achievements
+              </Text>
               <Text style={{ color: '#aaa', fontSize: 13 }}>View your badges</Text>
             </View>
           </View>
           <AntDesign name="right" size={20} color="#aaa" />
         </TouchableOpacity>
       </View>
+
       <ScrollView contentContainerStyle={{ alignItems: 'center', paddingBottom: 40 }}>
-        {/* Edit Profile Modal */}
         <Modal
           visible={editModalVisible}
           animationType="slide"
@@ -184,28 +212,30 @@ export default function ProfileScreen() {
                 placeholder="Name"
                 placeholderTextColor="#aaa"
                 value={editProfile.name}
-                onChangeText={text => setEditProfile({ ...editProfile, name: text })}
+                onChangeText={(text) => setEditProfile({ ...editProfile, name: text })}
               />
               <TextInput
                 style={styles.input}
                 placeholder="Level"
                 placeholderTextColor="#aaa"
                 value={editProfile.level}
-                onChangeText={text => setEditProfile({ ...editProfile, level: text })}
-                keyboardType="numeric"
+                onChangeText={(text) => setEditProfile({ ...editProfile, level: text })}
               />
               <TextInput
                 style={styles.input}
                 placeholder="Motivational Quote"
                 placeholderTextColor="#aaa"
                 value={editProfile.quote}
-                onChangeText={text => setEditProfile({ ...editProfile, quote: text })}
+                onChangeText={(text) => setEditProfile({ ...editProfile, quote: text })}
               />
               <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 16 }}>
                 <TouchableOpacity style={styles.modalBtn} onPress={() => setEditModalVisible(false)}>
                   <Text style={styles.modalBtnText}>Cancel</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={[styles.modalBtn, { backgroundColor: '#7066F6' }]} onPress={saveEditProfile}>
+                <TouchableOpacity
+                  style={[styles.modalBtn, { backgroundColor: '#7066F6' }]}
+                  onPress={saveEditProfile}
+                >
                   <Text style={[styles.modalBtnText, { color: '#fff' }]}>Save</Text>
                 </TouchableOpacity>
               </View>
@@ -216,6 +246,7 @@ export default function ProfileScreen() {
     </View>
   );
 }
+
 
 const styles = StyleSheet.create({
   container: {

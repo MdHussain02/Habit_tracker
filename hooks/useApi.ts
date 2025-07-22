@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react';
-import { getRefreshToken } from '../utils/storage';
+import { getAccessToken } from '../utils/storage';
 
 function isPlainObject(obj: any): obj is Record<string, string> {
   return obj && typeof obj === 'object' && !Array.isArray(obj);
@@ -10,8 +10,8 @@ export function useApi() {
   const [error, setError] = useState<string | null>(null);
 
   const getAuthHeaders = async () => {
-    const refresh = await getRefreshToken();
-    return refresh ? { Authorization: `Bearer ${refresh}` } : undefined;
+    const access = await getAccessToken();
+    return access ? { Authorization: `Bearer ${access}` } : undefined;
   };
 
   const fetchApi = useCallback(async (url: string, options: RequestInit = {}, requireAuth: boolean = true) => {
@@ -21,15 +21,18 @@ export function useApi() {
       let headers: Record<string, string> = {
         'Content-Type': 'application/json',
       };
+
       if (isPlainObject(options.headers)) {
         headers = { ...headers, ...options.headers };
       }
+
       if (requireAuth) {
         const authHeaders = await getAuthHeaders();
         if (authHeaders && authHeaders.Authorization) {
           headers['Authorization'] = authHeaders.Authorization;
         }
       }
+
       const response = await fetch(url, { ...options, headers });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error);
@@ -48,4 +51,4 @@ export function useApi() {
   const fetchDelete = useCallback((url: string, requireAuth: boolean = true) => fetchApi(url, { method: 'DELETE' }, requireAuth), [fetchApi]);
 
   return { fetchGet, fetchPost, fetchPut, fetchDelete, loading, error };
-} 
+}

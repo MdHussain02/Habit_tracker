@@ -108,7 +108,7 @@ export default function RegistrationScreen({ onRegister }: { onRegister: (user: 
       setChoicesLoading(true);
       const data = await fetchGet(`${API_BASE_URL}/profile/choices`, false);
       if (data.success !== false) {
-        setApiChoices(data);
+        setApiChoices(data.data);
       } else {
         showToast('Failed to load form options', 'error');
       }
@@ -132,6 +132,9 @@ export default function RegistrationScreen({ onRegister }: { onRegister: (user: 
         showToast('Registration successful!', 'success');
         await saveUserData(form);
         onRegister(form);
+        setTimeout(() => {
+          router.replace('/login');
+        }, 1000);
       } else {
         showToast(apiResult.error || apiResult.message || 'Registration failed', 'error');
       }

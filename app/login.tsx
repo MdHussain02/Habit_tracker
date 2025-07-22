@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { useApi } from '../hooks/useApi';
 import { useToast } from '../hooks/useToast';
-import { saveTokens, saveUserData } from '../utils/storage';
+import { getAccessToken, getRefreshToken, saveTokens, saveUserData } from '../utils/storage';
 
 export default function LoginScreen() {
   const [email, setEmail] = useState('');
@@ -13,16 +13,26 @@ export default function LoginScreen() {
   const { fetchPost, loading } = useApi();
 
   const API_BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL;
-  // console.log('API_BASE_URL', API_BASE_URL);
 
   const handleLogin = async () => {
     try {
       const data = await fetchPost(`${API_BASE_URL}/login`, { username: email, password }, false);
+
       if (data && (data.success || data.access)) {
+        // Save user data
         await saveUserData(data.user || { email, ...data });
+
+        // Save access and refresh tokens
         if (data.access && data.refresh) {
           await saveTokens(data.access, data.refresh);
+
+          // ✅ Log to confirm saving (for development/debugging)
+          const access = await getAccessToken();
+          const refresh = await getRefreshToken();
+          console.log('Access Token:', access);
+          console.log('Refresh Token:', refresh);
         }
+
         showToast('Logged in successfully!', 'success');
         router.replace('/(tabs)');
       } else {
@@ -36,6 +46,7 @@ export default function LoginScreen() {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Log In</Text>
+
       <TextInput
         style={styles.input}
         placeholder="Email"
@@ -45,6 +56,7 @@ export default function LoginScreen() {
         keyboardType="email-address"
         autoCapitalize="none"
       />
+
       <TextInput
         style={styles.input}
         placeholder="Password"
@@ -55,12 +67,13 @@ export default function LoginScreen() {
       />
 
       <View style={styles.btnContainer}>
-      <TouchableOpacity style={styles.loginButton} onPress={handleLogin} disabled={loading}>
-        <Text style={styles.loginButtonText}>{loading ? 'Logging in...' : 'Log In'}</Text>
-      </TouchableOpacity>
-      <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
-        <Text style={styles.backButtonText}>Back</Text>
-      </TouchableOpacity>
+        <TouchableOpacity style={styles.loginButton} onPress={handleLogin} disabled={loading}>
+          <Text style={styles.loginButtonText}>{loading ? 'Logging in...' : 'Log In'}</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+          <Text style={styles.backButtonText}>Back</Text>
+        </TouchableOpacity>
       </View>
     </View>
   );
@@ -93,12 +106,11 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#333',
   },
-
   btnContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    gap: 10, // or use marginRight on the first button for spacing if gap is not supported
+    gap: 10,
   },
   loginButton: {
     backgroundColor: '#7066F6',
@@ -128,4 +140,4 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontSize: 16,
   },
-}); 
+});
