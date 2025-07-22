@@ -4,6 +4,7 @@ import * as Notifications from 'expo-notifications';
 import { Stack } from 'expo-router';
 import React, { useEffect } from 'react';
 import { useColorScheme } from '../hooks/useColorScheme';
+import { ToastProvider } from '../hooks/useToast';
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
@@ -18,8 +19,10 @@ export default function RootLayout() {
   }, []);
 
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack screenOptions={{ headerShown: false }} />
-    </ThemeProvider>
+    <ToastProvider>
+      <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+        <Stack screenOptions={{ headerShown: false }} />
+      </ThemeProvider>
+    </ToastProvider>
   );
 }

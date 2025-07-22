@@ -1,36 +1,35 @@
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
-import { Alert, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import { saveUserData } from '../utils/storage';
+import { StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { useApi } from '../hooks/useApi';
+import { useToast } from '../hooks/useToast';
+import { saveTokens, saveUserData } from '../utils/storage';
 
 export default function LoginScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const { showToast } = useToast();
+  const { fetchPost, loading } = useApi();
 
   const API_BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL;
+  // console.log('API_BASE_URL', API_BASE_URL);
 
   const handleLogin = async () => {
-    setLoading(true);
     try {
-      const response = await fetch(`${API_BASE_URL}/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
-      });
-      const data = await response.json();
-      if (response.ok && data.success) {
+      const data = await fetchPost(`${API_BASE_URL}/login`, { email, password });
+      if (data && (data.success || data.access)) {
         await saveUserData(data.user || { email, ...data });
-        Alert.alert('Success', 'Logged in successfully!');
+        if (data.access && data.refresh) {
+          await saveTokens(data.access, data.refresh);
+        }
+        showToast('Logged in successfully!', 'success');
         router.replace('/(tabs)');
       } else {
-        Alert.alert('Error', data.message || 'Invalid email or password');
+        showToast(data?.message || 'Invalid email or password', 'error');
       }
-    } catch (e) {
-      Alert.alert('Error', 'Login failed');
-    } finally {
-      setLoading(false);
+    } catch (e: any) {
+      showToast(e.message || 'Login failed', 'error');
     }
   };
 

@@ -1,7 +1,9 @@
 import { useRouter } from 'expo-router';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { Dimensions, FlatList, KeyboardAvoidingView, Modal, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import TimePicker from '../components/TimePicker';
+import { useApi } from '../hooks/useApi';
+import { useToast } from '../hooks/useToast';
 import { saveUserData } from '../utils/storage';
 
 const { width } = Dimensions.get('window');
@@ -41,6 +43,8 @@ export default function RegistrationScreen({ onRegister }: { onRegister: (user: 
 
   
   const API_BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL;
+  const { fetchPost, loading } = useApi();
+  const { showToast } = useToast();
 
   // Dropdown states
   const [showGenderDropdown, setShowGenderDropdown] = useState(false);
@@ -60,10 +64,8 @@ export default function RegistrationScreen({ onRegister }: { onRegister: (user: 
     return true;
   };
 
-  const dummyRegisterApi = async (form: any) => {
-    // Format the payload as required by the backend
+  const registerApi = async (form: any) => {
     const payload = {
-      // username: form.username,
       email: form.email,
       password: form.password,
       confirmPassword: form.confirmPassword,
@@ -84,48 +86,37 @@ export default function RegistrationScreen({ onRegister }: { onRegister: (user: 
       },
     };
     try {
-      const response = await fetch(`${API_BASE_URL}/register`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(payload),
-      });
-      const data = await response.json();
-      console.log('API Response:', data);
+      const data = await fetchPost(`${API_BASE_URL}/register`, payload);
       return data;
-    } catch (error) {
-     return { success: false, error };
+    } catch (error: any) {
+      return { success: false, error: error.message };
     }
   };
 
-  const dummyGetApi = async () => {
-    try {
-      const response = await fetch(`${API_BASE_URL}/posts`); // Example GET endpoinPPPPt
-      const data = await response.json();
-      console.log('GET API Response:', data);
-      return data;
-    } catch (error) {
-      console.error('GET API Error:', error);
-      return { success: false, error };
-    }
-  };
-
-  // Optionally, call dummyGetApi on mount for demonstration
-  useEffect(() => {
-    dummyGetApi();
-  }, []);
+  // const dummyGetApi = async () => {
+  //   try {
+  //     const response = await fetch(`${API_BASE_URL}/posts`); // Example GET endpoinPPPPt
+  //     const data = await response.json();
+  //     console.log('GET API Response:', data);
+  //     return data;
+  //   } catch (error) {
+  //     console.error('GET API Error:', error);
+  //     return { success: false, error };
+  //   }
+  // };
 
 
   const nextStep = async () => {
     if (step < steps.length - 1) setStep(step + 1);
     else {
-      // Log registration data and post to dummy API
-      console.log('Registration Data:', form);
-      const apiResult = await dummyRegisterApi(form);
-      console.log('API Response:', apiResult);
-      await saveUserData(form);
-      onRegister(form);
+      const apiResult = await registerApi(form);
+      if (apiResult.success) {
+        showToast('Registration successful!', 'success');
+        await saveUserData(form);
+        onRegister(form);
+      } else {
+        showToast(apiResult.error || apiResult.message || 'Registration failed', 'error');
+      }
     }
   };
 
