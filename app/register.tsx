@@ -1,6 +1,7 @@
 import { useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
-import { Dimensions, FlatList, KeyboardAvoidingView, Modal, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Dimensions, FlatList, Modal, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import TimePicker from '../components/TimePicker';
 import { useApi } from '../hooks/useApi';
 import { useToast } from '../hooks/useToast';
@@ -134,7 +135,7 @@ export default function RegistrationScreen({ onRegister }: { onRegister: (user: 
         onRegister(form);
         setTimeout(() => {
           router.replace('/login');
-        }, 1000);
+        }, 1);
       } else {
         showToast(apiResult.error || apiResult.message || 'Registration failed', 'error');
       }
@@ -218,8 +219,13 @@ export default function RegistrationScreen({ onRegister }: { onRegister: (user: 
   };
 
   return (
-    <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-      <ScrollView contentContainerStyle={styles.scrollContainer} showsVerticalScrollIndicator={false}>
+    <KeyboardAwareScrollView
+    contentContainerStyle={styles.scrollContainer}
+    enableOnAndroid={true}
+    enableAutomaticScroll={true}
+    keyboardShouldPersistTaps="handled"
+    extraScrollHeight={100}
+  >
         {/* Back Button */}
         <TouchableOpacity style={styles.backNavBtn} onPress={() => router.back()}>
           <Text style={styles.backNavBtnText}>{'< Back'}</Text>
@@ -391,7 +397,6 @@ export default function RegistrationScreen({ onRegister }: { onRegister: (user: 
             <Text style={styles.buttonText}>{step === steps.length - 1 ? 'Create Account' : 'Next'}</Text>
           </TouchableOpacity>
         </View>
-      </ScrollView>
 
       {/* Dropdown Modals */}
       <DropdownModal
@@ -400,36 +405,37 @@ export default function RegistrationScreen({ onRegister }: { onRegister: (user: 
         options={getOptions('gender')}
         onSelect={(value) => handleChange('gender', value)}
         title="Select Gender"
-      />
+        />
       <DropdownModal
         visible={showFitnessDropdown}
         onClose={() => setShowFitnessDropdown(false)}
         options={getOptions('fitness_level')}
         onSelect={(value) => handleChange('fitnessLevel', value)}
         title="Select Fitness Level"
-      />
+        />
       <DropdownModal
         visible={showGoalDropdown}
         onClose={() => setShowGoalDropdown(false)}
         options={getOptions('primary_goal')}
         onSelect={(value) => handleChange('primaryGoal', value)}
         title="Select Primary Goal"
-      />
+        />
       <DropdownModal
         visible={showWorkoutTimeDropdown}
         onClose={() => setShowWorkoutTimeDropdown(false)}
         options={getOptions('preferred_workout_time')}
         onSelect={(value) => handleChange('preferredWorkoutTime', value)}
         title="Select Preferred Workout Time"
-      />
+        />
       <DropdownModal
         visible={showMotivationDropdown}
         onClose={() => setShowMotivationDropdown(false)}
         options={getOptions('motivation_level')}
         onSelect={(value) => handleChange('motivationLevel', value)}
         title="Select Motivation Level"
-      />
-    </KeyboardAvoidingView>
+        />
+        </KeyboardAwareScrollView>
+ 
   );
 }
 
@@ -442,6 +448,7 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     padding: 24,
     paddingTop: 40,
+    backgroundColor: '#18181b',
   },
   progressContainer: {
     marginBottom: 32,
