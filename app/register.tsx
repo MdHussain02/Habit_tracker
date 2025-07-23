@@ -1,13 +1,13 @@
+import { DropdownButton } from '@/components/DropDownButton';
+import { DropdownModal } from '@/components/DropdownSelect';
 import { useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
-import { Dimensions, FlatList, Modal, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import TimePicker from '../components/TimePicker';
 import { useApi } from '../hooks/useApi';
 import { useToast } from '../hooks/useToast';
 import { saveUserData } from '../utils/storage';
-
-const { width } = Dimensions.get('window');
 
 const steps = [
   'Personal Info',
@@ -47,12 +47,13 @@ export default function RegistrationScreen({ onRegister }: { onRegister: (user: 
     preferredWorkoutTime: '',
     notifications: true,
     motivationLevel: '',
+    weeklyGoal: '3', // ← or some default number
   });
 
   // API choices state
   const [apiChoices, setApiChoices] = useState<ApiChoices | null>(null);
   const [choicesLoading, setChoicesLoading] = useState(true);
-  
+
   const API_BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL;
   const { fetchPost, fetchGet, loading } = useApi();
   const { showToast } = useToast();
@@ -148,68 +149,8 @@ export default function RegistrationScreen({ onRegister }: { onRegister: (user: 
 
   const progress = ((step + 1) / steps.length) * 100;
 
-  const DropdownButton = ({ 
-    value, 
-    placeholder, 
-    onPress, 
-    style,
-    disabled = false
-  }: { 
-    value: string; 
-    placeholder: string; 
-    onPress: () => void; 
-    style?: any;
-    disabled?: boolean;
-  }) => (
-    <TouchableOpacity 
-      style={[styles.dropdownButton, style, disabled && styles.buttonDisabled]} 
-      onPress={onPress}
-      disabled={disabled}
-    >
-      <Text style={[styles.dropdownButtonText, !value && styles.placeholderText]}>
-        {disabled ? 'Loading...' : (value || placeholder)}
-      </Text>
-      <Text style={styles.dropdownArrow}>▼</Text>
-    </TouchableOpacity>
-  );
 
-  const DropdownModal = ({ 
-    visible, 
-    onClose, 
-    options, 
-    onSelect, 
-    title 
-  }: { 
-    visible: boolean; 
-    onClose: () => void; 
-    options: ChoiceOption[]; 
-    onSelect: (value: string) => void; 
-    title: string;
-  }) => (
-    <Modal visible={visible} transparent animationType="fade">
-      <TouchableOpacity style={styles.modalOverlay} onPress={onClose}>
-        <View style={styles.modalContent}>
-          <Text style={styles.modalTitle}>{title}</Text>
-          <FlatList
-            data={options}
-            keyExtractor={(item) => item.value}
-            renderItem={({ item }) => (
-              <TouchableOpacity
-                style={styles.dropdownItem}
-                onPress={() => {
-                  onSelect(item.value);
-                  onClose();
-                }}
-              >
-                <Text style={styles.dropdownItemText}>{item.label}</Text>
-              </TouchableOpacity>
-            )}
-            style={styles.dropdownList}
-          />
-        </View>
-      </TouchableOpacity>
-    </Modal>
-  );
+
 
   const router = useRouter();
 
@@ -221,184 +162,183 @@ export default function RegistrationScreen({ onRegister }: { onRegister: (user: 
   console.log(apiChoices);
   return (
     <KeyboardAwareScrollView
-    contentContainerStyle={styles.scrollContainer}
-    enableOnAndroid={true}
-    enableAutomaticScroll={true}
-    keyboardShouldPersistTaps="handled"
-    extraScrollHeight={100}
-  >
-        {/* Back Button */}
-        <TouchableOpacity style={styles.backNavBtn} onPress={() => router.back()}>
-          <Text style={styles.backNavBtnText}>{'< Back'}</Text>
-        </TouchableOpacity>
-        
-        {/* Progress Bar */}
-        <View style={styles.progressContainer}>
-          <View style={styles.progressBar}>
-            <View style={[styles.progressFill, { width: `${progress}%` }]} />
-          </View>
-          <Text style={styles.progressText}>{Math.round(progress)}% Complete</Text>
-        </View>
+      contentContainerStyle={styles.scrollContainer}
+      enableOnAndroid={true}
+      enableAutomaticScroll={true}
+      keyboardShouldPersistTaps="handled"
+      extraScrollHeight={100}
+    >
+      {/* Back Button */}
+      <TouchableOpacity style={styles.backNavBtn} onPress={() => router.back()}>
+        <Text style={styles.backNavBtnText}>{'< Back'}</Text>
+      </TouchableOpacity>
 
-        {/* Step Indicator */}
-        <View style={styles.stepContainer}>
-          {steps.map((label, idx) => (
-            <View key={label} style={styles.stepItem}>
-              <View style={[styles.stepCircle, step >= idx && styles.stepCircleActive]}>
-                <Text style={[styles.stepNumber, step >= idx && styles.stepNumberActive]}>
-                  {idx + 1}
-                </Text>
-              </View>
-              <Text style={[styles.stepLabel, step >= idx && styles.stepLabelActive]}>
-                {label}
+      {/* Progress Bar */}
+      <View style={styles.progressContainer}>
+        <View style={styles.progressBar}>
+          <View style={[styles.progressFill, { width: `${progress}%` }]} />
+        </View>
+        <Text style={styles.progressText}>{Math.round(progress)}% Complete</Text>
+      </View>
+
+      {/* Step Indicator */}
+      <View style={styles.stepContainer}>
+        {steps.map((label, idx) => (
+          <View key={label} style={styles.stepItem}>
+            <View style={[styles.stepCircle, step >= idx && styles.stepCircleActive]}>
+              <Text style={[styles.stepNumber, step >= idx && styles.stepNumberActive]}>
+                {idx + 1}
               </Text>
             </View>
-          ))}
-        </View>
-
-        <Text style={styles.title}>{steps[step]}</Text>
-
-        {/* Step 0: Personal Info */}
-        {step === 0 && (
-          <View style={styles.formSection}>
-            <Text style={styles.sectionTitle}>Tell us about yourself</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Full Name"
-              placeholderTextColor="#aaa"
-              value={form.name}
-              onChangeText={v => handleChange('name', v)}
-            />
-            <TextInput
-              style={styles.input}
-              placeholder="Email Address"
-              placeholderTextColor="#aaa"
-              value={form.email}
-              onChangeText={v => handleChange('email', v)}
-              keyboardType="email-address"
-              autoCapitalize="none"
-            />
-            <TextInput
-              style={styles.input}
-              placeholder="Password"
-              placeholderTextColor="#aaa"
-              value={form.password}
-              onChangeText={v => handleChange('password', v)}
-              secureTextEntry
-            />
-            <TextInput
-              style={styles.input}
-              placeholder="Confirm Password"
-              placeholderTextColor="#aaa"
-              value={form.confirmPassword}
-              onChangeText={v => handleChange('confirmPassword', v)}
-              secureTextEntry
-            />
-            {form.password && form.confirmPassword && form.password !== form.confirmPassword && (
-              <Text style={styles.errorText}>Passwords don't match</Text>
-            )}
+            <Text style={[styles.stepLabel, step >= idx && styles.stepLabelActive]}>
+              {label}
+            </Text>
           </View>
-        )}
+        ))}
+      </View>
 
-        {/* Step 1: Health & Goals */}
-        {step === 1 && (
-          <View style={styles.formSection}>
-            <Text style={styles.sectionTitle}>Health & Fitness Goals</Text>
-            <View style={styles.row}>
-              <TextInput
-                style={[styles.input, styles.halfInput]}
-                placeholder="Height (cm)"
-                placeholderTextColor="#aaa"
-                value={form.height}
-                onChangeText={v => handleChange('height', v)}
-                keyboardType="numeric"
-              />
-              <TextInput
-                style={[styles.input, styles.halfInput]}
-                placeholder="Weight (kg)"
-                placeholderTextColor="#aaa"
-                value={form.weight}
-                onChangeText={v => handleChange('weight', v)}
-                keyboardType="numeric"
-              />
-            </View>
-            <View style={styles.row}>
-              <TextInput
-                style={[styles.input, styles.halfInput]}
-                placeholder="Age"
-                placeholderTextColor="#aaa"
-                value={form.age}
-                onChangeText={v => handleChange('age', v)}
-                keyboardType="numeric"
-              />
-              <DropdownButton
-                value={form.gender}
-                placeholder="Select Gender"
-                onPress={() => setShowGenderDropdown(true)}
-                style={styles.halfInput}
-                disabled={choicesLoading || getOptions('gender').length === 0}
-              />
-            </View>
-            <DropdownButton
-              value={form.fitnessLevel}
-              placeholder="Select Fitness Level"
-              onPress={() => setShowFitnessDropdown(true)}
-              disabled={choicesLoading || getOptions('gender').length === 0}
-            />
-            <DropdownButton
-              value={form.primaryGoal}
-              placeholder="Select Primary Goal"
-              onPress={() => setShowGoalDropdown(true)}
-              disabled={choicesLoading || getOptions('gender').length === 0}
-            />
-          </View>
-        )}
+      <Text style={styles.title}>{steps[step]}</Text>
 
-        {/* Step 2: Preferences */}
-        {step === 2 && (
-          <View style={styles.formSection}>
-            <Text style={styles.sectionTitle}>Daily Schedule & Preferences</Text>
-            <TimePicker
-              title="Wake Up Time"
-              value={form.wakeUpTime}
-              onTimeChange={(time) => handleChange('wakeUpTime', time)}
-            />
-            <TimePicker
-              title="Sleep Time"
-              value={form.sleepTime}
-              onTimeChange={(time) => handleChange('sleepTime', time)}
-            />
-            <DropdownButton
-              value={form.preferredWorkoutTime}
-              placeholder="Select Preferred Workout Time"
-              onPress={() => setShowWorkoutTimeDropdown(true)}
-              disabled={choicesLoading}
-              disabled={choicesLoading || getOptions('gender').length === 0}
-            />
-            <DropdownButton
-              value={form.motivationLevel}
-              placeholder="Select Motivation Level"
-              onPress={() => setShowMotivationDropdown(true)}
-              disabled={choicesLoading}
-            />
-          </View>
-        )}
-        
-        {/* Navigation Buttons */}
-        <View style={styles.buttonRow}>
-          {step > 0 && (
-            <TouchableOpacity style={[styles.button, styles.backButton]} onPress={prevStep}>
-              <Text style={styles.buttonText}>Back</Text>
-            </TouchableOpacity>
+      {/* Step 0: Personal Info */}
+      {step === 0 && (
+        <View style={styles.formSection}>
+          <Text style={styles.sectionTitle}>Tell us about yourself</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Full Name"
+            placeholderTextColor="#aaa"
+            value={form.name}
+            onChangeText={v => handleChange('name', v)}
+          />
+          <TextInput
+            style={styles.input}
+            placeholder="Email Address"
+            placeholderTextColor="#aaa"
+            value={form.email}
+            onChangeText={v => handleChange('email', v)}
+            keyboardType="email-address"
+            autoCapitalize="none"
+          />
+          <TextInput
+            style={styles.input}
+            placeholder="Password"
+            placeholderTextColor="#aaa"
+            value={form.password}
+            onChangeText={v => handleChange('password', v)}
+            secureTextEntry
+          />
+          <TextInput
+            style={styles.input}
+            placeholder="Confirm Password"
+            placeholderTextColor="#aaa"
+            value={form.confirmPassword}
+            onChangeText={v => handleChange('confirmPassword', v)}
+            secureTextEntry
+          />
+          {form.password && form.confirmPassword && form.password !== form.confirmPassword && (
+            <Text style={styles.errorText}>Passwords don't match</Text>
           )}
-          <TouchableOpacity
-            style={[styles.button, !canNext() && styles.buttonDisabled]}
-            onPress={nextStep}
-            disabled={!canNext()}
-          >
-            <Text style={styles.buttonText}>{step === steps.length - 1 ? 'Create Account' : 'Next'}</Text>
-          </TouchableOpacity>
         </View>
+      )}
+
+      {/* Step 1: Health & Goals */}
+      {step === 1 && (
+        <View style={styles.formSection}>
+          <Text style={styles.sectionTitle}>Health & Fitness Goals</Text>
+          <View style={styles.row}>
+            <TextInput
+              style={[styles.input, styles.halfInput]}
+              placeholder="Height (cm)"
+              placeholderTextColor="#aaa"
+              value={form.height}
+              onChangeText={v => handleChange('height', v)}
+              keyboardType="numeric"
+            />
+            <TextInput
+              style={[styles.input, styles.halfInput]}
+              placeholder="Weight (kg)"
+              placeholderTextColor="#aaa"
+              value={form.weight}
+              onChangeText={v => handleChange('weight', v)}
+              keyboardType="numeric"
+            />
+          </View>
+          <View style={styles.row}>
+            <TextInput
+              style={[styles.input, styles.halfInput]}
+              placeholder="Age"
+              placeholderTextColor="#aaa"
+              value={form.age}
+              onChangeText={v => handleChange('age', v)}
+              keyboardType="numeric"
+            />
+            <DropdownButton
+              value={form.gender}
+              placeholder="Select Gender"
+              onPress={() => setShowGenderDropdown(true)}
+              style={styles.halfInput}
+              disabled={choicesLoading || getOptions('gender').length === 0}
+            />
+          </View>
+          <DropdownButton
+            value={form.fitnessLevel}
+            placeholder="Select Fitness Level"
+            onPress={() => setShowFitnessDropdown(true)}
+            disabled={choicesLoading || getOptions('gender').length === 0}
+          />
+          <DropdownButton
+            value={form.primaryGoal}
+            placeholder="Select Primary Goal"
+            onPress={() => setShowGoalDropdown(true)}
+            disabled={choicesLoading || getOptions('gender').length === 0}
+          />
+        </View>
+      )}
+
+      {/* Step 2: Preferences */}
+      {step === 2 && (
+        <View style={styles.formSection}>
+          <Text style={styles.sectionTitle}>Daily Schedule & Preferences</Text>
+          <TimePicker
+            title="Wake Up Time"
+            value={form.wakeUpTime}
+            onTimeChange={(time) => handleChange('wakeUpTime', time)}
+          />
+          <TimePicker
+            title="Sleep Time"
+            value={form.sleepTime}
+            onTimeChange={(time) => handleChange('sleepTime', time)}
+          />
+          <DropdownButton
+            value={form.preferredWorkoutTime}
+            placeholder="Select Preferred Workout Time"
+            onPress={() => setShowWorkoutTimeDropdown(true)}
+            disabled={choicesLoading || getOptions('gender').length === 0}
+          />
+          <DropdownButton
+            value={form.motivationLevel}
+            placeholder="Select Motivation Level"
+            onPress={() => setShowMotivationDropdown(true)}
+            disabled={choicesLoading}
+          />
+        </View>
+      )}
+
+      {/* Navigation Buttons */}
+      <View style={styles.buttonRow}>
+        {step > 0 && (
+          <TouchableOpacity style={[styles.button, styles.backButton]} onPress={prevStep}>
+            <Text style={styles.buttonText}>Back</Text>
+          </TouchableOpacity>
+        )}
+        <TouchableOpacity
+          style={[styles.button, !canNext() && styles.buttonDisabled]}
+          onPress={nextStep}
+          disabled={!canNext()}
+        >
+          <Text style={styles.buttonText}>{step === steps.length - 1 ? 'Create Account' : 'Next'}</Text>
+        </TouchableOpacity>
+      </View>
 
       {/* Dropdown Modals */}
       <DropdownModal
@@ -407,37 +347,37 @@ export default function RegistrationScreen({ onRegister }: { onRegister: (user: 
         options={getOptions('gender')}
         onSelect={(value) => handleChange('gender', value)}
         title="Select Gender"
-        />
+      />
       <DropdownModal
         visible={showFitnessDropdown}
         onClose={() => setShowFitnessDropdown(false)}
         options={getOptions('fitness_level')}
         onSelect={(value) => handleChange('fitnessLevel', value)}
         title="Select Fitness Level"
-        />
+      />
       <DropdownModal
         visible={showGoalDropdown}
         onClose={() => setShowGoalDropdown(false)}
         options={getOptions('primary_goal')}
         onSelect={(value) => handleChange('primaryGoal', value)}
         title="Select Primary Goal"
-        />
+      />
       <DropdownModal
         visible={showWorkoutTimeDropdown}
         onClose={() => setShowWorkoutTimeDropdown(false)}
         options={getOptions('preferred_workout_time')}
         onSelect={(value) => handleChange('preferredWorkoutTime', value)}
         title="Select Preferred Workout Time"
-        />
+      />
       <DropdownModal
         visible={showMotivationDropdown}
         onClose={() => setShowMotivationDropdown(false)}
         options={getOptions('motivation_level')}
         onSelect={(value) => handleChange('motivationLevel', value)}
         title="Select Motivation Level"
-        />
-        </KeyboardAwareScrollView>
- 
+      />
+    </KeyboardAwareScrollView>
+
   );
 }
 
