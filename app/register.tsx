@@ -109,7 +109,7 @@ export default function RegistrationScreen({ onRegister }: { onRegister: (user: 
       setChoicesLoading(true);
       const data = await fetchGet(`${API_BASE_URL}/profile/choices`, false);
       if (data.success !== false) {
-        setApiChoices(data.data);
+        setApiChoices(data);
       } else {
         showToast('Failed to load form options', 'error');
       }
@@ -213,11 +213,12 @@ export default function RegistrationScreen({ onRegister }: { onRegister: (user: 
 
   const router = useRouter();
 
-  // Helper function to get options safely
   const getOptions = (key: keyof ApiChoices): ChoiceOption[] => {
-    return apiChoices?.[key] || [];
+    if (!apiChoices || !apiChoices[key]) return [];
+    return apiChoices[key];
   };
 
+  console.log(apiChoices);
   return (
     <KeyboardAwareScrollView
     contentContainerStyle={styles.scrollContainer}
@@ -335,20 +336,20 @@ export default function RegistrationScreen({ onRegister }: { onRegister: (user: 
                 placeholder="Select Gender"
                 onPress={() => setShowGenderDropdown(true)}
                 style={styles.halfInput}
-                disabled={choicesLoading}
+                disabled={choicesLoading || getOptions('gender').length === 0}
               />
             </View>
             <DropdownButton
               value={form.fitnessLevel}
               placeholder="Select Fitness Level"
               onPress={() => setShowFitnessDropdown(true)}
-              disabled={choicesLoading}
+              disabled={choicesLoading || getOptions('gender').length === 0}
             />
             <DropdownButton
               value={form.primaryGoal}
               placeholder="Select Primary Goal"
               onPress={() => setShowGoalDropdown(true)}
-              disabled={choicesLoading}
+              disabled={choicesLoading || getOptions('gender').length === 0}
             />
           </View>
         )}
@@ -372,6 +373,7 @@ export default function RegistrationScreen({ onRegister }: { onRegister: (user: 
               placeholder="Select Preferred Workout Time"
               onPress={() => setShowWorkoutTimeDropdown(true)}
               disabled={choicesLoading}
+              disabled={choicesLoading || getOptions('gender').length === 0}
             />
             <DropdownButton
               value={form.motivationLevel}
