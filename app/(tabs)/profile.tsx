@@ -107,13 +107,13 @@ export default function ProfileScreen() {
     setEditModalVisible(false);
   };
 
-  if (loading) {
-    return (
-      <View style={styles.loadingContainer}>
-        <Text style={styles.loadingText}>Loading profile...</Text>
-      </View>
-    );
-  }
+  // if (loading) {
+  //   return (
+  //     <View style={styles.loadingContainer}>
+  //       <Text style={styles.loadingText}>Loading profile...</Text>
+  //     </View>
+  //   );
+  // }
 
   return (
     <View style={styles.container}>
