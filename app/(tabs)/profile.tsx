@@ -251,7 +251,7 @@ export default function ProfileScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#18181b',
+    backgroundColor: '#14141c',
     alignItems: 'center',
     paddingTop: 48,
   },
