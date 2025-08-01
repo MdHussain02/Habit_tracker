@@ -1,26 +1,28 @@
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { Tabs } from 'expo-router';
 import React from 'react';
+import { ProtectedRoute } from '../../components/ProtectedRoute';
 
 export default function TabLayout() {
   return (
-    <Tabs
-      screenOptions={{
-        headerShown: false,
-        tabBarStyle: {
-          height: 72,
-          paddingBottom: 14,
-          paddingTop: 8,
-          backgroundColor : "#1e1e2b"
-        },
-        tabBarActiveTintColor:'#636ae8',
-        // tabBarInactiveTintColor: '#666',
-        tabBarLabelStyle: {
-          fontSize: 12,
-          fontWeight: '600',
-        },
-      }}
-    >
+    <ProtectedRoute requireAuth={true}>
+      <Tabs
+        screenOptions={{
+          headerShown: false,
+          tabBarStyle: {
+            height: 72,
+            paddingBottom: 14,
+            paddingTop: 8,
+            backgroundColor : "#1e1e2b"
+          },
+          tabBarActiveTintColor:'#636ae8',
+          // tabBarInactiveTintColor: '#666',
+          tabBarLabelStyle: {
+            fontSize: 12,
+            fontWeight: '600',
+          },
+        }}
+      >
       <Tabs.Screen
         name="coach"
         options={{
@@ -57,6 +59,7 @@ export default function TabLayout() {
           ),
         }}
       />
-    </Tabs>
+      </Tabs>
+    </ProtectedRoute>
   );
 } 

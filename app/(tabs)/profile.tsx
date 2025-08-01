@@ -15,6 +15,7 @@ import {
   View
 } from 'react-native';
 import { useApi } from '../../hooks/useApi';
+import { useAuth } from '../../hooks/useAuth';
 
 const PROFILE_KEY = 'userProfile';
 
@@ -42,6 +43,7 @@ export default function ProfileScreen() {
   const router = useRouter();
   const { fetchGet } = useApi();
   const { showToast } = useToast();
+  const { logout } = useAuth();
 
   const API_BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL;
 
@@ -105,6 +107,16 @@ export default function ProfileScreen() {
     setProfile(newProfile);
     await AsyncStorage.setItem(PROFILE_KEY, JSON.stringify(newProfile));
     setEditModalVisible(false);
+  };
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      showToast('Logged out successfully', 'success');
+      router.replace('/onboarding');
+    } catch (error) {
+      showToast('Logout failed', 'error');
+    }
   };
 
   // if (loading) {
@@ -194,6 +206,14 @@ export default function ProfileScreen() {
             </View>
           </View>
           <AntDesign name="right" size={20} color="#aaa" />
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.logoutButton}
+          onPress={handleLogout}
+          activeOpacity={0.8}
+        >
+          <Text style={styles.logoutButtonText}>Logout</Text>
         </TouchableOpacity>
       </View>
 

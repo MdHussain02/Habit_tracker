@@ -48,3 +48,9 @@ export async function removeTokens() {
   await AsyncStorage.removeItem(ACCESS_TOKEN_KEY);
   await AsyncStorage.removeItem(REFRESH_TOKEN_KEY);
 }
+
+export async function isLoggedIn() {
+  const accessToken = await AsyncStorage.getItem(ACCESS_TOKEN_KEY);
+  const userData = await AsyncStorage.getItem(USER_DATA_KEY);
+  return !!(accessToken && userData);
+}

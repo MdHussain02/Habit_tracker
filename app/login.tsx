@@ -1,9 +1,10 @@
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import { StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { ProtectedRoute } from '../components/ProtectedRoute';
 import { useApi } from '../hooks/useApi';
+import { useAuth } from '../hooks/useAuth';
 import { useToast } from '../hooks/useToast';
-import { getAccessToken, getRefreshToken, saveTokens, saveUserData } from '../utils/storage';
 
 export default function LoginScreen() {
   const [email, setEmail] = useState('');
@@ -11,6 +12,7 @@ export default function LoginScreen() {
   const router = useRouter();
   const { showToast } = useToast();
   const { fetchPost, loading } = useApi();
+  const { login } = useAuth();
 
   const API_BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL;
 
@@ -19,22 +21,16 @@ export default function LoginScreen() {
       const data = await fetchPost(`${API_BASE_URL}/login`, { username: email, password }, false);
 
       if (data && (data.success || data.access)) {
-        // Save user data
-        await saveUserData(data.user || { email, ...data });
-
-        // Save access and refresh tokens
+        const userData = data.user || { email, ...data };
+        
+        // Use the auth context to handle login
         if (data.access && data.refresh) {
-          await saveTokens(data.access, data.refresh);
-
-          // ✅ Log to confirm saving (for development/debugging)
-          const access = await getAccessToken();
-          const refresh = await getRefreshToken();
-          console.log('Access Token:', access);
-          console.log('Refresh Token:', refresh);
+          await login(userData, data.access, data.refresh);
+          showToast('Logged in successfully!', 'success');
+          router.replace('/(tabs)');
+        } else {
+          showToast('Invalid response from server', 'error');
         }
-
-        showToast('Logged in successfully!', 'success');
-        router.replace('/(tabs)');
       } else {
         showToast(data?.error || 'Invalid email or password', 'error');
       }
@@ -44,38 +40,40 @@ export default function LoginScreen() {
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Log In</Text>
+    <ProtectedRoute requireAuth={false}>
+      <View style={styles.container}>
+        <Text style={styles.title}>Log In</Text>
 
-      <TextInput
-        style={styles.input}
-        placeholder="Email"
-        placeholderTextColor="#aaa"
-        value={email}
-        onChangeText={setEmail}
-        keyboardType="email-address"
-        autoCapitalize="none"
-      />
+        <TextInput
+          style={styles.input}
+          placeholder="Email"
+          placeholderTextColor="#aaa"
+          value={email}
+          onChangeText={setEmail}
+          keyboardType="email-address"
+          autoCapitalize="none"
+        />
 
-      <TextInput
-        style={styles.input}
-        placeholder="Password"
-        placeholderTextColor="#aaa"
-        value={password}
-        onChangeText={setPassword}
-        secureTextEntry
-      />
+        <TextInput
+          style={styles.input}
+          placeholder="Password"
+          placeholderTextColor="#aaa"
+          value={password}
+          onChangeText={setPassword}
+          secureTextEntry
+        />
 
-      <View style={styles.btnContainer}>
-        <TouchableOpacity style={styles.loginButton} onPress={handleLogin} disabled={loading}>
-          <Text style={styles.loginButtonText}>{loading ? 'Logging in...' : 'Log In'}</Text>
-        </TouchableOpacity>
+        <View style={styles.btnContainer}>
+          <TouchableOpacity style={styles.loginButton} onPress={handleLogin} disabled={loading}>
+            <Text style={styles.loginButtonText}>{loading ? 'Logging in...' : 'Log In'}</Text>
+          </TouchableOpacity>
 
-        <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
-          <Text style={styles.backButtonText}>Back</Text>
-        </TouchableOpacity>
+          <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+            <Text style={styles.backButtonText}>Back</Text>
+          </TouchableOpacity>
+        </View>
       </View>
-    </View>
+    </ProtectedRoute>
   );
 }
 

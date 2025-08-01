@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'expo-router';
 import { useApi } from './useApi';
 import { useToast } from './useToast';
-import { saveUserData } from '../utils/storage';
+import { useAuth } from './useAuth';
 
 // Interface for API choices
 interface ChoiceOption {
@@ -72,6 +72,7 @@ export const useRegistrationForm = (onRegister: (user: any) => void) => {
   const API_BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL;
   const { fetchPost, fetchGet, loading } = useApi();
   const { showToast } = useToast();
+  const { login } = useAuth();
   const router = useRouter();
 
   const handleChange = (key: string, value: string | boolean) => {
@@ -142,11 +143,17 @@ export const useRegistrationForm = (onRegister: (user: any) => void) => {
       const apiResult = await registerApi(form);
       if (apiResult.success) {
         showToast('Registration successful!', 'success');
-        await saveUserData(form);
-        onRegister(form);
-        setTimeout(() => {
+        
+        // If the API returns tokens, use them to log in immediately
+        if (apiResult.access && apiResult.refresh) {
+          await login(form, apiResult.access, apiResult.refresh);
+          onRegister(form);
+          router.replace('/(tabs)');
+        } else {
+          // Otherwise, redirect to login
+          onRegister(form);
           router.replace('/login');
-        }, 1);
+        }
       } else {
         showToast(apiResult.error || apiResult.message || 'Registration failed', 'error');
       }
@@ -158,8 +165,8 @@ export const useRegistrationForm = (onRegister: (user: any) => void) => {
   };
 
   const getOptions = (key: keyof ApiChoices): ChoiceOption[] => {
-    if (!apiChoices || !apiChoices[key]) return [];
-    return apiChoices[key];
+    if (!apiChoices) return [];
+    return apiChoices[key] || [];
   };
 
   const progress = ((step + 1) / 3) * 100;

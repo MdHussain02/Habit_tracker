@@ -3,6 +3,7 @@ import { DropdownModal } from '@/components/DropdownSelect';
 import React from 'react';
 import { StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
+import { ProtectedRoute } from '../components/ProtectedRoute';
 import TimePicker from '../components/TimePicker';
 import { useRegistrationForm } from '../hooks/useRegistrationForm';
 
@@ -46,13 +47,14 @@ export default function RegistrationScreen({ onRegister }: { onRegister: (user: 
   } = useRegistrationForm(onRegister);
 
   return (
-    <KeyboardAwareScrollView
-      contentContainerStyle={styles.scrollContainer}
-      enableOnAndroid={true}
-      enableAutomaticScroll={true}
-      keyboardShouldPersistTaps="handled"
-      extraScrollHeight={100}
-    >
+    <ProtectedRoute requireAuth={false}>
+      <KeyboardAwareScrollView
+        contentContainerStyle={styles.scrollContainer}
+        enableOnAndroid={true}
+        enableAutomaticScroll={true}
+        keyboardShouldPersistTaps="handled"
+        extraScrollHeight={100}
+      >
       {/* Back Button */}
       <TouchableOpacity style={styles.backNavBtn} onPress={() => router.back()}>
         <Text style={styles.backNavBtnText}>{'< Back'}</Text>
@@ -169,13 +171,13 @@ export default function RegistrationScreen({ onRegister }: { onRegister: (user: 
             value={form.fitnessLevel}
             placeholder="Select Fitness Level"
             onPress={() => setShowFitnessDropdown(true)}
-            disabled={choicesLoading || getOptions('gender').length === 0}
+            disabled={choicesLoading || getOptions('fitness_level').length === 0}
           />
           <DropdownButton
             value={form.primaryGoal}
             placeholder="Select Primary Goal"
             onPress={() => setShowGoalDropdown(true)}
-            disabled={choicesLoading || getOptions('gender').length === 0}
+            disabled={choicesLoading || getOptions('primary_goal').length === 0}
           />
         </View>
       )}
@@ -198,7 +200,7 @@ export default function RegistrationScreen({ onRegister }: { onRegister: (user: 
             value={form.preferredWorkoutTime}
             placeholder="Select Preferred Workout Time"
             onPress={() => setShowWorkoutTimeDropdown(true)}
-            disabled={choicesLoading || getOptions('gender').length === 0}
+            disabled={choicesLoading || getOptions('preferred_workout_time').length === 0}
           />
           <DropdownButton
             value={form.motivationLevel}
@@ -261,7 +263,8 @@ export default function RegistrationScreen({ onRegister }: { onRegister: (user: 
         onSelect={(value) => handleChange('motivationLevel', value)}
         title="Select Motivation Level"
       />
-    </KeyboardAwareScrollView>
+      </KeyboardAwareScrollView>
+    </ProtectedRoute>
   );
 }
 

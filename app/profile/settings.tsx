@@ -5,7 +5,8 @@ import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import { ScrollView, StyleSheet, Switch, Text, View } from "react-native";
 import Button from "../../components/ui/Button";
-import { removeUserData } from "../../utils/storage";
+import { useAuth } from "../../hooks/useAuth";
+import { useToast } from "../../hooks/useToast";
 
 export default function SettingsScreen() {
   const [darkMode, setDarkMode] = useState(true);
@@ -14,6 +15,8 @@ export default function SettingsScreen() {
   const [achievementAlerts, setAchievementAlerts] = useState(false);
   const [promotionalUpdates, setPromotionalUpdates] = useState(false);
   const router = useRouter();
+  const { logout } = useAuth();
+  const { showToast } = useToast();
 
   const settingsSections = [
     {
@@ -148,10 +151,13 @@ export default function SettingsScreen() {
             <Button
               type="primary"
               onPress={async () => {
-                await AsyncStorage.removeItem("onboardingDone");
-                await AsyncStorage.removeItem("userRegistered");
-                await removeUserData();
-                router.replace("/onboarding");
+                try {
+                  await logout();
+                  showToast('Logged out successfully', 'success');
+                  router.replace("/onboarding");
+                } catch (error) {
+                  showToast('Logout failed', 'error');
+                }
               }}
             >
               Log Out

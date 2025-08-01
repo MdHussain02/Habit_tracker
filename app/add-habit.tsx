@@ -6,6 +6,7 @@ import React, { useState } from 'react';
 import { Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import TimePicker from '../components/TimePicker';
 import { HabitIcon, HabitReminder } from '../types/habit';
+import { ProtectedRoute } from '../components/ProtectedRoute';
 
 const HABITS_STORAGE_KEY = '@habit_hero_habits';
 const SUGGESTED_HABITS = [
@@ -77,25 +78,26 @@ export default function AddHabitPage() {
   };
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <View style={styles.headerRow}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-          <Ionicons name="arrow-back" size={28} color="#fff" />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Add New Habit</Text>
-      </View>
-      <Text style={styles.label}>Select a Habit</Text>
-      <View style={styles.dropdownContainer}>
-        {SUGGESTED_HABITS.map(habit => (
-          <TouchableOpacity
-            key={habit}
-            style={[styles.dropdownItem, selectedHabit === habit && styles.selectedDropdownItem]}
-            onPress={() => setSelectedHabit(habit)}
-          >
-            <Text style={{ color: selectedHabit === habit ? '#fff' : '#ccc' }}>{habit}</Text>
+    <ProtectedRoute requireAuth={true}>
+      <ScrollView contentContainerStyle={styles.container}>
+        <View style={styles.headerRow}>
+          <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+            <Ionicons name="arrow-back" size={28} color="#fff" />
           </TouchableOpacity>
-        ))}
-      </View>
+          <Text style={styles.headerTitle}>Add New Habit</Text>
+        </View>
+        <Text style={styles.label}>Select a Habit</Text>
+        <View style={styles.dropdownContainer}>
+          {SUGGESTED_HABITS.map(habit => (
+            <TouchableOpacity
+              key={habit}
+              style={[styles.dropdownItem, selectedHabit === habit && styles.selectedDropdownItem]}
+              onPress={() => setSelectedHabit(habit)}
+            >
+              <Text style={{ color: selectedHabit === habit ? '#fff' : '#ccc' }}>{habit}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
       {selectedHabit === 'Custom' && (
         <TextInput
           style={styles.input}
@@ -144,6 +146,7 @@ export default function AddHabitPage() {
         {saving ? 'Saving...' : 'Save Habit'}
       </Button>
     </ScrollView>
+    </ProtectedRoute>
   );
 }
 const styles = StyleSheet.create({
@@ -247,4 +250,4 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     letterSpacing: 0.5,
   },
-}); 
+});
