@@ -1,70 +1,32 @@
-import React, { createContext, useCallback, useContext, useState } from 'react';
-import { Animated, StyleSheet, Text } from 'react-native';
+import { useCallback } from 'react';
+import Toast from 'react-native-toast-message';
 
 interface ToastContextType {
-  showToast: (message: string, type?: 'success' | 'error') => void;
+  showToast: (message: string, type?: 'success' | 'error' | 'info' | 'warning') => void;
 }
 
-const ToastContext = createContext<ToastContextType>({ showToast: () => {} });
+export const useToast = () => {
+  const showToast = useCallback((message: string, type: 'success' | 'error' | 'info' | 'warning' = 'success') => {
+    Toast.show({
+      type: type,
+      text1: message,
+      position: 'bottom',
+      visibilityTime: 3000,
+      autoHide: true,
+      topOffset: 30,
+      bottomOffset: 40,
+    });
+  }, []);
 
-export const useToast = () => useContext(ToastContext);
-
-export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
-  const [visible, setVisible] = useState(false);
-  const opacity = React.useRef(new Animated.Value(0)).current;
-
-  const showToast = useCallback((message: string, type: 'success' | 'error' = 'success') => {
-    setToast({ message, type });
-    setVisible(true);
-    Animated.timing(opacity, { toValue: 1, duration: 200, useNativeDriver: true }).start();
-    setTimeout(() => {
-      Animated.timing(opacity, { toValue: 0, duration: 200, useNativeDriver: true }).start(() => {
-        setVisible(false);
-        setToast(null);
-      });
-    }, 2200);
-  }, [opacity]);
-
-  return (
-    <ToastContext.Provider value={{ showToast }}>
-      {children}
-      {visible && toast && (
-        <Animated.View style={[styles.toast, toast.type === 'error' ? styles.error : styles.success, { opacity }]}> 
-          <Text style={styles.toastText}>{toast.message}</Text>
-        </Animated.View>
-      )}
-    </ToastContext.Provider>
-  );
+  return { showToast };
 };
 
-const styles = StyleSheet.create({
-  toast: {
-    position: 'absolute',
-    bottom: 20,
-    left: 24,
-    right: 24,
-    paddingVertical: 10,
-    paddingHorizontal: 15,
-    borderRadius: 16,
-    zIndex: 9999,
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.18,
-    shadowRadius: 8,
-    elevation: 8,
-  },
-  toastText: {
-    color: '#fff',
-    fontSize: 14,
-    fontWeight: 'bold',
-    textAlign: 'center',
-  },
-  success: {
-    backgroundColor: '#5c62d2',
-  },
-  error: {
-    backgroundColor: '#FF1972',
-  },
-}); 
+// Export a simplified provider that just renders the Toast component
+export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  return (
+    <>
+      {children}
+      <Toast />
+    </>
+  );
+}; 
