@@ -51,17 +51,17 @@ export default function ProfileScreen() {
     try {
       setLoading(true);
       const data = await fetchGet(`${API_BASE_URL}/profile`);
-      if (data?.profile) {
+      if (data.data?.profile) {
         setProfile({
-          name: data.profile.name || '',
-          email: data.email || '',
-          height: data.profile.height?.toString() || '',
-          weight: data.profile.weight?.toString() || '',
-          age: data.profile.age?.toString() || '',
-          gender: data.profile.gender || '',
+          name: data.data.profile.name || '',
+          email: data.data.email || '',
+          height: data.data.profile.height?.toString() || '',
+          weight: data.data.profile.weight?.toString() || '',
+          age: data.data.profile.age?.toString() || '',
+          gender: data.data.profile.gender || '',
           avatar: '', // Update if API provides avatar
-          level: data.profile.fitness_level || '',
-          quote: data.profile.motivation_level || '',
+          level: data.data.profile.fitness_level || '',
+          quote: data.data.profile.motivation_level || '',
         });
       } else {
         showToast('Failed to load profile', 'error');

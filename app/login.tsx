@@ -20,19 +20,19 @@ export default function LoginScreen() {
     try {
       const data = await fetchPost(`${API_BASE_URL}/login`, { username: email, password }, false);
 
-      if (data && (data.success || data.access)) {
+      if (data.data && (data.data.success || data.data.access)) {
         const userData = data.user || { email, ...data };
         
         // Use the auth context to handle login
-        if (data.access && data.refresh) {
-          await login(userData, data.access, data.refresh);
+        if (data.data.access && data.data.refresh) {
+          await login(userData, data.data.access, data.data.refresh);
           showToast('Logged in successfully!', 'success');
           router.replace('/(tabs)');
         } else {
           showToast('Invalid response from server', 'error');
         }
       } else {
-        showToast(data?.error || 'Invalid email or password', 'error');
+        showToast(data.data?.error || 'Invalid email or password', 'error');
       }
     } catch (e: any) {
       showToast(e.message || 'Login failed', 'error');
