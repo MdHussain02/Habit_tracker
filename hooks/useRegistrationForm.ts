@@ -144,7 +144,7 @@ export const useRegistrationForm = (onRegister: (user: any) => void) => {
       const apiResult = await registerApi(form);
       if (apiResult.success) {
         showToast('Registration successful!', 'success');
-        
+        router.replace('/login');
         // If the API returns tokens, use them to log in immediately
         if (apiResult.access && apiResult.refresh) {
           await login(form, apiResult.access, apiResult.refresh);
@@ -153,7 +153,7 @@ export const useRegistrationForm = (onRegister: (user: any) => void) => {
         } else {
           // Otherwise, redirect to login
           onRegister(form);
-          router.replace('/login');
+        
         }
       } else {
         showToast(apiResult.error || apiResult.message || 'Registration failed', 'error');
