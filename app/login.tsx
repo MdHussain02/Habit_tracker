@@ -26,16 +26,16 @@ export default function LoginScreen() {
         // Use the auth context to handle login
         if (data.data.access && data.data.refresh) {
           await login(userData, data.data.access, data.data.refresh);
-          showToast('Logged in successfully!', 'success');
+          showToast('Logged in successfully!', 'success', 'top');
           router.replace('/(tabs)');
         } else {
-          showToast('Invalid response from server', 'error');
+          showToast('Invalid response from server', 'error', 'top');
         }
       } else {
-        showToast(data.data?.error || 'Invalid email or password', 'error');
+        showToast(data.data?.error || 'Invalid email or password', 'error', 'top');
       }
     } catch (e: any) {
-      showToast(e.message || 'Login failed', 'error');
+      showToast(e.message || 'Login failed', 'error', 'top');
     }
   };
 
