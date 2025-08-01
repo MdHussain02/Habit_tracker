@@ -1,3 +1,4 @@
+import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React from 'react';
 import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
@@ -14,7 +15,7 @@ export default function OnboardingScreen() {
           Build lasting habits, track your progress, and get personalized insights with your AI-powered coach.
         </Text>
         <TouchableOpacity style={styles.button} onPress={() => router.push('/register')} activeOpacity={0.8}>
-          <Text style={styles.buttonText}>Start Your Journey  {'>'}</Text>
+          <Text style={styles.buttonText}>Start Your Journey   <Ionicons name="arrow-forward" size={15} color="#fff" /></Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.loginLink} onPress={() => router.push('/login')} activeOpacity={0.7}>
           <Text style={styles.loginLinkText}>Already a member? <Text style={styles.loginLinkTextBold}>Log in</Text></Text>

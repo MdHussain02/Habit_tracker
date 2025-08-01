@@ -1,3 +1,4 @@
+import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import { StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
@@ -42,35 +43,37 @@ export default function LoginScreen() {
   return (
     <ProtectedRoute requireAuth={false}>
       <View style={styles.container}>
-        <Text style={styles.title}>Log In</Text>
+        <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+          <Ionicons name="arrow-back" size={24} color="#7066F6" />
+        </TouchableOpacity>
+        
+        <View style={styles.content}>
+          <Text style={styles.title}>Log In</Text>
 
-        <TextInput
-          style={styles.input}
-          placeholder="Email"
-          placeholderTextColor="#aaa"
-          value={email}
-          onChangeText={setEmail}
-          keyboardType="email-address"
-          autoCapitalize="none"
-        />
+          <TextInput
+            style={styles.input}
+            placeholder="Email"
+            placeholderTextColor="#aaa"
+            value={email}
+            onChangeText={setEmail}
+            keyboardType="email-address"
+            autoCapitalize="none"
+          />
 
-        <TextInput
-          style={styles.input}
-          placeholder="Password"
-          placeholderTextColor="#aaa"
-          value={password}
-          onChangeText={setPassword}
-          secureTextEntry
-        />
+          <TextInput
+            style={styles.input}
+            placeholder="Password"
+            placeholderTextColor="#aaa"
+            value={password}
+            onChangeText={setPassword}
+            secureTextEntry
+          />
 
-        <View style={styles.btnContainer}>
-          <TouchableOpacity style={styles.loginButton} onPress={handleLogin} disabled={loading}>
-            <Text style={styles.loginButtonText}>{loading ? 'Logging in...' : 'Log In'}</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
-            <Text style={styles.backButtonText}>Back</Text>
-          </TouchableOpacity>
+          <View style={styles.btnContainer}>
+            <TouchableOpacity style={styles.loginButton} onPress={handleLogin} disabled={loading}>
+              <Text style={styles.loginButtonText}>{loading ? 'Logging in...' : 'Log In'}</Text>
+            </TouchableOpacity>
+          </View>
         </View>
       </View>
     </ProtectedRoute>
@@ -81,6 +84,18 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#18181b',
+  },
+  backButton: {
+    position: 'absolute',
+    top: 50,
+    left: 20,
+    zIndex: 10,
+    padding: 8,
+    borderRadius: 20,
+    backgroundColor: '#23232b',
+  },
+  content: {
+    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     padding: 24,
@@ -112,28 +127,14 @@ const styles = StyleSheet.create({
   },
   loginButton: {
     backgroundColor: '#7066F6',
-    borderRadius: 16,
-    paddingVertical: 14,
-    paddingHorizontal: 32,
+    borderRadius: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
     alignItems: 'center',
-    minWidth: 120,
+    minWidth: 250,
     marginBottom: 16,
   },
   loginButtonText: {
-    color: '#fff',
-    fontWeight: 'bold',
-    fontSize: 16,
-  },
-  backButton: {
-    backgroundColor: '#7066F6',
-    borderRadius: 16,
-    paddingVertical: 14,
-    paddingHorizontal: 32,
-    alignItems: 'center',
-    minWidth: 120,
-    marginBottom: 16,
-  },
-  backButtonText: {
     color: '#fff',
     fontWeight: 'bold',
     fontSize: 16,
