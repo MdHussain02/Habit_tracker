@@ -137,8 +137,6 @@ export const useRegistrationForm = (onRegister: (user: any) => void) => {
   }, []);
 
 
-  console.log(apiChoices);
-
   const nextStep = async () => {
     if (step < 2) {
       setStep(step + 1);
