@@ -159,6 +159,7 @@ export default function RegistrationScreen({ onRegister }: { onRegister: (user: 
               onChangeText={v => handleChange('age', v)}
               keyboardType="numeric"
             />
+            
             <DropdownButton
               value={form.gender}
               placeholder="Select Gender"
@@ -172,6 +173,7 @@ export default function RegistrationScreen({ onRegister }: { onRegister: (user: 
             placeholder="Select Fitness Level"
             onPress={() => setShowFitnessDropdown(true)}
             disabled={choicesLoading || getOptions('fitness_level').length === 0}
+            
           />
           <DropdownButton
             value={form.primaryGoal}

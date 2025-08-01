@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react';
 import { useRouter } from 'expo-router';
+import { useEffect, useState } from 'react';
 import { useApi } from './useApi';
-import { useToast } from './useToast';
 import { useAuth } from './useAuth';
+import { useToast } from './useToast';
 
 // Interface for API choices
 interface ChoiceOption {
@@ -120,7 +120,7 @@ export const useRegistrationForm = (onRegister: (user: any) => void) => {
       setChoicesLoading(true);
       const data = await fetchGet(`${API_BASE_URL}/profile/choices`, false);
       if (data.success !== false) {
-        setApiChoices(data);
+        setApiChoices(data?.data);
       } else {
         showToast('Failed to load form options', 'error');
       }
@@ -135,6 +135,9 @@ export const useRegistrationForm = (onRegister: (user: any) => void) => {
   useEffect(() => {
     getProfileChoices();
   }, []);
+
+
+  console.log(apiChoices);
 
   const nextStep = async () => {
     if (step < 2) {
