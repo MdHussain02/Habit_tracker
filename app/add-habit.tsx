@@ -1,12 +1,13 @@
 import Button from '@/components/ui/Button';
+import { useToast } from '@/hooks/useToast';
 import { FontAwesome, Ionicons, MaterialIcons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import { Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { ProtectedRoute } from '../components/ProtectedRoute';
 import TimePicker from '../components/TimePicker';
 import { HabitIcon, HabitReminder } from '../types/habit';
-import { ProtectedRoute } from '../components/ProtectedRoute';
 
 const HABITS_STORAGE_KEY = '@habit_hero_habits';
 const SUGGESTED_HABITS = [
@@ -49,11 +50,12 @@ export default function AddHabitPage() {
   const [selectedIcon, setSelectedIcon] = useState<HabitIcon | undefined>(undefined);
   const [reminder, setReminder] = useState<HabitReminder>({ enabled: true, time: '09:00' });
   const [saving, setSaving] = useState(false);
+    const { showToast } = useToast();
 
   const handleSave = async () => {
     const name = selectedHabit === 'Custom' ? customHabit.trim() : selectedHabit;
     if (!name) {
-      alert('Please enter a habit name');
+      showToast('Please enter a habit name' ,   "warning" ,'top');
       return;
     }
     setSaving(true);
@@ -71,7 +73,7 @@ export default function AddHabitPage() {
       await AsyncStorage.setItem(HABITS_STORAGE_KEY, JSON.stringify([...habits, newHabit]));
       router.back();
     } catch (e) {
-      alert('Failed to save habit');
+      showToast('Failed to save habit' ,   "error" ,'top');
     } finally {
       setSaving(false);
     }
