@@ -1,4 +1,5 @@
 import Button from '@/components/ui/Button';
+import { PookieColors } from '@/constants/Colors';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
@@ -44,41 +45,72 @@ export default function LoginScreen() {
   return (
     <ProtectedRoute requireAuth={false}>
       <View style={styles.container}>
-        <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
-          <Ionicons name="arrow-back" size={24} color="#7066F6" />
-        </TouchableOpacity>
-        
-        <View style={styles.content}>
-          <Text style={styles.title}>Log In</Text>
+        {/* Header */}
+        <View style={styles.header}>
+          <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+            <Ionicons name="arrow-back" size={24} color="#fff" />
+          </TouchableOpacity>
 
-          <TextInput
-            style={styles.input}
-            placeholder="Email"
-            placeholderTextColor="#aaa"
-            value={email}
-            onChangeText={setEmail}
-            keyboardType="email-address"
-            autoCapitalize="none"
-          />
+          <View style={styles.headerContent}>
+          <Text style={styles.headerTitle}>Welcome Back</Text>
+          <Text style={styles.headerSubtitle}>Sign in to continue your journey</Text>
+          </View>
+        </View>
 
-          <TextInput
-            style={styles.input}
-            placeholder="Password"
-            placeholderTextColor="#aaa"
-            value={password}
-            onChangeText={setPassword}
-            secureTextEntry
-          />
+        {/* Login Form Card */}
+        <View style={styles.formCard}>
+          <View style={styles.inputContainer}>
+            <View style={styles.inputWrapper}>
+              <Ionicons name="mail-outline" size={20} color="#999" style={styles.inputIcon} />
+              <TextInput
+                style={styles.input}
+                placeholder="Email"
+                placeholderTextColor="#999"
+                value={email}
+                onChangeText={setEmail}
+                keyboardType="email-address"
+                autoCapitalize="none"
+              />
+            </View>
+          </View>
 
-          <View style={styles.btnContainer}>
+          <View style={styles.inputContainer}>
+            <View style={styles.inputWrapper}>
+              <Ionicons name="lock-closed-outline" size={20} color="#999" style={styles.inputIcon} />
+              <TextInput
+                style={styles.input}
+                placeholder="Password"
+                placeholderTextColor="#999"
+                value={password}
+                onChangeText={setPassword}
+                secureTextEntry
+              />
+            </View>
+          </View>
+
+          <View style={styles.buttonContainer}>
             <Button
               onPress={handleLogin} 
               loading={loading}
               disabled={loading}
             >
-              {loading ? 'Logging in' : 'Log In'}
+              {loading ? 'Signing In...' : 'Sign In'}
             </Button>
           </View>
+
+          <View style={styles.divider}>
+            <View style={styles.dividerLine} />
+            <Text style={styles.dividerText}>or</Text>
+            <View style={styles.dividerLine} />
+          </View>
+
+          <TouchableOpacity 
+            style={styles.registerButton}
+            onPress={() => router.push('/register')}
+          >
+            <Text style={styles.registerText}>Don't have an account? </Text>
+            <Text style={styles.registerLink}>Sign Up</Text>
+          </TouchableOpacity>
         </View>
       </View>
     </ProtectedRoute>
@@ -87,61 +119,121 @@ export default function LoginScreen() {
 
 const styles = StyleSheet.create({
   container: {
+
     flex: 1,
-    backgroundColor: '#18181b',
+    backgroundColor: '#14141c',
+  },
+  header: {
+    paddingTop: 60,
+    paddingBottom: 40,
+    paddingHorizontal: 24,
+    alignItems: 'center',
+  },
+
+  headerContent: {
+  marginTop: 150,
+    alignItems: 'center',
   },
   backButton: {
     position: 'absolute',
-    top: 50,
-    left: 20,
+    top: 60,
+    left: 24,
     zIndex: 10,
     padding: 8,
     borderRadius: 20,
-    backgroundColor: '#23232b',
+    backgroundColor: '#22222b',
   },
-  content: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 24,
-  },
-  title: {
+  headerTitle: {
     fontSize: 28,
     fontWeight: 'bold',
     color: '#fff',
-    marginBottom: 32,
+    marginBottom: 8,
     textAlign: 'center',
   },
-  input: {
-    width: '100%',
-    maxWidth: 320,
-    backgroundColor: '#23232b',
-    color: '#fff',
-    borderRadius: 12,
-    padding: 14,
-    marginBottom: 16,
+  headerSubtitle: {
     fontSize: 16,
+    color: '#999',
+    textAlign: 'center',
+  },
+  formCard: {
+    backgroundColor: '#22222b',
+    marginHorizontal: 24,
+    borderRadius: 20,
+    padding: 24,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
+  },
+  inputContainer: {
+    marginBottom: 20,
+  },
+  inputWrapper: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#1a1a23',
+    borderRadius: 12,
     borderWidth: 1,
     borderColor: '#333',
+    paddingHorizontal: 16,
   },
-  btnContainer: {
+  inputIcon: {
+    marginRight: 12,
+  },
+  input: {
+    flex: 1,
+    color: '#fff',
+    fontSize: 16,
+    paddingVertical: 16,
+  },
+  buttonContainer: {
+    marginTop: 8,
+  },
+  loginButton: {
+    backgroundColor: PookieColors.hotPink,
+    borderRadius: 12,
+    paddingVertical: 16,
+    alignItems: 'center',
+    shadowColor: PookieColors.hotPink,
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
+  },
+  divider: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: 24,
+  },
+  dividerLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: '#333',
+  },
+  dividerText: {
+    color: '#999',
+    fontSize: 14,
+    marginHorizontal: 16,
+  },
+  registerButton: {
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    gap: 10,
   },
-  loginButton: {
-    backgroundColor: '#7066F6',
-    borderRadius: 10,
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    alignItems: 'center',
-    minWidth: 250,
-    marginBottom: 16,
+  registerText: {
+    color: '#999',
+    fontSize: 14,
   },
-  loginButtonText: {
-    color: '#fff',
-    fontWeight: 'bold',
-    fontSize: 16,
+  registerLink: {
+    color: PookieColors.hotPink,
+    fontSize: 14,
+    fontWeight: '600',
   },
 });
