@@ -1,6 +1,5 @@
 import { PookieColors } from "@/constants/Colors";
 import { Ionicons } from "@expo/vector-icons";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import { ScrollView, StyleSheet, Switch, Text, View } from "react-native";

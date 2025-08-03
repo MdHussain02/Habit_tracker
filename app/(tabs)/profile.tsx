@@ -207,14 +207,6 @@ export default function ProfileScreen() {
           </View>
           <AntDesign name="right" size={20} color="#aaa" />
         </TouchableOpacity>
-
-        <TouchableOpacity
-          style={styles.logoutButton}
-          onPress={handleLogout}
-          activeOpacity={0.8}
-        >
-          <Text style={styles.logoutButtonText}>Logout</Text>
-        </TouchableOpacity>
       </View>
 
       <ScrollView contentContainerStyle={{ alignItems: 'center', paddingBottom: 40 }}>

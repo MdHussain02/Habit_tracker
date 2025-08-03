@@ -269,7 +269,7 @@ export default function RegistrationScreen({ onRegister }: { onRegister: (user: 
           />
         </KeyboardAwareScrollView>
       </View>
-    </ProtectedRoute>
+    </ProtectedRoute> 
   );
 }
 

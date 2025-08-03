@@ -1,3 +1,4 @@
+import Button from '@/components/ui/Button';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
@@ -70,9 +71,13 @@ export default function LoginScreen() {
           />
 
           <View style={styles.btnContainer}>
-            <TouchableOpacity style={styles.loginButton} onPress={handleLogin} disabled={loading}>
-              <Text style={styles.loginButtonText}>{loading ? 'Logging in...' : 'Log In'}</Text>
-            </TouchableOpacity>
+            <Button
+              onPress={handleLogin} 
+              loading={loading}
+              disabled={loading}
+            >
+              {loading ? 'Logging in' : 'Log In'}
+            </Button>
           </View>
         </View>
       </View>

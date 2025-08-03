@@ -1,3 +1,4 @@
+import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
 import { ActivityIndicator, StyleSheet, Text, TextStyle, TouchableOpacity, ViewStyle } from 'react-native';
 
@@ -92,7 +93,10 @@ export default function Button({
         children
       )}
       {type === 'primary' && !loading && (
-        <Text style={{ color: TEXT_COLOR, fontSize: 20, fontWeight: 'bold', marginLeft: 8 }}>{'>'}</Text>
+        <Text style={{ color: TEXT_COLOR, fontSize: 20, fontWeight: 'bold', marginLeft: 8 }}>
+
+          <Ionicons name="arrow-forward" size={24} color="#ffffffff" />
+        </Text>
       )}
     </TouchableOpacity>
   );
