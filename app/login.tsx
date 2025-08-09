@@ -21,14 +21,14 @@ export default function LoginScreen() {
 
   const handleLogin = async () => {
     try {
-      const data = await fetchPost(`${API_BASE_URL}/login`, { username: email, password }, false);
+      const data = await fetchPost(`${API_BASE_URL}/auth/login`, {  email, password }, false);
 
-      if (data.data && (data.data.success || data.data.access)) {
+      if (data && (data.success )) {
         const userData = data.user || { email, ...data };
         
         // Use the auth context to handle login
-        if (data.data.access && data.data.refresh) {
-          await login(userData, data.data.access, data.data.refresh);
+        if (data.token) {
+          await login(userData, data.token);
           showToast('Logged in successfully!', 'success', 'top');
           router.replace('/(tabs)');
         } else {

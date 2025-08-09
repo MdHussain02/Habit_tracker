@@ -87,28 +87,59 @@ export const useRegistrationForm = (onRegister: (user: any) => void) => {
   };
 
   const registerApi = async (form: FormData) => {
+    // Helper function to find the value for a given label
+    const findValueByLabel = (choices: ChoiceOption[], label: string): string => {
+      const choice = choices.find(option => option.label === label);
+      return choice ? choice.value : label;
+    };
+
+    // Helper function to normalize values for API
+    const normalizeValue = (value: string): string => {
+      return value.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+    };
+
+    // Debug logging
+    console.log('API Choices:', apiChoices);
+    console.log('Form Data:', form);
+
+    // Map display labels to API enum values
+    const genderValue = apiChoices ? findValueByLabel(apiChoices.gender, form.gender) : normalizeValue(form.gender);
+    const fitnessLevelValue = apiChoices ? findValueByLabel(apiChoices.fitness_level, form.fitnessLevel) : normalizeValue(form.fitnessLevel);
+    const primaryGoalValue = apiChoices ? findValueByLabel(apiChoices.primary_goal, form.primaryGoal) : normalizeValue(form.primaryGoal);
+    const motivationLevelValue = apiChoices ? findValueByLabel(apiChoices.motivation_level, form.motivationLevel) : normalizeValue(form.motivationLevel);
+    const preferredWorkoutTimeValue = apiChoices ? findValueByLabel(apiChoices.preferred_workout_time, form.preferredWorkoutTime) : normalizeValue(form.preferredWorkoutTime);
+
+    // Debug logging for mapped values
+    console.log('Mapped Values:', {
+      gender: { original: form.gender, mapped: genderValue },
+      fitnessLevel: { original: form.fitnessLevel, mapped: fitnessLevelValue },
+      primaryGoal: { original: form.primaryGoal, mapped: primaryGoalValue },
+      motivationLevel: { original: form.motivationLevel, mapped: motivationLevelValue },
+      preferredWorkoutTime: { original: form.preferredWorkoutTime, mapped: preferredWorkoutTimeValue }
+    });
+
     const payload = {
+      name: form.name,
       email: form.email,
       password: form.password,
       confirmPassword: form.confirmPassword,
-      profile: {
-        name: form.name,
-        age: Number(form.age),
-        gender: form.gender,
-        weight: Number(form.weight),
-        height: Number(form.height),
-        fitness_level: form.fitnessLevel,
-        motivation_level: form.motivationLevel,
-        notifications: form.notifications,
-        preferred_workout_time: form.preferredWorkoutTime,
-        primary_goal: form.primaryGoal,
-        sleep_time: form.sleepTime,
-        wake_up_time: form.wakeUpTime,
-        weekly_goal: Number(form.weeklyGoal),
-      },
+      height: Number(form.height),
+      weight: Number(form.weight),
+      age: Number(form.age),
+      gender: genderValue,
+      fitnessLevel: fitnessLevelValue,
+      primaryGoal: primaryGoalValue,
+      wakeUpTime: form.wakeUpTime,
+      sleepTime: form.sleepTime,
+      preferredWorkoutTime: preferredWorkoutTimeValue,
+      notifications: form.notifications,
+      motivationLevel: motivationLevelValue,
+      weeklyGoal: form.weeklyGoal,
     };
+
+    console.log('Final API Payload:', payload);
     try {
-      const data = await fetchPost(`${API_BASE_URL}/register`, payload, false);
+      const data = await fetchPost(`${API_BASE_URL}/auth/register`, payload, false);
       return data;
     } catch (error: any) {
       return { success: false, error: error.message };
@@ -118,15 +149,80 @@ export const useRegistrationForm = (onRegister: (user: any) => void) => {
   const getProfileChoices = async () => {
     try {
       setChoicesLoading(true);
-      const data = await fetchGet(`${API_BASE_URL}/profile/choices`, false);
-      if (data.success !== false) {
+      console.log('Fetching profile choices from:', `${API_BASE_URL}/choices`);
+      const data = await fetchGet(`${API_BASE_URL}/choices`, false);
+      console.log('Profile choices response:', data);
+      
+      if (data && data.success !== false) {
         setApiChoices(data?.data);
+        console.log('API Choices set:', data?.data);
       } else {
-        showToast('Failed to load form options', 'error');
+        console.warn('Failed to load form options, using fallback values');
+        showToast('Failed to load form options, using default values', 'warning');
+        // Set fallback choices if API fails
+        setApiChoices({
+          gender: [
+            { value: 'male', label: 'Male' },
+            { value: 'female', label: 'Female' },
+            { value: 'other', label: 'Other' }
+          ],
+          fitness_level: [
+            { value: 'beginner', label: 'Beginner' },
+            { value: 'intermediate', label: 'Intermediate' },
+            { value: 'advanced', label: 'Advanced' }
+          ],
+          primary_goal: [
+            { value: 'weight-loss', label: 'Weight Loss' },
+            { value: 'muscle-gain', label: 'Muscle Gain' },
+            { value: 'endurance-training', label: 'Endurance Training' },
+            { value: 'general-fitness', label: 'General Fitness' }
+          ],
+          motivation_level: [
+            { value: 'low', label: 'Low' },
+            { value: 'medium', label: 'Medium' },
+            { value: 'high', label: 'High' }
+          ],
+          preferred_workout_time: [
+            { value: 'morning', label: 'Morning (6-9 AM)' },
+            { value: 'afternoon', label: 'Afternoon (12-5 PM)' },
+            { value: 'evening', label: 'Evening (6-9 PM)' },
+            { value: 'night', label: 'Night (9-12 PM)' }
+          ]
+        });
       }
     } catch (error: any) {
-      showToast('Failed to load form options', 'error');
       console.error('Profile choices error:', error);
+      showToast('Failed to load form options, using default values', 'warning');
+      // Set fallback choices on error
+      setApiChoices({
+        gender: [
+          { value: 'male', label: 'Male' },
+          { value: 'female', label: 'Female' },
+          { value: 'other', label: 'Other' }
+        ],
+        fitness_level: [
+          { value: 'beginner', label: 'Beginner' },
+          { value: 'intermediate', label: 'Intermediate' },
+          { value: 'advanced', label: 'Advanced' }
+        ],
+        primary_goal: [
+          { value: 'weight-loss', label: 'Weight Loss' },
+          { value: 'muscle-gain', label: 'Muscle Gain' },
+          { value: 'endurance-training', label: 'Endurance Training' },
+          { value: 'general-fitness', label: 'General Fitness' }
+        ],
+        motivation_level: [
+          { value: 'low', label: 'Low' },
+          { value: 'medium', label: 'Medium' },
+          { value: 'high', label: 'High' }
+        ],
+        preferred_workout_time: [
+          { value: 'morning', label: 'Morning (6-9 AM)' },
+          { value: 'afternoon', label: 'Afternoon (12-5 PM)' },
+          { value: 'evening', label: 'Evening (6-9 PM)' },
+          { value: 'night', label: 'Night (9-12 PM)' }
+        ]
+      });
     } finally {
       setChoicesLoading(false);
     }
@@ -136,6 +232,7 @@ export const useRegistrationForm = (onRegister: (user: any) => void) => {
     getProfileChoices();
   }, []);
 
+  
 
   const nextStep = async () => {
     if (step < 2) {
@@ -147,7 +244,7 @@ export const useRegistrationForm = (onRegister: (user: any) => void) => {
         router.replace('/login');
         // If the API returns tokens, use them to log in immediately
         if (apiResult.access && apiResult.refresh) {
-          await login(form, apiResult.access, apiResult.refresh);
+          await login(form, apiResult.access,);
           onRegister(form);
           router.replace('/(tabs)');
         } else {

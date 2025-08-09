@@ -12,7 +12,7 @@ interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  login: (userData: User, accessToken: string, refreshToken: string) => Promise<void>;
+  login: (userData: User, accessToken: string) => Promise<void>;
   logout: () => Promise<void>;
   checkAuth: () => Promise<void>;
 }
@@ -46,7 +46,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const login = async (userData: User, accessToken: string, refreshToken: string) => {
+  const login = async (userData: User, accessToken: string, refreshToken?: string) => {
     try {
       await saveUserData(userData);
       await saveTokens(accessToken, refreshToken);
@@ -92,4 +92,4 @@ export function useAuth() {
     throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
-} 
+}

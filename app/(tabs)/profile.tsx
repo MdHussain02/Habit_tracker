@@ -50,18 +50,18 @@ export default function ProfileScreen() {
   const getProfileDetails = async () => {
     try {
       setLoading(true);
-      const data = await fetchGet(`${API_BASE_URL}/profile`);
-      if (data.data?.profile) {
+      const data = await fetchGet(`${API_BASE_URL}/auth/me`);
+      if (data.success && data.data) {
         setProfile({
-          name: data.data.profile.name || '',
+          name: data.data.name || '',
           email: data.data.email || '',
-          height: data.data.profile.height?.toString() || '',
-          weight: data.data.profile.weight?.toString() || '',
-          age: data.data.profile.age?.toString() || '',
-          gender: data.data.profile.gender || '',
+          height: data.data.height?.toString() || '',
+          weight: data.data.weight?.toString() || '',
+          age: data.data.age?.toString() || '',
+          gender: data.data.gender || '',
           avatar: '', // Update if API provides avatar
-          level: data.data.profile.fitness_level || '',
-          quote: data.data.profile.motivation_level || '',
+          level: data.data.fitnessLevel || '',
+          quote: data.data.motivationLevel || '',
         });
       } else {
         showToast('Failed to load profile', 'error');
@@ -535,4 +535,4 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     width: '100%',
   },
-}); 
+});

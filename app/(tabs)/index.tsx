@@ -1,11 +1,12 @@
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { Alert, FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import HabitCard from '../../components/HabitCard';
 import TimePicker from '../../components/TimePicker';
+import { useApi } from '../../hooks/useApi';
 import { useHabitNotifications } from '../../hooks/useHabitNotifications';
+import { useToast } from '../../hooks/useToast';
 import { Habit } from '../../types/habit';
 
 const HABITS_STORAGE_KEY = '@habit_hero_habits';
@@ -18,23 +19,60 @@ export default function HomeScreen() {
   const [showEditModal, setShowEditModal] = useState(false);
 
   const router = useRouter();
+  const { fetchGet } = useApi();
+  const { showToast } = useToast();
+  const API_BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL;
 
   const { addHabitWithNotification, editHabitWithNotification, deleteHabitWithNotification } = useHabitNotifications(habits, setHabits);
 
   useEffect(() => {
-    const loadHabits = async () => {
-      try {
-        const habitsJson = await AsyncStorage.getItem(HABITS_STORAGE_KEY);
-        const loadedHabits = habitsJson ? JSON.parse(habitsJson) : [];
-        setHabits(loadedHabits);
-      } catch (error) {
-        console.error('Error loading habits:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
     loadHabits();
   }, []);
+
+  const loadHabits = async () => {
+    try {
+      setLoading(true);
+      // Fetch habits from API
+      const response = await fetchGet(`${API_BASE_URL}/habits`);
+      
+      if (response.success && response.data) {
+        // Map API response to app's Habit structure
+        const mappedHabits: Habit[] = response.data.map((item: any) => {
+          // Extract hours and minutes from target_time for reminder
+          const targetTime = new Date(item.target_time);
+          const hours = targetTime.getHours().toString().padStart(2, '0');
+          const minutes = targetTime.getMinutes().toString().padStart(2, '0');
+          const reminderTime = `${hours}:${minutes}`;
+          
+          // Map repeats array to completedDates (placeholder implementation)
+          // In a real app, you would need to track actual completion dates
+          const completedDates: string[] = [];
+          
+          return {
+            id: item._id,
+            name: item.name,
+            icon: { set: 'Ionicons', name: 'star' }, // Default icon, you may want to map icon_id to actual icons
+            createdAt: new Date(item.created_time).getTime(),
+            streak: 0, // You'll need to calculate this based on completion history
+            completedDates: completedDates,
+            reminder: {
+              enabled: true,
+              time: reminderTime
+            }
+          };
+        });
+        
+        setHabits(mappedHabits);
+      } else {
+        showToast('Failed to load habits', 'error');
+      }
+    } catch (error) {
+      console.error('Error loading habits:', error);
+      showToast('Failed to load habits', 'error');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const addHabit = addHabitWithNotification;
 

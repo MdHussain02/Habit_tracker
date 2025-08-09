@@ -31,9 +31,11 @@ export async function removeUserData() {
   await AsyncStorage.removeItem(USER_DATA_KEY);
 }
 
-export async function saveTokens(access: string, refresh: string) {
+export async function saveTokens(access: string, refresh?: string) {
   await AsyncStorage.setItem(ACCESS_TOKEN_KEY, access);
-  await AsyncStorage.setItem(REFRESH_TOKEN_KEY, refresh);
+  if (refresh) {
+    await AsyncStorage.setItem(REFRESH_TOKEN_KEY, refresh);
+  }
 }
 
 export async function getAccessToken() {

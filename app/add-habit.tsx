@@ -1,15 +1,14 @@
 import Button from '@/components/ui/Button';
 import { useToast } from '@/hooks/useToast';
 import { FontAwesome, Ionicons, MaterialIcons } from '@expo/vector-icons';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import { Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { ProtectedRoute } from '../components/ProtectedRoute';
 import TimePicker from '../components/TimePicker';
 import { HabitIcon, HabitReminder } from '../types/habit';
+import { useApi } from '../hooks/useApi';
 
-const HABITS_STORAGE_KEY = '@habit_hero_habits';
 const SUGGESTED_HABITS = [
   'Drink Water',
   'Read',
@@ -30,6 +29,30 @@ const SUGGESTED_ICONS: HabitIcon[] = [
   { set: 'MaterialIcons', name: 'fitness-center' },
   { set: 'Ionicons', name: 'star' },
 ];
+
+// Map icon to icon_id (simplified mapping for example)
+const ICON_ID_MAP: Record<string, number> = {
+  'water': 1,
+  'book': 2,
+  'directions-run': 3,
+  'self-improvement': 4,
+  'restaurant': 5,
+  'bed': 6,
+  'fitness-center': 7,
+  'star': 8,
+};
+
+// Days of the week for repeats field (0 = Sunday, 1 = Monday, etc.)
+const DAYS_OF_WEEK = [
+  { id: 0, name: 'Sun' },
+  { id: 1, name: 'Mon' },
+  { id: 2, name: 'Tue' },
+  { id: 3, name: 'Wed' },
+  { id: 4, name: 'Thu' },
+  { id: 5, name: 'Fri' },
+  { id: 6, name: 'Sat' },
+];
+
 function renderIcon(icon: HabitIcon, size: number, color: string) {
   switch (icon.set) {
     case 'Ionicons':
@@ -42,6 +65,7 @@ function renderIcon(icon: HabitIcon, size: number, color: string) {
       return null;
   }
 }
+
 export default function AddHabitPage() {
   const router = useRouter();
   const [selectedHabit, setSelectedHabit] = useState(SUGGESTED_HABITS[0]);
@@ -49,34 +73,65 @@ export default function AddHabitPage() {
   const [description, setDescription] = useState('');
   const [selectedIcon, setSelectedIcon] = useState<HabitIcon | undefined>(undefined);
   const [reminder, setReminder] = useState<HabitReminder>({ enabled: true, time: '09:00' });
+  const [selectedDays, setSelectedDays] = useState<number[]>([1, 2, 3, 4, 5]); // Default to weekdays
   const [saving, setSaving] = useState(false);
-    const { showToast } = useToast();
+  
+  const { showToast } = useToast();
+  const { fetchPost } = useApi();
+  const API_BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL;
 
   const handleSave = async () => {
     const name = selectedHabit === 'Custom' ? customHabit.trim() : selectedHabit;
     if (!name) {
-      showToast('Please enter a habit name' ,   "warning" ,'top');
+      showToast('Please enter a habit name', "warning", 'top');
       return;
     }
     setSaving(true);
     try {
-      const habitsJson = await AsyncStorage.getItem(HABITS_STORAGE_KEY);
-      const habits = habitsJson ? JSON.parse(habitsJson) : [];
-      const newHabit = {
-        id: Date.now().toString(),
+      // Create the payload according to the API requirements
+      const now = new Date();
+      
+      // Set target time based on the selected reminder time
+      const [hours, minutes] = reminder.time.split(':').map(Number);
+      const targetTime = new Date(now);
+      targetTime.setHours(hours, minutes, 0, 0);
+      
+      // Get icon_id from the selected icon or use default
+      const iconId = selectedIcon ? ICON_ID_MAP[selectedIcon.name] || 1 : 1;
+      
+      const payload = {
         name,
-        description,
-        icon: selectedIcon,
-        reminder,
-        completedDates: [],
+        created_time: now.toISOString(),
+        target_time: targetTime.toISOString(),
+        icon_id: iconId,
+        repeats: selectedDays,
       };
-      await AsyncStorage.setItem(HABITS_STORAGE_KEY, JSON.stringify([...habits, newHabit]));
-      router.back();
+      
+      // Call the API to create the habit
+      const response = await fetchPost(`${API_BASE_URL}/habits`, payload);
+      
+      if (response.success) {
+        showToast('Habit created successfully', "success", 'top');
+        router.back();
+      } else {
+        showToast('Failed to create habit', "error", 'top');
+      }
     } catch (e) {
-      showToast('Failed to save habit' ,   "error" ,'top');
+      console.error('Error creating habit:', e);
+      showToast('Failed to create habit', "error", 'top');
     } finally {
       setSaving(false);
     }
+  };
+
+  const toggleDay = (dayId: number) => {
+    setSelectedDays(prev => {
+      if (prev.includes(dayId)) {
+        return prev.filter(id => id !== dayId);
+      } else {
+        return [...prev, dayId].sort((a, b) => a - b);
+      }
+    });
   };
 
   return (
@@ -139,6 +194,22 @@ export default function AddHabitPage() {
         enabled={true}
         onToggle={() => {}}
       />
+      
+      <Text style={styles.label}>Repeat on Days</Text>
+      <View style={styles.daysContainer}>
+        {DAYS_OF_WEEK.map((day) => (
+          <TouchableOpacity
+            key={day.id}
+            style={[styles.dayButton, selectedDays.includes(day.id) && styles.selectedDayButton]}
+            onPress={() => toggleDay(day.id)}
+          >
+            <Text style={[styles.dayText, selectedDays.includes(day.id) && styles.selectedDayText]}>
+              {day.name}
+            </Text>
+          </TouchableOpacity>
+        ))}
+      </View>
+      
       <Button
         onPress={handleSave}
         loading={saving}
@@ -151,6 +222,7 @@ export default function AddHabitPage() {
     </ProtectedRoute>
   );
 }
+
 const styles = StyleSheet.create({
   container: {
     backgroundColor: '#14141c',
@@ -232,6 +304,32 @@ const styles = StyleSheet.create({
   selectedIconButton: {
     borderColor: '#636ae8',
     backgroundColor: '#14141c',
+  },
+  daysContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginVertical: 12,
+  },
+  dayButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#23232b',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 2,
+    borderColor: 'transparent',
+  },
+  selectedDayButton: {
+    borderColor: '#636ae8',
+    backgroundColor: '#14141c',
+  },
+  dayText: {
+    color: '#ccc',
+    fontWeight: '600',
+  },
+  selectedDayText: {
+    color: '#fff',
   },
   saveButton: {
     backgroundColor: '#FF1972',
