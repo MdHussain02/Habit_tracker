@@ -262,35 +262,33 @@ export default function SettingsScreen() {
       <View style={styles.testSection}>
         <Text style={styles.testSectionTitle}>Test Notifications</Text>
         <Button
-          title="Send Test Notification"
           onPress={handleTestNotification}
           style={styles.testButton}
-        />
+        >
+          Send Test Notification
+        </Button>
         <Button
-          title="Trigger Test Notifications"
           onPress={handleTriggerTestNotifications}
           style={styles.testButton}
-        />
+        >
+          Trigger Test Notifications
+        </Button>
         <Button
-          title="Start Test Notifications"
           onPress={handleStartTestNotifications}
           style={styles.testButton}
-        />
+        >
+          Send Test Notification
+        </Button>
         <Button
-          title="Stop Test Notifications"
-          onPress={handleStopTestNotifications}
+          onPress={handleTriggerTestNotifications}
           style={styles.testButton}
-        />
-        <Button
-          title="Get Jobs Status"
-          onPress={handleGetJobsStatus}
-          style={styles.testButton}
-        />
+        >
+          Trigger Test Notifications
+        </Button>
       </View>
 
       <View style={styles.logoutSection}>
         <Button
-          title="Logout"
           onPress={() => {
             Alert.alert(
               "Logout",
@@ -302,7 +300,7 @@ export default function SettingsScreen() {
             );
           }}
           style={styles.logoutButton}
-        />
+        >Logout</Button>
       </View>
     </ScrollView>
   );

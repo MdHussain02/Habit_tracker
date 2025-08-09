@@ -1,7 +1,8 @@
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useFocusEffect, useRouter } from 'expo-router';
 import React, { useState } from 'react';
-import { Alert, FlatList, RefreshControl, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, Animated, FlatList, RefreshControl, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import HabitCardShimmer from '../../components/HabitCardShimmer';
 import HabitCard from '../../components/HabitCard';
 import TimePicker from '../../components/TimePicker';
 import { useApi } from '../../hooks/useApi';
@@ -62,7 +63,8 @@ export default function HomeScreen() {
           return {
             id: item._id,
             name: item.name,
-            icon: { set: 'Ionicons', name: 'star' }, // Default icon, you may want to map icon_id to actual icons
+            icon_id: item.icon_id || 1, // Default to 1 (water icon) if not provided
+            icon: { set: 'Ionicons', name: 'star' }, // Keeping for backward compatibility
             createdAt: new Date(item.created_time).getTime(),
             streak: 0, // You'll need to calculate this based on completion history
             completedDates: completedDates,
@@ -118,9 +120,16 @@ export default function HomeScreen() {
 
   if (loading) {
     return (
-      <View style={styles.loadingContainer}>
-        <Text style={styles.loadingText}>Loading your habits...</Text>
-      </View>
+      <Animated.View style={[styles.container, { opacity: loading ? 1 : 0 }]}>
+        <View style={styles.topHeaderRow}>
+          <Text style={styles.headerTitleMain}>Today's Habits</Text>
+        </View>
+        <View style={{ flex: 1, marginTop: 10 }}>
+          {[1, 2, 3].map((i) => (
+            <HabitCardShimmer key={i} />
+          ))}
+        </View>
+      </Animated.View>
     );
   }
 
@@ -158,13 +167,7 @@ export default function HomeScreen() {
               }
               renderItem={({ item }) => (
                 <View style={styles.habitCardModern}>
-                  <HabitCard
-                    habit={item}
-                    isCompletedToday={item.completedDates.includes(new Date().toISOString().split('T')[0])}
-                    onToggleCompletion={() => {}}
-                    onDelete={handleDeleteHabit}
-                    onEditTime={handleEditTime}
-                  />
+                  <HabitCard habit={item} />
                 </View>
               )}
               style={styles.habitsListModern}

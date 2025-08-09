@@ -1,46 +1,25 @@
 import Button from '@/components/ui/Button';
 import { useToast } from '@/hooks/useToast';
-import { FontAwesome, Ionicons, MaterialIcons } from '@expo/vector-icons';
+import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
-import { Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { ProtectedRoute } from '../components/ProtectedRoute';
 import TimePicker from '../components/TimePicker';
-import { HabitIcon, HabitReminder } from '../types/habit';
+import { HabitReminder } from '../types/habit';
 import { useApi } from '../hooks/useApi';
 
-const SUGGESTED_HABITS = [
-  'Drink Water',
-  'Read',
-  'Exercise',
-  'Meditate',
-  'Sleep Early',
-  'Eat Healthy',
-  'Walk',
-  'Custom',
+// Icon options with their corresponding icon_id
+const ICON_OPTIONS = [
+  { id: 1, name: 'water', set: 'Ionicons' as const },
+  { id: 2, name: 'book', set: 'Ionicons' as const },
+  { id: 3, name: 'fitness', set: 'Ionicons' as const },
+  { id: 4, name: 'cafe', set: 'Ionicons' as const },
+  { id: 5, name: 'moon', set: 'Ionicons' as const },
+  { id: 6, name: 'walk', set: 'Ionicons' as const },
+  { id: 7, name: 'barbell', set: 'Ionicons' as const },
+  { id: 8, name: 'star', set: 'Ionicons' as const },
 ];
-const SUGGESTED_ICONS: HabitIcon[] = [
-  { set: 'Ionicons', name: 'water' },
-  { set: 'Ionicons', name: 'book' },
-  { set: 'MaterialIcons', name: 'directions-run' },
-  { set: 'MaterialIcons', name: 'self-improvement' },
-  { set: 'MaterialIcons', name: 'restaurant' },
-  { set: 'Ionicons', name: 'bed' },
-  { set: 'MaterialIcons', name: 'fitness-center' },
-  { set: 'Ionicons', name: 'star' },
-];
-
-// Map icon to icon_id (simplified mapping for example)
-const ICON_ID_MAP: Record<string, number> = {
-  'water': 1,
-  'book': 2,
-  'directions-run': 3,
-  'self-improvement': 4,
-  'restaurant': 5,
-  'bed': 6,
-  'fitness-center': 7,
-  'star': 8,
-};
 
 // Days of the week for repeats field (0 = Sunday, 1 = Monday, etc.)
 const DAYS_OF_WEEK = [
@@ -53,72 +32,53 @@ const DAYS_OF_WEEK = [
   { id: 6, name: 'Sat' },
 ];
 
-function renderIcon(icon: HabitIcon, size: number, color: string) {
-  switch (icon.set) {
-    case 'Ionicons':
-      return <Ionicons name={icon.name as any} size={size} color={color} />;
-    case 'MaterialIcons':
-      return <MaterialIcons name={icon.name as any} size={size} color={color} />;
-    case 'FontAwesome':
-      return <FontAwesome name={icon.name as any} size={size} color={color} />;
-    default:
-      return null;
-  }
-}
-
 export default function AddHabitPage() {
   const router = useRouter();
-  const [selectedHabit, setSelectedHabit] = useState(SUGGESTED_HABITS[0]);
-  const [customHabit, setCustomHabit] = useState('');
-  const [description, setDescription] = useState('');
-  const [selectedIcon, setSelectedIcon] = useState<HabitIcon | undefined>(undefined);
-  const [reminder, setReminder] = useState<HabitReminder>({ enabled: true, time: '09:00' });
+  const [habitName, setHabitName] = useState('');
+  const [selectedIconId, setSelectedIconId] = useState<number>(1);
+  const [targetTime, setTargetTime] = useState('09:00');
   const [selectedDays, setSelectedDays] = useState<number[]>([1, 2, 3, 4, 5]); // Default to weekdays
   const [saving, setSaving] = useState(false);
-  
+
   const { showToast } = useToast();
   const { fetchPost } = useApi();
   const API_BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL;
 
   const handleSave = async () => {
-    const name = selectedHabit === 'Custom' ? customHabit.trim() : selectedHabit;
-    if (!name) {
+    if (!habitName.trim()) {
       showToast('Please enter a habit name', "warning", 'top');
       return;
     }
+
     setSaving(true);
     try {
-      // Create the payload according to the API requirements
       const now = new Date();
-      
-      // Set target time based on the selected reminder time
-      const [hours, minutes] = reminder.time.split(':').map(Number);
-      const targetTime = new Date(now);
-      targetTime.setHours(hours, minutes, 0, 0);
-      
-      // Get icon_id from the selected icon or use default
-      const iconId = selectedIcon ? ICON_ID_MAP[selectedIcon.name] || 1 : 1;
-      
+
+      // Set target time based on the selected time
+      const [hours, minutes] = targetTime.split(':').map(Number);
+      const targetDateTime = new Date(now);
+      targetDateTime.setHours(hours, minutes, 0, 0);
+
       const payload = {
-        name,
+        name: habitName.trim(),
         created_time: now.toISOString(),
-        target_time: targetTime.toISOString(),
-        icon_id: iconId,
+        target_time: targetDateTime.toISOString(),
+        icon_id: selectedIconId,
         repeats: selectedDays,
       };
-      
+
       // Call the API to create the habit
       const response = await fetchPost(`${API_BASE_URL}/habits`, payload);
-      
+
       if (response.success) {
-        showToast('Habit created successfully', "success", 'top');
+        showToast('Habit created successfully', 'success', 'top');
         router.back();
       } else {
-        showToast('Failed to create habit', "error", 'top');
+        showToast(response.error || 'Failed to create habit', 'error', 'top');
       }
     } catch (e) {
       console.error('Error creating habit:', e);
-      showToast('Failed to create habit', "error", 'top');
+      showToast('Failed to create habit', 'error', 'top');
     } finally {
       setSaving(false);
     }
@@ -143,82 +103,63 @@ export default function AddHabitPage() {
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Add New Habit</Text>
         </View>
-        <Text style={styles.label}>Select a Habit</Text>
-        <View style={styles.dropdownContainer}>
-          {SUGGESTED_HABITS.map(habit => (
+
+        <Text style={styles.label}>Habit Name</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Enter habit name"
+          placeholderTextColor="#666"
+          value={habitName}
+          onChangeText={setHabitName}
+        />
+
+        <Text style={styles.label}>Select an Icon</Text>
+        <View style={styles.iconGrid}>
+          {ICON_OPTIONS.map((icon) => (
             <TouchableOpacity
-              key={habit}
-              style={[styles.dropdownItem, selectedHabit === habit && styles.selectedDropdownItem]}
-              onPress={() => setSelectedHabit(habit)}
+              key={icon.id}
+              style={[
+                styles.iconButton,
+                selectedIconId === icon.id && styles.selectedIconButton
+              ]}
+              onPress={() => setSelectedIconId(icon.id)}
             >
-              <Text style={{ color: selectedHabit === habit ? '#fff' : '#ccc' }}>{habit}</Text>
+              <Ionicons name={icon.name as any} size={32} color={selectedIconId === icon.id ? '#fff' : '#ccc'} />
             </TouchableOpacity>
           ))}
         </View>
-      {selectedHabit === 'Custom' && (
-        <TextInput
-          style={styles.input}
-          placeholder="Enter custom habit name"
-          placeholderTextColor="#666"
-          value={customHabit}
-          onChangeText={setCustomHabit}
+
+        <Text style={styles.label}>Habit Time</Text>
+        <TimePicker
+          value={targetTime}
+          onTimeChange={setTargetTime}
+          enabled={true}
+          onToggle={() => {}}
         />
-      )}
-      <Text style={styles.label}>Description (optional)</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Describe your habit"
-        placeholderTextColor="#666"
-        value={description}
-        onChangeText={setDescription}
-      />
-      <Text style={styles.label}>Choose an Icon (optional)</Text>
-      <View style={styles.iconGrid}>
-        {SUGGESTED_ICONS.map((icon) => {
-          const isSelected = selectedIcon && selectedIcon.set === icon.set && selectedIcon.name === icon.name;
-          return (
+
+        <Text style={styles.label}>Repeat on Days</Text>
+        <View style={styles.daysContainer}>
+          {DAYS_OF_WEEK.map((day) => (
             <TouchableOpacity
-              key={icon.set + icon.name}
-              style={[styles.iconButton, isSelected && styles.selectedIconButton]}
-              onPress={() => setSelectedIcon(isSelected ? undefined : icon)}
+              key={day.id}
+              style={[styles.dayButton, selectedDays.includes(day.id) && styles.selectedDayButton]}
+              onPress={() => toggleDay(day.id)}
             >
-              {renderIcon(icon, 32, isSelected ? '#fff' : '#ccc')}
+              <Text style={[styles.dayText, selectedDays.includes(day.id) && styles.selectedDayText]}>
+                {day.name}
+              </Text>
             </TouchableOpacity>
-          );
-        })}
-      </View>
-      <Text style={styles.label}>Habit Time</Text>
-      <TimePicker
-        value={reminder.time}
-        onTimeChange={time => setReminder(prev => ({ ...prev, time }))}
-        enabled={true}
-        onToggle={() => {}}
-      />
-      
-      <Text style={styles.label}>Repeat on Days</Text>
-      <View style={styles.daysContainer}>
-        {DAYS_OF_WEEK.map((day) => (
-          <TouchableOpacity
-            key={day.id}
-            style={[styles.dayButton, selectedDays.includes(day.id) && styles.selectedDayButton]}
-            onPress={() => toggleDay(day.id)}
-          >
-            <Text style={[styles.dayText, selectedDays.includes(day.id) && styles.selectedDayText]}>
-              {day.name}
-            </Text>
-          </TouchableOpacity>
-        ))}
-      </View>
-      
-      <Button
-        onPress={handleSave}
-        loading={saving}
-        disabled={saving}
-        style={{ marginTop: 24, marginBottom: 8 }}
-      >
-        {saving ? 'Saving...' : 'Save Habit'}
-      </Button>
-    </ScrollView>
+          ))}
+        </View>
+
+        <Button
+          onPress={handleSave}
+          loading={saving}
+          style={styles.saveButton}
+        >
+          {saving ? 'Saving...' : 'Save Habit'}
+        </Button>
+      </ScrollView>
     </ProtectedRoute>
   );
 }
@@ -227,8 +168,8 @@ const styles = StyleSheet.create({
   container: {
     backgroundColor: '#14141c',
     flexGrow: 1,
-    padding: 24,
-    paddingTop: Platform.OS === 'android' ? 48 : 64,
+    padding: 16,
+    paddingTop: 50,
   },
   headerRow: {
     flexDirection: 'row',
@@ -237,108 +178,81 @@ const styles = StyleSheet.create({
   },
   backButton: {
     padding: 8,
-    marginRight: 8,
+    marginRight: 16,
   },
   headerTitle: {
-    fontSize: 22,
-    fontWeight: '700',
+    fontSize: 24,
+    fontWeight: 'bold',
     color: '#fff',
-    flex: 1,
-    textAlign: 'center',
   },
   label: {
-    color: '#fff',
     fontSize: 16,
-    fontWeight: '600',
+    color: '#fff',
+    marginBottom: 8,
     marginTop: 16,
-    marginBottom: 8,
-  },
-  dropdownContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    marginBottom: 8,
-  },
-  dropdownItem: {
-    backgroundColor: '#23232b',
-    borderRadius: 16,
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    margin: 4,
-  },
-  selectedDropdownItem: {
-    backgroundColor: '#14141c',
-    borderWidth: 2,
-    borderColor: '#636ae8', // subtle highlight
+    fontWeight: '500',
   },
   input: {
     backgroundColor: '#23232b',
     borderRadius: 12,
-    padding: 14,
-    fontSize: 16,
+    padding: 16,
     color: '#fff',
+    fontSize: 16,
+    marginBottom: 16,
     borderWidth: 1,
-    borderColor: '#3a3a3a',
-    marginBottom: 4,
+    borderColor: '#333',
   },
   iconGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    marginVertical: 12,
+    justifyContent: 'space-between',
+    marginBottom: 16,
   },
   iconButton: {
-    margin: 8,
-    width: 54,
-    height: 54,
-    borderRadius: 27,
+    width: '22%',
+    aspectRatio: 1,
+    borderRadius: 12,
     backgroundColor: '#23232b',
-    alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 2,
-    borderColor: 'transparent',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    elevation: 2,
+    alignItems: 'center',
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: '#333',
   },
   selectedIconButton: {
-    borderColor: '#636ae8',
-    backgroundColor: '#14141c',
+    backgroundColor: '#3a3a3a',
+    borderColor: '#666',
   },
   daysContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginVertical: 12,
+    marginBottom: 24,
   },
   dayButton: {
     width: 40,
     height: 40,
     borderRadius: 20,
     backgroundColor: '#23232b',
-    alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 2,
-    borderColor: 'transparent',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#333',
   },
   selectedDayButton: {
-    borderColor: '#636ae8',
-    backgroundColor: '#14141c',
+    backgroundColor: '#3a3a3a',
+    borderColor: '#666',
   },
   dayText: {
     color: '#ccc',
-    fontWeight: '600',
+    fontWeight: '500',
   },
   selectedDayText: {
     color: '#fff',
+    fontWeight: 'bold',
   },
   saveButton: {
-    backgroundColor: '#FF1972',
-    borderRadius: 24,
-    paddingVertical: 16,
-    alignItems: 'center',
-    marginTop: 24,
-    marginBottom: 8,
-    shadowColor: '#000',
+    marginTop: 8,
+    marginBottom: 32,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.3,
     shadowRadius: 8,

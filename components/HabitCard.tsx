@@ -1,57 +1,41 @@
-import { FontAwesome, Ionicons, MaterialIcons } from '@expo/vector-icons';
+import { Ionicons } from '@expo/vector-icons';
 import { default as React } from 'react';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 import { Habit } from '../types/habit';
 
-function renderIcon(icon: Habit['icon'], size: number, color: string) {
-  if (!icon) return null;
-  switch (icon.set) {
-    case 'Ionicons':
-      return <Ionicons name={icon.name as any} size={size} color={color} />;
-    case 'MaterialIcons':
-      return <MaterialIcons name={icon.name as any} size={size} color={color} />;
-    case 'FontAwesome':
-      return <FontAwesome name={icon.name as any} size={size} color={color} />;
-    default:
-      return null;
-  }
+// Map icon_id to icon names
+const ICON_MAP: Record<number, string> = {
+  1: 'water',
+  2: 'book',
+  3: 'fitness',
+  4: 'cafe',
+  5: 'moon',
+  6: 'walk',
+  7: 'barbell',
+  8: 'star',
+};
+
+function renderIcon(iconId: number, size: number, color: string) {
+  const iconName = ICON_MAP[iconId] || 'help-circle';
+  return <Ionicons name={iconName as any} size={size} color={color} />;
 }
 
 interface HabitCardProps {
   habit: Habit;
-  isCompletedToday: boolean;
-  onToggleCompletion: (habitId: string) => void;
-  onDelete?: (habitId: string) => void;
-  onEditTime?: (habit: Habit) => void;
 } 
 
 export default function HabitCard({ 
-  habit, 
-  isCompletedToday, 
-  onToggleCompletion,
-  onDelete,
-  onEditTime
+  habit
 }: HabitCardProps) {
   return (
     <View style={styles.container}>
-      <TouchableOpacity 
-        style={styles.checkbox}
-        onPress={() => onToggleCompletion(habit.id)}
-      >
-        <Ionicons 
-          name={isCompletedToday ? 'checkmark-circle' : 'ellipse-outline'} 
-          size={28} 
-          color={isCompletedToday ? '#4CAF50' : '#ccc'} 
-        />
-      </TouchableOpacity>
-      
       <View style={styles.content}>
         <View style={styles.header}>
-          <Text style={[styles.name, isCompletedToday && styles.completedName]}>
+          <Text style={styles.name}>
             {habit.name}
           </Text>
-          {habit.icon && (
-            <View style={styles.icon}>{renderIcon(habit.icon, 22, '#ccc')}</View>
+          {habit.icon_id && (
+            <View style={styles.icon}>{renderIcon(habit.icon_id, 22, '#ccc')}</View>
           )}
         </View>
         
@@ -68,24 +52,6 @@ export default function HabitCard({
           </View>
         )}
       </View>
-      <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-        {onEditTime && (
-          <TouchableOpacity 
-            style={styles.editButton}
-            onPress={() => onEditTime(habit)}
-          >
-            <Ionicons name="pencil-outline" size={20} color="#ccc" />
-          </TouchableOpacity>
-        )}
-        {onDelete && (
-          <TouchableOpacity 
-            style={styles.deleteButton}
-            onPress={() => onDelete(habit.id)}
-          >
-            <Ionicons name="trash-outline" size={20} color="#ccc" />
-          </TouchableOpacity>
-        )}
-      </View>
     </View>
   );
 }
@@ -97,18 +63,12 @@ const styles = StyleSheet.create({
     backgroundColor: "#22222b",
     borderRadius: 20,
     padding: 15,
-    marginBottom: 10
-  },
-  checkbox: {
-    marginRight: 16,
-    backgroundColor: '#3a3a3a',
-    borderRadius: 16,
-    padding: 6,
-    alignItems: 'center',
-    justifyContent: 'center',
+    marginBottom: 10,
+    marginHorizontal: 12
   },
   content: {
     flex: 1,
+    marginLeft: 8,
   },
   header: {
     flexDirection: 'row',
@@ -122,16 +82,15 @@ const styles = StyleSheet.create({
     flex: 1,
     letterSpacing: 0.5,
   },
-  completedName: {
-    textDecorationLine: 'line-through',
-    color: '#666',
-  },
   icon: {
     marginLeft: 10,
     backgroundColor: '#3a3a3a',
     borderRadius: 12,
-    padding: 4,
-    marginTop: 26
+    padding: 6,
+    width: 34,
+    height: 34,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   streakContainer: {
     flexDirection: 'row',
@@ -144,16 +103,4 @@ const styles = StyleSheet.create({
     marginLeft: 6,
     fontWeight: '600',
   },
-  deleteButton: {
-    padding: 8,
-    marginLeft: 8,
-    backgroundColor: '#3a3a3a',
-    borderRadius: 16,
-  },
-  editButton: {
-    padding: 8,
-    marginLeft: 0,
-    backgroundColor: '#3a3a3a',
-    borderRadius: 16,
-  },
-}); 
+});

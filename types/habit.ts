@@ -13,7 +13,8 @@ export interface HabitReminder {
 export interface Habit {
   id: string;
   name: string;
-  icon?: HabitIcon;
+  icon_id: number;  // Numeric ID for the icon
+  icon?: HabitIcon; // Keep for backward compatibility
   createdAt: number;
   streak: number;
   completedDates: string[];
