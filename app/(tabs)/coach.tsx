@@ -33,15 +33,17 @@ const ICON_MAP: Record<number, string> = {
 };
 
 export default function CoachScreen() {
-  const [suggestions, setSuggestions] = useState<AISuggestion[]>([]);
+  const [generalSuggestions, setGeneralSuggestions] = useState<AISuggestion[]>([]);
+  const [fitnessSuggestions, setFitnessSuggestions] = useState<AISuggestion[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingFitness, setLoadingFitness] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { fetchGet, fetchPost } = useApi();
   const router = useRouter();
   const { showToast } = useToast();
 
-  const loadSuggestions = async (isRefreshing = false) => {
+  const loadGeneralSuggestions = async (isRefreshing = false) => {
     try {
       if (!isRefreshing) {
         setLoading(true);
@@ -50,7 +52,7 @@ export default function CoachScreen() {
       const response = await fetchGet('/suggestions') as AISuggestionsResponse;
       
       if (response.success && response.data) {
-        setSuggestions(response.data.suggestions);
+        setGeneralSuggestions(Array.isArray(response.data) ? response.data : response.data.suggestions);
         setError(null);
       } else {
         setError('Failed to load suggestions. Please try again.');
@@ -66,13 +68,32 @@ export default function CoachScreen() {
     }
   };
 
+  const loadFitnessSuggestions = async () => {
+    try {
+      setLoadingFitness(true);
+      const response = await fetchGet('/suggestions/category/fitness') as AISuggestionsResponse;
+      
+      if (response.success && response.data) {
+        setFitnessSuggestions(Array.isArray(response.data) ? response.data : response.data.suggestions);
+      } else {
+        console.warn('Failed to load fitness suggestions');
+      }
+    } catch (err) {
+      console.error('Error loading fitness suggestions:', err);
+    } finally {
+      setLoadingFitness(false);
+    }
+  };
+
   useEffect(() => {
-    loadSuggestions();
+    loadGeneralSuggestions();
+    loadFitnessSuggestions();
   }, []);
 
   const onRefresh = () => {
     setRefreshing(true);
-    loadSuggestions(true);
+    loadGeneralSuggestions(true);
+    loadFitnessSuggestions();
   };
 
   const formatTime = (dateString: string) => {
@@ -113,11 +134,11 @@ export default function CoachScreen() {
     }
   };
 
-  const renderSuggestionCard = (suggestion: AISuggestion, index: number) => {
+  const renderSuggestionCard = (suggestion: AISuggestion, key: string) => {
     const iconName = ICON_MAP[suggestion.icon_id] || 'help-circle';
     
     return (
-      <View key={`suggestion-${index}`} style={styles.suggestionCard}>
+      <View key={`suggestion-${key}`} style={styles.suggestionCard}>
         <View style={styles.suggestionHeader}>
           <View style={styles.suggestionIcon}>
             <Ionicons name={iconName as any} size={24} color="#fff" />
@@ -168,22 +189,77 @@ export default function CoachScreen() {
     );
   };
 
+  const renderContent = () => {
+    if (error) {
+      return (
+        <View style={styles.centered}>
+          <Text style={styles.errorText}>{error}</Text>
+          <TouchableOpacity 
+            style={styles.retryButton}
+            onPress={() => loadGeneralSuggestions()}
+          >
+            <Text style={styles.retryButtonText}>Retry</Text>
+          </TouchableOpacity>
+        </View>
+      );
+    }
+
+    const hasGeneralSuggestions = generalSuggestions.length > 0;
+    const hasFitnessSuggestions = fitnessSuggestions.length > 0;
+
+    if (!hasGeneralSuggestions && !hasFitnessSuggestions) {
+      return (
+        <View style={styles.emptyState}>
+          <Ionicons name="bulb-outline" size={48} color="#666" />
+          <Text style={styles.emptyStateText}>No suggestions available</Text>
+          <Text style={styles.emptyStateSubtext}>
+            Check back later for personalized habit suggestions
+          </Text>
+        </View>
+      );
+    }
+
+    return (
+      <ScrollView>
+        {hasFitnessSuggestions && (
+          <View style={styles.section}>
+            <View style={styles.sectionHeader}>
+              <Ionicons name="fitness" size={24} color="#6366f1" />
+              <Text style={styles.sectionTitle}>Fitness Suggestions</Text>
+            </View>
+            <Text style={styles.sectionSubtitle}>
+              Personalized workout and fitness recommendations
+            </Text>
+            <View style={styles.suggestionsContainer}>
+              {fitnessSuggestions.map((suggestion, index) => 
+                renderSuggestionCard(suggestion, `fitness-${index}`)
+              )}
+            </View>
+          </View>
+        )}
+
+        {hasGeneralSuggestions && (
+          <View style={styles.section}>
+            <View style={styles.sectionHeader}>
+              <Ionicons name="bulb-outline" size={24} color="#6366f1" />
+              <Text style={styles.sectionTitle}>General Suggestions</Text>
+            </View>
+            <Text style={styles.sectionSubtitle}>
+              Habits to improve your daily routine
+            </Text>
+            <View style={styles.suggestionsContainer}>
+              {generalSuggestions.map((suggestion, index) => 
+                renderSuggestionCard(suggestion, `general-${index}`)
+              )}
+            </View>
+          </View>
+        )}
+      </ScrollView>
+    );
+  };
+
   if (loading && !refreshing) {
     return <SuggestionShimmer />;
-  }
-
-  if (error) {
-    return (
-      <View style={[styles.container, styles.centered]}>
-        <Text style={styles.errorText}>{error}</Text>
-        <TouchableOpacity 
-          style={styles.retryButton}
-          onPress={() => loadSuggestions()}
-        >
-          <Text style={styles.retryButtonText}>Retry</Text>
-        </TouchableOpacity>
-      </View>
-    );
   }
 
   return (
@@ -203,25 +279,8 @@ export default function CoachScreen() {
             tintColor={PookieColors.hotPink}
           />
         }>
-          {/* AI Suggestions Section */}
-          <View style={styles.section}>
-            <View style={styles.sectionHeader}>
-              <Ionicons name="sparkles" size={24} color={PookieColors.hotPink} />
-              <Text style={styles.sectionTitle}>AI-Powered Suggestions</Text>
-            </View>
-            <Text style={styles.sectionSubtitle}>Personalized habit recommendations just for you.</Text>
-            
-            {suggestions.length > 0 ? (
-              suggestions.map((suggestion, index) => renderSuggestionCard(suggestion, index))
-            ) : (
-              <View style={styles.emptyState}>
-                <Ionicons name="bulb" size={48} color="#444" />
-                <Text style={styles.emptyStateText}>No suggestions available</Text>
-                <Text style={styles.emptyStateSubtext}>Check back later for personalized recommendations</Text>
-              </View>
-            )}
-          </View>
-        </ScrollView>
+        {renderContent()}
+      </ScrollView>
     </View>
   );
 }
@@ -289,6 +348,9 @@ const styles = StyleSheet.create({
   scrollView: {
     flex: 1,
     paddingHorizontal: 20,
+  },
+  suggestionsContainer: {
+    paddingBottom: 20,
   },
   section: {
     marginBottom: 30,
