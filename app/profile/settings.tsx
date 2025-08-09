@@ -1,21 +1,121 @@
 import { PookieColors } from "@/constants/Colors";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import React, { useState } from "react";
-import { ScrollView, StyleSheet, Switch, Text, View } from "react-native";
+import { useEffect, useState } from "react";
+import { Alert, ScrollView, StyleSheet, Switch, Text, View } from "react-native";
 import Button from "../../components/ui/Button";
 import { useAuth } from "../../hooks/useAuth";
+import { usePushNotifications } from "../../hooks/usePushNotifications";
 import { useToast } from "../../hooks/useToast";
+import { useNotificationService } from "../../services/notificationService";
+
+interface LocalPreferences {
+  notifications: boolean;
+  habitReminders: boolean;
+  streakAlerts: boolean;
+  reports: boolean;
+  motivationalMessages: boolean;
+  testNotifications: boolean;
+}
 
 export default function SettingsScreen() {
   const [darkMode, setDarkMode] = useState(true);
-  const [dailyReminders, setDailyReminders] = useState(true);
-  const [coachTips, setCoachTips] = useState(true);
-  const [achievementAlerts, setAchievementAlerts] = useState(false);
-  const [promotionalUpdates, setPromotionalUpdates] = useState(false);
   const router = useRouter();
   const { logout } = useAuth();
   const { showToast } = useToast();
+  const { preferences, isLoading, error, updatePreferences } = usePushNotifications();
+  const { 
+    sendTestNotification, 
+    triggerTestNotifications, 
+    startTestNotifications, 
+    stopTestNotifications,
+    getJobsStatus 
+  } = useNotificationService();
+
+  const [localPreferences, setLocalPreferences] = useState<LocalPreferences>({
+    notifications: true,
+    habitReminders: true,
+    streakAlerts: true,
+    reports: true,
+    motivationalMessages: true,
+    testNotifications: false,
+  });
+
+  useEffect(() => {
+    if (preferences) {
+      setLocalPreferences({
+        notifications: preferences.notifications ?? true,
+        habitReminders: preferences.habitReminders ?? true,
+        streakAlerts: preferences.streakAlerts ?? true,
+        reports: preferences.reports ?? true,
+        motivationalMessages: preferences.motivationalMessages ?? true,
+        testNotifications: preferences.testNotifications ?? false,
+      });
+    }
+  }, [preferences]);
+
+  const handleToggle = async (key: keyof LocalPreferences) => {
+    const newPreferences = {
+      ...localPreferences,
+      [key]: !localPreferences[key],
+    };
+    
+    setLocalPreferences(newPreferences);
+    
+    try {
+      await updatePreferences({ [key]: newPreferences[key] });
+      showToast(`${key.replace(/([A-Z])/g, ' $1').toLowerCase()} ${newPreferences[key] ? 'enabled' : 'disabled'}`, 'success');
+    } catch (err) {
+      // Revert on error
+      setLocalPreferences(prev => ({ ...prev, [key]: !newPreferences[key] }));
+      showToast('Failed to update notification preferences', 'error');
+    }
+  };
+
+  const handleTestNotification = async () => {
+    try {
+      await sendTestNotification('Test Notification', 'This is a test notification from Habit Hero!');
+      showToast('Test notification sent!', 'success');
+    } catch (err) {
+      showToast('Failed to send test notification', 'error');
+    }
+  };
+
+  const handleTriggerTestNotifications = async () => {
+    try {
+      await triggerTestNotifications();
+      showToast('Test notifications triggered!', 'success');
+    } catch (err) {
+      showToast('Failed to trigger test notifications', 'error');
+    }
+  };
+
+  const handleStartTestNotifications = async () => {
+    try {
+      await startTestNotifications();
+      showToast('Test notifications started!', 'success');
+    } catch (err) {
+      showToast('Failed to start test notifications', 'error');
+    }
+  };
+
+  const handleStopTestNotifications = async () => {
+    try {
+      await stopTestNotifications();
+      showToast('Test notifications stopped!', 'success');
+    } catch (err) {
+      showToast('Failed to stop test notifications', 'error');
+    }
+  };
+
+  const handleGetJobsStatus = async () => {
+    try {
+      const status = await getJobsStatus();
+      showToast(`Jobs status: ${status.status}`, 'info');
+    } catch (err) {
+      showToast('Failed to get jobs status', 'error');
+    }
+  };
 
   const settingsSections = [
     {
@@ -39,44 +139,64 @@ export default function SettingsScreen() {
       description: "Manage how Habit Hero keeps you informed and motivated",
       items: [
         {
-          id: "daily-reminders",
-          title: "Daily Habit Reminders",
+          id: "notifications",
+          title: "Notifications",
           description:
-            "Receive a friendly nudge at your preferred time to complete your daily habits.",
+            "Enable or disable all notifications.",
           type: "toggle",
-          value: dailyReminders,
-          onValueChange: setDailyReminders,
+          value: localPreferences.notifications,
+          onValueChange: () => handleToggle('notifications'),
           icon: "notifications",
         },
         {
-          id: "coach-tips",
-          title: "Smart Coach Insights",
+          id: "habit-reminders",
+          title: "Habit Reminders",
           description:
-            "Get personalized tips, motivational messages, and progress insights from your AI coach.",
+            "Receive reminders when it's time to complete your habits.",
           type: "toggle",
-          value: coachTips,
-          onValueChange: setCoachTips,
-          icon: "bulb",
+          value: localPreferences.habitReminders,
+          onValueChange: () => handleToggle('habitReminders'),
+          icon: "notifications",
         },
         {
-          id: "achievement-alerts",
-          title: "Achievement Alerts",
+          id: "streak-alerts",
+          title: "Streak Alerts",
           description:
-            "Celebrate your milestones! Get notified when you hit a new streak or achieve a habit goal.",
+            "Celebrate your streaks and get motivated to keep going.",
           type: "toggle",
-          value: achievementAlerts,
-          onValueChange: setAchievementAlerts,
+          value: localPreferences.streakAlerts,
+          onValueChange: () => handleToggle('streakAlerts'),
           icon: "trophy",
         },
         {
-          id: "promotional-updates",
-          title: "Promotional Updates",
+          id: "reports",
+          title: "Weekly Reports",
           description:
-            "Stay informed about new app features, exclusive offers, and important announcements.",
+            "Receive weekly summaries of your habit progress.",
           type: "toggle",
-          value: promotionalUpdates,
-          onValueChange: setPromotionalUpdates,
-          icon: "gift",
+          value: localPreferences.reports,
+          onValueChange: () => handleToggle('reports'),
+          icon: "bar-chart",
+        },
+        {
+          id: "motivational-messages",
+          title: "Motivational Messages",
+          description:
+            "Get inspiring messages to help you stay on track.",
+          type: "toggle",
+          value: localPreferences.motivationalMessages,
+          onValueChange: () => handleToggle('motivationalMessages'),
+          icon: "bulb",
+        },
+        {
+          id: "test-notifications",
+          title: "Test Notifications",
+          description:
+            "Allow test notifications for debugging purposes.",
+          type: "toggle",
+          value: localPreferences.testNotifications,
+          onValueChange: () => handleToggle('testNotifications'),
+          icon: "bug",
         },
       ],
     },
@@ -98,24 +218,17 @@ export default function SettingsScreen() {
         <View style={styles.settingControl}>
           <Text style={styles.settingLabel}>
             {item.type === "toggle"
-              ? item.id === "theme"
-                ? "Use Dark Mode"
-                : item.id === "daily-reminders"
-                ? "Enable Reminders"
-                : item.id === "coach-tips"
-                ? "Enable Coach Tips"
-                : item.id === "achievement-alerts"
-                ? "Enable Alerts"
-                : "Enable Promotions"
-              : ""}
+              ? item.value
+                ? "Enabled"
+                : "Disabled"
+              : item.value}
           </Text>
           {item.type === "toggle" && (
             <Switch
               value={item.value}
               onValueChange={item.onValueChange}
-              trackColor={{ false: "#3a3a3a", true: PookieColors.hotPink }}
-              thumbColor={item.value ? "#fff" : "#ccc"}
-              ios_backgroundColor="#3a3a3a"
+              trackColor={{ false: "#767577", true: PookieColors.hotPink }}
+              thumbColor={item.value ? "#f5dd4b" : "#f4f3f4"}
             />
           )}
         </View>
@@ -124,47 +237,74 @@ export default function SettingsScreen() {
   };
 
   return (
-    <View style={styles.container}>
-      <View style={styles.gradientBackground}>
-        {/* Header */}
-        <View style={styles.header}>
-          <Text style={styles.headerTitle}>Settings</Text>
-        </View>
-
-        <ScrollView
-          style={styles.scrollView}
-          showsVerticalScrollIndicator={false}
-        >
-          {settingsSections.map((section) => (
-            <View key={section.title} style={styles.section}>
-              <Text style={styles.sectionTitle}>{section.title}</Text>
-              <Text style={styles.sectionDescription}>
-                {section.description}
-              </Text>
-
-              {section.items.map(renderSettingItem)}
-            </View>
-          ))}
-
-          <View style={styles.logoutButton}>
-            <Button
-              type="primary"
-              onPress={async () => {
-                try {
-                  await logout();
-                  showToast('Logged out successfully', 'success');
-                  router.replace("/onboarding");
-                } catch (error) {
-                  showToast('Logout failed', 'error');
-                }
-              }}
-            >
-              Log Out
-            </Button>
-          </View>
-        </ScrollView>
+    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+      <View style={styles.header}>
+        <Text style={styles.headerTitle}>Settings</Text>
+        <Text style={styles.headerDescription}>
+          Customize your Habit Hero experience
+        </Text>
       </View>
-    </View>
+
+      {error && (
+        <View style={styles.errorContainer}>
+          <Text style={styles.errorText}>{error}</Text>
+        </View>
+      )}
+
+      {settingsSections.map((section) => (
+        <View key={section.title} style={styles.section}>
+          <Text style={styles.sectionTitle}>{section.title}</Text>
+          <Text style={styles.sectionDescription}>{section.description}</Text>
+          {section.items.map(renderSettingItem)}
+        </View>
+      ))}
+
+      <View style={styles.testSection}>
+        <Text style={styles.testSectionTitle}>Test Notifications</Text>
+        <Button
+          title="Send Test Notification"
+          onPress={handleTestNotification}
+          style={styles.testButton}
+        />
+        <Button
+          title="Trigger Test Notifications"
+          onPress={handleTriggerTestNotifications}
+          style={styles.testButton}
+        />
+        <Button
+          title="Start Test Notifications"
+          onPress={handleStartTestNotifications}
+          style={styles.testButton}
+        />
+        <Button
+          title="Stop Test Notifications"
+          onPress={handleStopTestNotifications}
+          style={styles.testButton}
+        />
+        <Button
+          title="Get Jobs Status"
+          onPress={handleGetJobsStatus}
+          style={styles.testButton}
+        />
+      </View>
+
+      <View style={styles.logoutSection}>
+        <Button
+          title="Logout"
+          onPress={() => {
+            Alert.alert(
+              "Logout",
+              "Are you sure you want to logout?",
+              [
+                { text: "Cancel", style: "cancel" },
+                { text: "Logout", onPress: logout, style: "destructive" },
+              ]
+            );
+          }}
+          style={styles.logoutButton}
+        />
+      </View>
+    </ScrollView>
   );
 }
 
@@ -189,6 +329,11 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: "bold",
     color: "#fff",
+  },
+  headerDescription: {
+    fontSize: 16,
+    color: "#999",
+    marginTop: 8,
   },
   scrollView: {
     flex: 1,
@@ -263,5 +408,32 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontWeight: "bold",
     fontSize: 16,
+  },
+  errorContainer: {
+    backgroundColor: "#ff6b6b",
+    padding: 15,
+    borderRadius: 10,
+    marginBottom: 20,
+    alignItems: "center",
+  },
+  errorText: {
+    color: "#fff",
+    fontSize: 14,
+  },
+  testSection: {
+    paddingHorizontal: 20,
+    marginBottom: 20,
+  },
+  testButton: {
+    backgroundColor: PookieColors.hotPink,
+  },
+  testSectionTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#fff",
+    marginBottom: 12,
+  },
+  logoutSection: {
+    paddingHorizontal: 20,
   },
 });

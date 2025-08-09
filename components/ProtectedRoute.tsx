@@ -1,6 +1,6 @@
 import { useRouter } from 'expo-router';
 import React, { useEffect } from 'react';
-import { ActivityIndicator, View, StyleSheet } from 'react-native';
+import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import { useAuth } from '../hooks/useAuth';
 
 interface ProtectedRouteProps {
@@ -21,7 +21,7 @@ export function ProtectedRoute({
     if (!isLoading) {
       if (requireAuth && !isAuthenticated) {
         // User needs to be authenticated but isn't
-        router.replace(redirectTo);
+        router.replace(redirectTo as any);
       } else if (!requireAuth && isAuthenticated) {
         // User is authenticated but shouldn't be on this page (e.g., login/register when already logged in)
         router.replace('/(tabs)');

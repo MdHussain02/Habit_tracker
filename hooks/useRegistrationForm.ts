@@ -157,72 +157,12 @@ export const useRegistrationForm = (onRegister: (user: any) => void) => {
         setApiChoices(data?.data);
         console.log('API Choices set:', data?.data);
       } else {
-        console.warn('Failed to load form options, using fallback values');
-        showToast('Failed to load form options, using default values', 'warning');
-        // Set fallback choices if API fails
-        setApiChoices({
-          gender: [
-            { value: 'male', label: 'Male' },
-            { value: 'female', label: 'Female' },
-            { value: 'other', label: 'Other' }
-          ],
-          fitness_level: [
-            { value: 'beginner', label: 'Beginner' },
-            { value: 'intermediate', label: 'Intermediate' },
-            { value: 'advanced', label: 'Advanced' }
-          ],
-          primary_goal: [
-            { value: 'weight-loss', label: 'Weight Loss' },
-            { value: 'muscle-gain', label: 'Muscle Gain' },
-            { value: 'endurance-training', label: 'Endurance Training' },
-            { value: 'general-fitness', label: 'General Fitness' }
-          ],
-          motivation_level: [
-            { value: 'low', label: 'Low' },
-            { value: 'medium', label: 'Medium' },
-            { value: 'high', label: 'High' }
-          ],
-          preferred_workout_time: [
-            { value: 'morning', label: 'Morning (6-9 AM)' },
-            { value: 'afternoon', label: 'Afternoon (12-5 PM)' },
-            { value: 'evening', label: 'Evening (6-9 PM)' },
-            { value: 'night', label: 'Night (9-12 PM)' }
-          ]
-        });
+        console.error('Failed to load form options from API');
+        showToast('Failed to load form options. Please try again later.', 'error');
       }
     } catch (error: any) {
       console.error('Profile choices error:', error);
-      showToast('Failed to load form options, using default values', 'warning');
-      // Set fallback choices on error
-      setApiChoices({
-        gender: [
-          { value: 'male', label: 'Male' },
-          { value: 'female', label: 'Female' },
-          { value: 'other', label: 'Other' }
-        ],
-        fitness_level: [
-          { value: 'beginner', label: 'Beginner' },
-          { value: 'intermediate', label: 'Intermediate' },
-          { value: 'advanced', label: 'Advanced' }
-        ],
-        primary_goal: [
-          { value: 'weight-loss', label: 'Weight Loss' },
-          { value: 'muscle-gain', label: 'Muscle Gain' },
-          { value: 'endurance-training', label: 'Endurance Training' },
-          { value: 'general-fitness', label: 'General Fitness' }
-        ],
-        motivation_level: [
-          { value: 'low', label: 'Low' },
-          { value: 'medium', label: 'Medium' },
-          { value: 'high', label: 'High' }
-        ],
-        preferred_workout_time: [
-          { value: 'morning', label: 'Morning (6-9 AM)' },
-          { value: 'afternoon', label: 'Afternoon (12-5 PM)' },
-          { value: 'evening', label: 'Evening (6-9 PM)' },
-          { value: 'night', label: 'Night (9-12 PM)' }
-        ]
-      });
+      showToast('Failed to load form options. Please try again later.', 'error');
     } finally {
       setChoicesLoading(false);
     }
