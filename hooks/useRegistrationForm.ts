@@ -75,8 +75,14 @@ export const useRegistrationForm = (onRegister: (user: any) => void) => {
   const { login } = useAuth();
   const router = useRouter();
 
-  const handleChange = (key: string, value: string | boolean) => {
-    setForm({ ...form, [key]: value });
+  const handleChange = (key: string, value: string | boolean | { value: string; label: string }) => {
+    // If the value is an object with value/label (from a dropdown selection),
+    // we want to store the value, not the label
+    if (value && typeof value === 'object' && 'value' in value) {
+      setForm({ ...form, [key]: value.value });
+    } else {
+      setForm({ ...form, [key]: value });
+    }
   };
 
   const canNext = () => {
@@ -87,37 +93,10 @@ export const useRegistrationForm = (onRegister: (user: any) => void) => {
   };
 
   const registerApi = async (form: FormData) => {
-    // Helper function to find the value for a given label
-    const findValueByLabel = (choices: ChoiceOption[], label: string): string => {
-      const choice = choices.find(option => option.label === label);
-      return choice ? choice.value : label;
-    };
-
-    // Helper function to normalize values for API
-    const normalizeValue = (value: string): string => {
-      return value.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
-    };
-
-    // Debug logging
     console.log('API Choices:', apiChoices);
     console.log('Form Data:', form);
 
-    // Map display labels to API enum values
-    const genderValue = apiChoices ? findValueByLabel(apiChoices.gender, form.gender) : normalizeValue(form.gender);
-    const fitnessLevelValue = apiChoices ? findValueByLabel(apiChoices.fitness_level, form.fitnessLevel) : normalizeValue(form.fitnessLevel);
-    const primaryGoalValue = apiChoices ? findValueByLabel(apiChoices.primary_goal, form.primaryGoal) : normalizeValue(form.primaryGoal);
-    const motivationLevelValue = apiChoices ? findValueByLabel(apiChoices.motivation_level, form.motivationLevel) : normalizeValue(form.motivationLevel);
-    const preferredWorkoutTimeValue = apiChoices ? findValueByLabel(apiChoices.preferred_workout_time, form.preferredWorkoutTime) : normalizeValue(form.preferredWorkoutTime);
-
-    // Debug logging for mapped values
-    console.log('Mapped Values:', {
-      gender: { original: form.gender, mapped: genderValue },
-      fitnessLevel: { original: form.fitnessLevel, mapped: fitnessLevelValue },
-      primaryGoal: { original: form.primaryGoal, mapped: primaryGoalValue },
-      motivationLevel: { original: form.motivationLevel, mapped: motivationLevelValue },
-      preferredWorkoutTime: { original: form.preferredWorkoutTime, mapped: preferredWorkoutTimeValue }
-    });
-
+    // The form values are the same as the API expects since label and value are identical
     const payload = {
       name: form.name,
       email: form.email,
@@ -126,14 +105,14 @@ export const useRegistrationForm = (onRegister: (user: any) => void) => {
       height: Number(form.height),
       weight: Number(form.weight),
       age: Number(form.age),
-      gender: genderValue,
-      fitnessLevel: fitnessLevelValue,
-      primaryGoal: primaryGoalValue,
+      gender: form.gender,
+      fitnessLevel: form.fitnessLevel,
+      primaryGoal: form.primaryGoal,
       wakeUpTime: form.wakeUpTime,
       sleepTime: form.sleepTime,
-      preferredWorkoutTime: preferredWorkoutTimeValue,
+      preferredWorkoutTime: form.preferredWorkoutTime,
       notifications: form.notifications,
-      motivationLevel: motivationLevelValue,
+      motivationLevel: form.motivationLevel,
       weeklyGoal: form.weeklyGoal,
     };
 
@@ -149,15 +128,19 @@ export const useRegistrationForm = (onRegister: (user: any) => void) => {
   const getProfileChoices = async () => {
     try {
       setChoicesLoading(true);
-      console.log('Fetching profile choices from:', `${API_BASE_URL}/choices`);
-      const data = await fetchGet(`${API_BASE_URL}/choices`, false);
-      console.log('Profile choices response:', data);
+      const response = await fetchGet(`${API_BASE_URL}/choices`, false);
       
-      if (data && data.success !== false) {
-        setApiChoices(data?.data);
-        console.log('API Choices set:', data?.data);
+      if (response && response.success !== false && response.data) {
+        const transformedData = {
+          gender: response.data.gender || [],
+          fitness_level: response.data.fitnessLevel || response.data.fitness_level || [],
+          motivation_level: response.data.motivationLevel || response.data.motivation_level || [],
+          preferred_workout_time: response.data.preferredWorkoutTime || response.data.preferred_workout_time || [],
+          primary_goal: response.data.primaryGoal || response.data.primary_goal || []
+        };
+        
+        setApiChoices(transformedData);
       } else {
-        console.error('Failed to load form options from API');
         showToast('Failed to load form options. Please try again later.', 'error');
       }
     } catch (error: any) {
@@ -203,8 +186,17 @@ export const useRegistrationForm = (onRegister: (user: any) => void) => {
   };
 
   const getOptions = (key: keyof ApiChoices): ChoiceOption[] => {
-    if (!apiChoices) return [];
-    return apiChoices[key] || [];
+    if (!apiChoices) {
+      return [];
+    }
+    
+    const options = apiChoices[key];
+    
+    if (!Array.isArray(options)) {
+      return [];
+    }
+    
+    return options;
   };
 
   const progress = ((step + 1) / 3) * 100;

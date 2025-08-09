@@ -1,29 +1,42 @@
 import { StyleSheet, Text, TouchableOpacity } from 'react-native';
 
+interface ChoiceOption {
+  value: string;
+  label: string;
+}
+
 export const DropdownButton = ({ 
     value, 
+    options = [],
     placeholder, 
     onPress, 
     style,
     disabled = false
   }: { 
     value: string; 
+    options?: ChoiceOption[];
     placeholder: string; 
     onPress: () => void; 
     style?: any;
     disabled?: boolean;
-  }) => (
+  }) => {
+      // Find the selected option to display its label
+    const selectedOption = options?.find(option => option.value === value);
+    const displayText = selectedOption ? selectedOption.label : value || placeholder;
+    
+    return (
     <TouchableOpacity 
       style={[styles.dropdownButton, style, disabled && styles.buttonDisabled]} 
       onPress={onPress}
       disabled={disabled}
     >
       <Text style={[styles.dropdownButtonText, !value && styles.placeholderText]}>
-        {disabled ? 'Loading...' : (value || placeholder)}
+        {disabled ? 'Loading...' : displayText}
       </Text>
       <Text style={styles.dropdownArrow}>▼</Text>
     </TouchableOpacity>
   );
+}
   const styles = StyleSheet.create({
     container: {
       flex: 1,

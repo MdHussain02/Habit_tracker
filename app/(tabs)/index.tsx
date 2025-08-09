@@ -1,7 +1,7 @@
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
-import React, { useEffect, useState } from 'react';
-import { Alert, FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { useFocusEffect, useRouter } from 'expo-router';
+import React, { useState } from 'react';
+import { Alert, FlatList, RefreshControl, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import HabitCard from '../../components/HabitCard';
 import TimePicker from '../../components/TimePicker';
 import { useApi } from '../../hooks/useApi';
@@ -14,6 +14,7 @@ const HABITS_STORAGE_KEY = '@habit_hero_habits';
 export default function HomeScreen() {
   const [habits, setHabits] = useState<Habit[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [editHabitId, setEditHabitId] = useState<string | null>(null);
   const [editTime, setEditTime] = useState<string>('09:00');
   const [showEditModal, setShowEditModal] = useState(false);
@@ -25,13 +26,23 @@ export default function HomeScreen() {
 
   const { addHabitWithNotification, editHabitWithNotification, deleteHabitWithNotification } = useHabitNotifications(habits, setHabits);
 
-  useEffect(() => {
-    loadHabits();
-  }, []);
+  useFocusEffect(
+    React.useCallback(() => {
+      loadHabits();
+    }, [])
+  );
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await loadHabits();
+    setRefreshing(false);
+  };
 
   const loadHabits = async () => {
     try {
-      setLoading(true);
+      if (!refreshing) {
+        setLoading(true);
+      }
       // Fetch habits from API
       const response = await fetchGet(`${API_BASE_URL}/habits`);
       
@@ -74,7 +85,10 @@ export default function HomeScreen() {
     }
   };
 
-  const addHabit = addHabitWithNotification;
+  const addHabit = async (habit: Omit<Habit, 'id' | 'createdAt'>) => {
+    await addHabitWithNotification(habit);
+    await loadHabits(); // Refresh the list after adding a new habit
+  };
 
   const handleSaveEditTime = async () => {
     if (!editHabitId) return;
@@ -134,6 +148,14 @@ export default function HomeScreen() {
             <FlatList
               data={habits}
               keyExtractor={(item) => item.id}
+              refreshControl={
+                <RefreshControl
+                  refreshing={refreshing}
+                  onRefresh={onRefresh}
+                  colors={['#FF1972']}
+                  tintColor="#FF1972"
+                />
+              }
               renderItem={({ item }) => (
                 <View style={styles.habitCardModern}>
                   <HabitCard

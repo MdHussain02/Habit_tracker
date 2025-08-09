@@ -164,6 +164,7 @@ export default function RegistrationScreen({ onRegister }: { onRegister: (user: 
                 
                 <DropdownButton
                   value={form.gender}
+                  options={getOptions('gender')}
                   placeholder="Select Gender"
                   onPress={() => setShowGenderDropdown(true)}
                   style={[styles.halfInput]}
@@ -172,13 +173,14 @@ export default function RegistrationScreen({ onRegister }: { onRegister: (user: 
               </View>
               <DropdownButton
                 value={form.fitnessLevel}
+                options={getOptions('fitness_level')}
                 placeholder="Select Fitness Level"
                 onPress={() => setShowFitnessDropdown(true)}
                 disabled={choicesLoading || getOptions('fitness_level').length === 0}
-                
               />
               <DropdownButton
                 value={form.primaryGoal}
+                options={getOptions('primary_goal')}
                 placeholder="Select Primary Goal"
                 onPress={() => setShowGoalDropdown(true)}
                 disabled={choicesLoading || getOptions('primary_goal').length === 0}
@@ -202,12 +204,14 @@ export default function RegistrationScreen({ onRegister }: { onRegister: (user: 
               />
               <DropdownButton
                 value={form.preferredWorkoutTime}
+                options={getOptions('preferred_workout_time')}
                 placeholder="Select Preferred Workout Time"
                 onPress={() => setShowWorkoutTimeDropdown(true)}
                 disabled={choicesLoading || getOptions('preferred_workout_time').length === 0}
               />
               <DropdownButton
                 value={form.motivationLevel}
+                options={getOptions('motivation_level')}
                 placeholder="Select Motivation Level"
                 onPress={() => setShowMotivationDropdown(true)}
                 disabled={choicesLoading}
@@ -236,35 +240,35 @@ export default function RegistrationScreen({ onRegister }: { onRegister: (user: 
             visible={showGenderDropdown}
             onClose={() => setShowGenderDropdown(false)}
             options={getOptions('gender')}
-            onSelect={(value) => handleChange('gender', value)}
+            onSelect={(option) => handleChange('gender', option)}
             title="Select Gender"
           />
           <DropdownModal
             visible={showFitnessDropdown}
             onClose={() => setShowFitnessDropdown(false)}
             options={getOptions('fitness_level')}
-            onSelect={(value) => handleChange('fitnessLevel', value)}
+            onSelect={(option) => handleChange('fitnessLevel', option)}
             title="Select Fitness Level"
           />
           <DropdownModal
             visible={showGoalDropdown}
             onClose={() => setShowGoalDropdown(false)}
             options={getOptions('primary_goal')}
-            onSelect={(value) => handleChange('primaryGoal', value)}
+            onSelect={(option) => handleChange('primaryGoal', option)}
             title="Select Primary Goal"
           />
           <DropdownModal
             visible={showWorkoutTimeDropdown}
             onClose={() => setShowWorkoutTimeDropdown(false)}
             options={getOptions('preferred_workout_time')}
-            onSelect={(value) => handleChange('preferredWorkoutTime', value)}
+            onSelect={(option) => handleChange('preferredWorkoutTime', option)}
             title="Select Preferred Workout Time"
           />
           <DropdownModal
             visible={showMotivationDropdown}
             onClose={() => setShowMotivationDropdown(false)}
             options={getOptions('motivation_level')}
-            onSelect={(value) => handleChange('motivationLevel', value)}
+            onSelect={(option) => handleChange('motivationLevel', option)}
             title="Select Motivation Level"
           />
         </KeyboardAwareScrollView>

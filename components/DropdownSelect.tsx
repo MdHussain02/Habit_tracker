@@ -1,34 +1,41 @@
 import { FlatList, Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+
 interface ChoiceOption {
-    value: string;
-    label: string;
+  value: string;
+  label: string;
 }
 
 export const DropdownModal = ({ 
-    visible, 
-    onClose, 
-    options, 
-    onSelect, 
-    title 
-  }: { 
-    visible: boolean; 
-    onClose: () => void; 
-    options: ChoiceOption[]; 
-    onSelect: (value: string) => void; 
-    title: string;
-  }) => (
+  visible, 
+  onClose, 
+  options, 
+  onSelect, 
+  title 
+}: { 
+  visible: boolean; 
+  onClose: () => void; 
+  options: ChoiceOption[]; 
+  onSelect: (option: ChoiceOption) => void; 
+  title: string;
+}) => {
+  return (
     <Modal visible={visible} transparent animationType="fade">
-      <TouchableOpacity style={styles.modalOverlay} onPress={onClose}>
+      <TouchableOpacity 
+        style={styles.modalOverlay} 
+        onPress={onClose}
+        activeOpacity={1}
+      >
         <View style={styles.modalContent}>
           <Text style={styles.modalTitle}>{title}</Text>
           <FlatList
-            data={options}
-            keyExtractor={(item) => item.value}
+            data={options || []}
+            keyExtractor={(item) => item?.value || ''}
             renderItem={({ item }) => (
               <TouchableOpacity
                 style={styles.dropdownItem}
                 onPress={() => {
-                  onSelect(item.value);
+                  console.log(`Selected option:`, item);
+                  onSelect(item);
                   onClose();
                 }}
               >
@@ -36,14 +43,15 @@ export const DropdownModal = ({
               </TouchableOpacity>
             )}
             style={styles.dropdownList}
+            contentContainerStyle={styles.dropdownListContent}
           />
         </View>
       </TouchableOpacity>
     </Modal>
   );
+};
 
-
-  const styles = StyleSheet.create({
+const styles = StyleSheet.create({
     container: {
       flex: 1,
       backgroundColor: '#18181b',
@@ -238,6 +246,10 @@ export const DropdownModal = ({
     },
     dropdownList: {
       maxHeight: 300,
+      width: '100%',
+    },
+    dropdownListContent: {
+      paddingVertical: 8,
     },
     dropdownItem: {
       paddingVertical: 16,
