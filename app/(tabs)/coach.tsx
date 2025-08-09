@@ -35,8 +35,10 @@ const ICON_MAP: Record<number, string> = {
 export default function CoachScreen() {
   const [generalSuggestions, setGeneralSuggestions] = useState<AISuggestion[]>([]);
   const [fitnessSuggestions, setFitnessSuggestions] = useState<AISuggestion[]>([]);
+  const [nutritionSuggestions, setNutritionSuggestions] = useState<AISuggestion[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadingFitness, setLoadingFitness] = useState(true);
+  const [loadingNutrition, setLoadingNutrition] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { fetchGet, fetchPost } = useApi();
@@ -85,15 +87,34 @@ export default function CoachScreen() {
     }
   };
 
+  const loadNutritionSuggestions = async () => {
+    try {
+      setLoadingNutrition(true);
+      const response = await fetchGet('/suggestions/category/nutrition') as AISuggestionsResponse;
+      
+      if (response.success && response.data) {
+        setNutritionSuggestions(Array.isArray(response.data) ? response.data : response.data.suggestions);
+      } else {
+        console.warn('Failed to load nutrition suggestions');
+      }
+    } catch (err) {
+      console.error('Error loading nutrition suggestions:', err);
+    } finally {
+      setLoadingNutrition(false);
+    }
+  };
+
   useEffect(() => {
     loadGeneralSuggestions();
     loadFitnessSuggestions();
+    loadNutritionSuggestions();
   }, []);
 
   const onRefresh = () => {
     setRefreshing(true);
     loadGeneralSuggestions(true);
     loadFitnessSuggestions();
+    loadNutritionSuggestions();
   };
 
   const formatTime = (dateString: string) => {
@@ -206,8 +227,9 @@ export default function CoachScreen() {
 
     const hasGeneralSuggestions = generalSuggestions.length > 0;
     const hasFitnessSuggestions = fitnessSuggestions.length > 0;
+    const hasNutritionSuggestions = nutritionSuggestions.length > 0;
 
-    if (!hasGeneralSuggestions && !hasFitnessSuggestions) {
+    if (!hasGeneralSuggestions && !hasFitnessSuggestions && !hasNutritionSuggestions) {
       return (
         <View style={styles.emptyState}>
           <Ionicons name="bulb-outline" size={48} color="#666" />
@@ -238,11 +260,28 @@ export default function CoachScreen() {
           </View>
         )}
 
+        {hasNutritionSuggestions && (
+          <View style={styles.section}>
+            <View style={styles.sectionHeader}>
+              <Ionicons name="nutrition" size={24} color="#10b981" />
+              <Text style={[styles.sectionTitle, { color: '#10b981' }]}>Nutrition Suggestions</Text>
+            </View>
+            <Text style={styles.sectionSubtitle}>
+              Healthy eating habits and meal planning
+            </Text>
+            <View style={styles.suggestionsContainer}>
+              {nutritionSuggestions.map((suggestion, index) => 
+                renderSuggestionCard(suggestion, `nutrition-${index}`)
+              )}
+            </View>
+          </View>
+        )}
+
         {hasGeneralSuggestions && (
           <View style={styles.section}>
             <View style={styles.sectionHeader}>
-              <Ionicons name="bulb-outline" size={24} color="#6366f1" />
-              <Text style={styles.sectionTitle}>General Suggestions</Text>
+              <Ionicons name="bulb-outline" size={24} color="#8b5cf6" />
+              <Text style={[styles.sectionTitle, { color: '#8b5cf6' }]}>General Suggestions</Text>
             </View>
             <Text style={styles.sectionSubtitle}>
               Habits to improve your daily routine
