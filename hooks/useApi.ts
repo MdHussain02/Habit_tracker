@@ -1,9 +1,22 @@
 import { useCallback, useState } from 'react';
 import { getAccessToken } from '../utils/storage';
 
+// Get the base URL from environment variables
+const API_BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL || '';
+
 function isPlainObject(obj: any): obj is Record<string, string> {
   return obj && typeof obj === 'object' && !Array.isArray(obj);
 }
+
+// Helper function to construct the full URL
+const getFullUrl = (url: string): string => {
+  // If the URL already starts with http or https, use it as is
+  if (url.startsWith('http://') || url.startsWith('https://')) {
+    return url;
+  }
+  // Otherwise, prepend the base URL
+  return `${API_BASE_URL}${url.startsWith('/') ? '' : '/'}${url}`;
+};
 
 export function useApi() {
   const [loading, setLoading] = useState(false);
@@ -33,9 +46,10 @@ export function useApi() {
         }
       }
 
-      const response = await fetch(url, { ...options, headers });
+      const fullUrl = getFullUrl(url);
+      const response = await fetch(fullUrl, { ...options, headers });
       const data = await response.json();
-      if (!response.ok) throw new Error(data.error);
+      if (!response.ok) throw new Error(data.error || 'API request failed');
       return data;
     } catch (err: any) {
       setError(err.message || 'API error');

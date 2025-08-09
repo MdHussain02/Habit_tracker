@@ -27,3 +27,33 @@ export interface HabitFormData {
   icon?: HabitIcon;
   reminder?: HabitReminder;
 }
+
+export interface AISuggestion {
+  name: string;
+  description: string;
+  target_time: string;
+  repeats: number[];
+  icon_id: number;
+  difficulty: string;
+  category: string;
+  estimated_duration: number;
+  success_tips: string[];
+}
+
+export interface AISuggestionsResponse {
+  success: boolean;
+  data: {
+    suggestions: AISuggestion[];
+    userProfile: {
+      age: number;
+      fitnessLevel: string;
+      primaryGoal: string;
+      motivationLevel: string;
+    };
+    existingHabitsCount: number;
+    options: {
+      maxSuggestions: number;
+      focusArea: string;
+    };
+  };
+}
