@@ -1,60 +1,115 @@
 import { PookieColors } from '@/constants/Colors';
-import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
-import React, { useState } from 'react';
+import { useApi } from '@/hooks/useApi';
+import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
+import { useEffect, useState } from 'react';
 import {
+  ActivityIndicator,
   Dimensions,
+  RefreshControl,
   ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from 'react-native';
-const { width } = Dimensions.get('window');
-export default function AnalyticsScreen() {
-  const [selectedPeriod, setSelectedPeriod] = useState<'week' | 'month'>('week');
 
-  const completionData = {
-    week: [65, 80, 90, 85, 70, 75, 95],
+const { width } = Dimensions.get('window');
+
+interface AnalysisData {
+  analysis: {
+    strengths: string[];
+    gaps: string[];
+    recommendations: string[];
+    consistency_score: number;
+    balance_score: number;
+  };
+  metrics: {
+    totalHabits: number;
+    activeHabits: number;
+    averageFrequency: number;
+    consistencyScore: number;
+    balanceScore: number;
+  };
+  userProfile: {
+    age: number;
+    fitnessLevel: string;
+    primaryGoal: string;
+    motivationLevel: string;
+  };
+}
+
+export default function AnalyticsScreen() {
+  const [isLoading, setIsLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [analysisData, setAnalysisData] = useState<AnalysisData | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const { fetchGet } = useApi();
+  const router = useRouter();
+
+  const fetchAnalysisData = async () => {
+    try {
+      const response = await fetchGet('/suggestions/analysis');
+      if (response.success && response.data) {
+        setAnalysisData(response.data);
+        setError(null);
+      } else {
+        setError('Failed to load analysis data');
+      }
+    } catch (err) {
+      console.error('Error fetching analysis data:', err);
+      setError('An error occurred while loading analysis data');
+    } finally {
+      setIsLoading(false);
+      setIsRefreshing(false);
+    }
   };
 
-  const longestStreaks = [
-    {
-      id: '1',
-      name: 'Morning Yoga',
-      days: 90,
-      isPersonalBest: true,
-    },
-    {
-      id: '2',
-      name: 'Read 15 Mins',
-      days: 65,
-      isPersonalBest: true,
-    },
-    {
-      id: '3',
-      name: 'Drink Water',
-      days: 42,
-      isPersonalBest: true,
-    },
-  ];
+  useEffect(() => {
+    fetchAnalysisData();
+  }, []);
 
-  const mostSkippedHabits = [
-    {
-      id: '1',
-      name: 'Evening Run',
-      skippedCount: 18,
-    },
-    {
-      id: '2',
-      name: 'Meditate',
-      skippedCount: 12,
-    },
-    {
-      id: '3',
-      name: 'Learn Spanish',
-      skippedCount: 9,
-    },
-  ];
+  const onRefresh = () => {
+    setIsRefreshing(true);
+    fetchAnalysisData();
+  };
+
+  if (isLoading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color={PookieColors.hotPink} />
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <View style={styles.errorContainer}>
+        <Ionicons name="warning-outline" size={48} color="#f87171" />
+        <Text style={styles.errorText}>{error}</Text>
+        <TouchableOpacity
+          style={styles.retryButton}
+          onPress={() => {
+            setIsLoading(true);
+            fetchAnalysisData();
+          }}
+        >
+          <Text style={styles.retryButtonText}>Retry</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
+
+  if (!analysisData) {
+    return (
+      <View style={styles.errorContainer}>
+        <Ionicons name="help-circle-outline" size={48} color="#9ca3af" />
+        <Text style={styles.errorText}>No analysis data available</Text>
+      </View>
+    );
+  }
+
+  const { analysis, metrics, userProfile } = analysisData;
 
   const renderProgressBar = (percentage: number) => {
     return (
@@ -67,110 +122,144 @@ export default function AnalyticsScreen() {
     );
   };
 
-  const renderGraph = () => {
-    const data = completionData.week;
-    const maxValue = Math.max(...data);
-    const barWidth = (width - 80) / data.length;
-
-    return (
-      <View style={styles.graphContainer}>
-        <View style={styles.graphBars}>
-          {data.map((value, index) => {
-            const height = (value / maxValue) * 120;
-            return (
-              <View key={index} style={styles.barContainer}>
-                <View style={[styles.bar, { height, width: barWidth - 4 }]} />
-                <Text style={styles.barLabel}>
-                  {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'][index]}
-                </Text>
-              </View>
-            );
-          })}
-        </View>
+  const renderSection = (title: string, items: string[], icon: string, color: string) => (
+    <View style={styles.section}>
+      <View style={styles.sectionHeader}>
+        <Ionicons name={icon as any} size={20} color={color} />
+        <Text style={[styles.sectionTitle, { color, marginLeft: 8 }]}>{title}</Text>
       </View>
-    );
-  };
+      <View style={styles.listContainer}>
+        {items.map((item, index) => (
+          <View key={index} style={styles.listItem}>
+            <View style={[styles.bullet, { backgroundColor: color }]} />
+            <Text style={styles.listText}>{item}</Text>
+          </View>
+        ))}
+      </View>
+    </View>
+  );
 
   return (
-    <View style={styles.container}>
-    
-        {/* Header */}
-        <View style={styles.header}>
-          <Text style={styles.headerTitle}>Analytics</Text>
+    <ScrollView
+      style={styles.container}
+      refreshControl={
+        <RefreshControl
+          refreshing={isRefreshing}
+          onRefresh={onRefresh}
+          tintColor={PookieColors.hotPink}
+          colors={[PookieColors.hotPink]}
+        />
+      }
+    >
+      {/* Header */}
+      <View style={styles.header}>
+        <Text style={styles.headerTitle}>Habit Analysis</Text>
+        <Text style={styles.headerSubtitle}>Your personalized insights and recommendations</Text>
+      </View>
+
+      <View style={styles.content}>
+        {/* Metrics Section */}
+        <View style={styles.metricsContainer}>
+          <View style={styles.metricCard}>
+            <Ionicons name="stats-chart" size={24} color={PookieColors.hotPink} />
+            <Text style={styles.metricValue}>{metrics.totalHabits}</Text>
+            <Text style={styles.metricLabel}>Total Habits</Text>
+          </View>
+          <View style={styles.metricCard}>
+            <Ionicons name="checkmark-circle" size={24} color="#4CAF50" />
+            <Text style={styles.metricValue}>{metrics.activeHabits}</Text>
+            <Text style={styles.metricLabel}>Active</Text>
+          </View>
         </View>
 
-        <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
-          {/* Completion Rate Section */}
+        <View style={styles.metricsContainer}>
+          <View style={styles.metricCard}>
+            <Ionicons name="trending-up" size={24} color="#2196F3" />
+            <Text style={styles.metricValue}>{metrics.consistencyScore}%</Text>
+            <Text style={styles.metricLabel}>Consistency</Text>
+          </View>
+          <View style={styles.metricCard}>
+            <Ionicons name="scale" size={24} color="#9C27B0" />
+            <Text style={styles.metricValue}>{metrics.balanceScore}%</Text>
+            <Text style={styles.metricLabel}>Balance</Text>
+          </View>
+        </View>
+
+        {/* User Profile */}
+        <View style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <Ionicons name="person-circle" size={20} color={PookieColors.hotPink} />
+            <Text style={[styles.sectionTitle, { marginLeft: 8 }]}>Your Profile</Text>
+          </View>
+          <View style={styles.profileInfo}>
+            <Text style={styles.infoText}><Text style={styles.infoLabel}>Goal:</Text> {userProfile.primaryGoal}</Text>
+            <Text style={styles.infoText}><Text style={styles.infoLabel}>Fitness Level:</Text> {userProfile.fitnessLevel}</Text>
+            <Text style={styles.infoText}><Text style={styles.infoLabel}>Motivation:</Text> {userProfile.motivationLevel}</Text>
+          </View>
+        </View>
+
+        {/* Strengths */}
+        {analysis.strengths.length > 0 && (
           <View style={styles.section}>
             <View style={styles.sectionHeader}>
-              <Text style={styles.sectionTitle}>Completion Rate</Text>
+              <Ionicons name="thumbs-up" size={20} color="#4CAF50" />
+              <Text style={[styles.sectionTitle, { marginLeft: 8, color: '#4CAF50' }]}>
+                Your Strengths
+              </Text>
             </View>
-            
-            {renderGraph()}
-          </View>
-
-          {/* Longest Streaks Section */}
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Longest Streaks</Text>
-            
-            {longestStreaks.map((streak) => (
-              <View key={streak.id} style={styles.streakCard}>
-                <View style={styles.streakInfo}>
-                  <Text style={styles.streakName}>{streak.name}</Text>
-                  <View style={styles.streakDays}>
-                    <Text style={styles.streakNumber}>{streak.days}</Text>
-                    <Text style={styles.streakLabel}>days</Text>
-                  </View>
+            <View style={styles.listContainer}>
+              {analysis.strengths.map((strength, index) => (
+                <View key={index} style={styles.listItem}>
+                  <Ionicons name="checkmark-circle" size={16} color="#4CAF50" />
+                  <Text style={styles.listText}>{strength}</Text>
                 </View>
-                <View style={styles.streakBadges}>
-                  <View style={styles.personalBestBadge}>
-                    <Text style={styles.personalBestText}>Personal Best!</Text>
-                  </View>
-                  <MaterialCommunityIcons name="fire" size={20} color="#ff6b6b" />
-                </View>
-              </View>
-            ))}
-          </View>
-
-          {/* Most Skipped Habits Section */}
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Most Skipped Habits</Text>
-            
-            {mostSkippedHabits.map((habit) => (
-              <View key={habit.id} style={styles.skippedCard}>
-                <View style={styles.skippedInfo}>
-                  <View style={styles.skippedIcon}>
-                    <Ionicons name="close" size={16} color="#fff" />
-                  </View>
-                  <View style={styles.skippedDetails}>
-                    <Text style={styles.skippedName}>{habit.name}</Text>
-                    <Text style={styles.skippedCount}>Skipped {habit.skippedCount} times</Text>
-                  </View>
-                </View>
-                <TouchableOpacity style={styles.reviewButton}>
-                  <Text style={styles.reviewButtonText}>Review</Text>
-                </TouchableOpacity>
-              </View>
-            ))}
-          </View>
-
-          {/* Overall Progress Section */}
-          <View style={styles.overallProgressCard}>
-            <View style={styles.overallProgressHeader}>
-              <MaterialCommunityIcons name="medal" size={24} color="#ffd93d" />
-              <View style={styles.overallProgressInfo}>
-                <Text style={styles.overallProgressTitle}>Overall Progress</Text>
-                <Text style={styles.overallProgressSubtitle}>
-                  Review your journey and celebrate milestones.
-                </Text>
-              </View>
+              ))}
             </View>
-            <TouchableOpacity style={styles.viewDetailsButton}>
-              <Text style={styles.viewDetailsText}>View Details</Text>
-            </TouchableOpacity>
           </View>
-        </ScrollView>
-    </View>
+        )}
+
+        {/* Gaps */}
+        {analysis.gaps.length > 0 && (
+          <View style={styles.section}>
+            <View style={styles.sectionHeader}>
+              <Ionicons name="warning" size={20} color="#FF9800" />
+              <Text style={[styles.sectionTitle, { marginLeft: 8, color: '#FF9800' }]}>
+                Areas for Improvement
+              </Text>
+            </View>
+            <View style={styles.listContainer}>
+              {analysis.gaps.map((gap, index) => (
+                <View key={`gap-${index}`} style={styles.listItem}>
+                  <Ionicons name="alert-circle" size={16} color="#FF9800" />
+                  <Text style={styles.listText}>{gap}</Text>
+                </View>
+              ))}
+            </View>
+          </View>
+        )}
+
+        {/* Recommendations */}
+        {analysis.recommendations.length > 0 && (
+          <View style={[styles.section, { marginBottom: 40 }]}>
+            <View style={styles.sectionHeader}>
+              <Ionicons name="bulb" size={20} color={PookieColors.hotPink} />
+              <Text style={[styles.sectionTitle, { marginLeft: 8 }]}>
+                Recommendations
+              </Text>
+            </View>
+            <View style={styles.listContainer}>
+              {analysis.recommendations.map((recommendation, index) => (
+                <View key={`rec-${index}`} style={styles.listItem}>
+                  <Ionicons name="arrow-forward" size={16} color={PookieColors.hotPink} />
+                  <Text style={styles.listText}>{recommendation}</Text>
+                </View>
+              ))}
+            </View>
+          </View>
+        )}
+
+      </View>
+    </ScrollView>
   );
 }
 
@@ -179,8 +268,92 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#14141c',
   },
-  gradientBackground: {
+  loadingContainer: {
     flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#14141c',
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+    backgroundColor: '#14141c',
+  },
+  errorText: {
+    color: '#f87171',
+    fontSize: 16,
+    textAlign: 'center',
+    marginVertical: 16,
+  },
+  retryButton: {
+    backgroundColor: PookieColors.hotPink,
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 8,
+    marginTop: 8,
+  },
+  retryButtonText: {
+    color: '#fff',
+    fontWeight: '600',
+    fontSize: 16,
+  },
+  content: {
+    padding: 16,
+  },
+  metricsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 16,
+  },
+  metricCard: {
+    backgroundColor: '#1e1e28',
+    borderRadius: 12,
+    padding: 16,
+    alignItems: 'center',
+    flex: 1,
+    marginHorizontal: 4,
+  },
+  metricValue: {
+    color: '#fff',
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginVertical: 8,
+  },
+  metricLabel: {
+    color: '#9ca3af',
+    fontSize: 14,
+  },
+  profileInfo: {
+    backgroundColor: '#1e1e28',
+    borderRadius: 12,
+    padding: 16,
+  },
+  infoText: {
+    color: '#fff',
+    marginBottom: 8,
+    fontSize: 15,
+  },
+  infoLabel: {
+    color: PookieColors.hotPink,
+    fontWeight: '600',
+  },
+  listContainer: {
+    backgroundColor: '#1e1e28',
+    borderRadius: 12,
+    padding: 16,
+  },
+  listItem: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    marginBottom: 12,
+  },
+  listText: {
+    color: '#fff',
+    marginLeft: 12,
+    flex: 1,
+    lineHeight: 22,
   },
   header: {
     paddingTop: 60,

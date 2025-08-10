@@ -1,7 +1,8 @@
 import { Ionicons } from '@expo/vector-icons';
 import { default as React } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Habit } from '../types/habit';
+import { useRouter } from 'expo-router';
 
 // Map icon_id to icon names
 const ICON_MAP: Record<number, string> = {
@@ -27,8 +28,25 @@ interface HabitCardProps {
 export default function HabitCard({ 
   habit
 }: HabitCardProps) {
+  const router = useRouter();
+  const habitId = habit._id || habit.id;
+  
+  if (!habitId) {
+    console.error('No habit ID found');
+    return null;
+  }
+
+  const handlePress = () => {
+    // @ts-ignore - We know this route exists
+    router.push(`/habits/${habitId}` as any);
+  };
+
   return (
-    <View style={styles.container}>
+    <TouchableOpacity 
+      style={styles.container}
+      onPress={handlePress}
+      activeOpacity={0.8}
+    >
       <View style={styles.content}>
         <View style={styles.header}>
           <Text style={styles.name}>
@@ -52,7 +70,7 @@ export default function HabitCard({
           </View>
         )}
       </View>
-    </View>
+    </TouchableOpacity>
   );
 }
 

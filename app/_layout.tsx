@@ -6,6 +6,13 @@ import { AuthProvider } from '../hooks/useAuth';
 import { useColorScheme } from '../hooks/useColorScheme';
 import { PushNotificationProvider } from '../hooks/usePushNotifications';
 import { ToastProvider } from '../hooks/useToast';
+import { RootStackParamList } from './_route.types';
+
+declare global {
+  namespace ReactNavigation {
+    interface RootParamList extends RootStackParamList {}
+  }
+}
 
 // Configure notification handler
 Notifications.setNotificationHandler({
@@ -13,7 +20,10 @@ Notifications.setNotificationHandler({
     shouldShowAlert: true,
     shouldPlaySound: true,
     shouldSetBadge: true,
-  }),
+    shouldShowBanner: true,
+    shouldShowList: true,
+    
+  } as Notifications.NotificationBehavior),
 });
 
 export default function RootLayout() {

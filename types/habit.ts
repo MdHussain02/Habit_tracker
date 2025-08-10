@@ -11,15 +11,18 @@ export interface HabitReminder {
 }
 
 export interface Habit {
-  id: string;
+  _id: string;
+  id?: string; // For backward compatibility
   name: string;
   icon_id: number;  // Numeric ID for the icon
   icon?: HabitIcon; // Keep for backward compatibility
-  createdAt: number;
+  createdAt: number | string;
   streak: number;
   completedDates: string[];
   lastCompletedDate?: string;
   reminder?: HabitReminder;
+  target_time?: string;
+  repeats?: number[];
 }
 
 export interface HabitFormData {
