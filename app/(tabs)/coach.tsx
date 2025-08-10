@@ -160,30 +160,82 @@ export default function CoachScreen() {
     }
   };
 
-  const renderSuggestionCard = (suggestion: AISuggestion, key: string) => {
+  const SuggestionCard = ({ suggestion, key }: { suggestion: AISuggestion, key: string }) => {
+    const [expanded, setExpanded] = useState(false);
+    const [showReadMore, setShowReadMore] = useState(false);
     const iconName = ICON_MAP[suggestion.icon_id] || 'help-circle';
     
+    const toggleExpand = () => {
+      setExpanded(!expanded);
+    };
+
+    const onTextLayout = (e: any) => {
+      const { lineHeight } = e.nativeEvent;
+      const maxLines = 3;
+      const maxHeight = lineHeight * maxLines;
+      const currentHeight = e.nativeEvent.lines.reduce((acc: number, line: any) => {
+        return acc + line.height;
+      }, 0);
+      
+      setShowReadMore(currentHeight > maxHeight);
+    };
+
+    const getCategoryColor = (category: string) => {
+      switch (category.toLowerCase()) {
+        case 'fitness':
+          return '#6366f1';
+        case 'nutrition':
+          return '#10b981';
+        default:
+          return PookieColors.hotPink;
+      }
+    };
+
+    const categoryColor = getCategoryColor(suggestion.category);
+
     return (
       <View key={`suggestion-${key}`} style={styles.suggestionCard}>
         <View style={styles.suggestionHeader}>
-          <View style={styles.suggestionIcon}>
-            <Ionicons name={iconName as any} size={24} color="#fff" />
+          <View style={[styles.suggestionIcon, { backgroundColor: `${categoryColor}20` }]}>
+            <Ionicons name={iconName as any} size={20} color={categoryColor} />
           </View>
           <View style={styles.suggestionTitleContainer}>
             <Text style={styles.suggestionTitle}>{suggestion.name}</Text>
-            <Text style={styles.suggestionCategory}>
-              {suggestion.category} • {suggestion.difficulty}
-            </Text>
+            <View style={styles.suggestionMetaContainer}>
+              <View style={[styles.categoryBadge, { backgroundColor: `${categoryColor}20` }]}>
+                <Text style={[styles.categoryText, { color: categoryColor }]}>
+                  {suggestion.category}
+                </Text>
+              </View>
+              <Text style={styles.difficultyText}>
+                {suggestion.difficulty}
+              </Text>
+            </View>
           </View>
           <TouchableOpacity 
-            style={styles.addButton}
+            style={[styles.addButton, { backgroundColor: categoryColor }]}
             onPress={() => handleAddHabit(suggestion)}
           >
-            <Text style={styles.addButtonText}>Add</Text>
+            <Ionicons name="add" size={18} color="#fff" />
           </TouchableOpacity>
         </View>
         
-        <Text style={styles.suggestionDescription}>{suggestion.description}</Text>
+        <View style={styles.descriptionContainer}>
+          <Text 
+            style={styles.suggestionDescription} 
+            numberOfLines={expanded ? undefined : 3}
+            onTextLayout={onTextLayout}
+          >
+            {suggestion.description}
+          </Text>
+          {showReadMore && (
+            <TouchableOpacity onPress={toggleExpand} style={styles.readMoreButton}>
+              <Text style={[styles.readMoreText, { color: categoryColor }]}>
+                {expanded ? 'Read Less' : 'Read More'}
+              </Text>
+            </TouchableOpacity>
+          )}
+        </View>
         
         <View style={styles.suggestionMeta}>
           <View style={styles.metaItem}>
@@ -201,16 +253,86 @@ export default function CoachScreen() {
         </View>
         
         {suggestion.success_tips.length > 0 && (
-          <View style={styles.tipsContainer}>
-            <Text style={styles.tipsTitle}>Success Tips:</Text>
+          <View style={[styles.tipsContainer, { borderLeftColor: categoryColor }]}>
+            <Text style={styles.tipsTitle}>Success Tips</Text>
             {suggestion.success_tips.map((tip, i) => (
               <View key={`tip-${i}`} style={styles.tipItem}>
-                <Text style={styles.tipBullet}>•</Text>
+                <View style={[styles.tipBulletContainer, { backgroundColor: `${categoryColor}20` }]}>
+                  <Text style={[styles.tipBullet, { color: categoryColor }]}>•</Text>
+                </View>
                 <Text style={styles.tipText}>{tip}</Text>
               </View>
             ))}
           </View>
         )}
+      </View>
+    );
+  };
+
+  const renderSuggestionCard = (suggestion: AISuggestion, key: string) => {
+    return <SuggestionCard suggestion={suggestion} key={key} />;
+  };
+
+  const navigateToAllSuggestions = (category: string, suggestions: AISuggestion[]) => {
+    router.push({
+      pathname: '/suggestions/[category]',
+      params: { 
+        category,
+        suggestions: JSON.stringify(suggestions)
+      }
+    } as any);
+  };
+
+  const renderCategorySection = ({
+    title,
+    icon,
+    color,
+    suggestions,
+    loading,
+    categoryKey,
+    subtitle
+  }: {
+    title: string;
+    icon: keyof typeof Ionicons.glyphMap;
+    color: string;
+    suggestions: AISuggestion[];
+    loading: boolean;
+    categoryKey: string;
+    subtitle: string;
+  }) => {
+    if (loading) return null;
+    if (suggestions.length === 0) return null;
+
+    const mainSuggestion = suggestions[0];
+    const hasMore = suggestions.length > 1;
+
+    return (
+      <View style={styles.section}>
+        <View style={styles.sectionHeader}>
+          <View style={styles.sectionTitleContainer}>
+            <View style={[styles.sectionIcon, { backgroundColor: `${color}20` }]}>
+              <Ionicons name={icon} size={20} color={color} />
+            </View>
+            <View>
+              <Text style={[styles.sectionTitle, { color }]}>{title}</Text>
+              <Text style={styles.sectionSubtitle}>{subtitle}</Text>
+            </View>
+          </View>
+        </View>
+        
+        <View style={styles.suggestionsContainer}>
+          {renderSuggestionCard(mainSuggestion, `${categoryKey}-0`)}
+          
+          {hasMore && (
+            <TouchableOpacity 
+              style={[styles.viewAllButton, { borderColor: color }]}
+              onPress={() => navigateToAllSuggestions(categoryKey, suggestions)}
+            >
+              <Text style={[styles.viewAllText, { color }]}>View All {suggestions.length} Suggestions</Text>
+              <Ionicons name="chevron-forward" size={16} color={color} />
+            </TouchableOpacity>
+          )}
+        </View>
       </View>
     );
   };
@@ -248,56 +370,35 @@ export default function CoachScreen() {
 
     return (
       <ScrollView>
-        {hasFitnessSuggestions && (
-          <View style={styles.section}>
-            <View style={styles.sectionHeader}>
-              <Ionicons name="fitness" size={24} color="#6366f1" />
-              <Text style={styles.sectionTitle}>Fitness Suggestions</Text>
-            </View>
-            <Text style={styles.sectionSubtitle}>
-              Personalized workout and fitness recommendations
-            </Text>
-            <View style={styles.suggestionsContainer}>
-              {fitnessSuggestions.map((suggestion, index) => 
-                renderSuggestionCard(suggestion, `fitness-${index}`)
-              )}
-            </View>
-          </View>
-        )}
+        {renderCategorySection({
+          title: 'Fitness Suggestions',
+          icon: 'fitness',
+          color: '#6366f1',
+          suggestions: fitnessSuggestions,
+          loading: loadingFitness,
+          categoryKey: 'fitness',
+          subtitle: 'Personalized workout and fitness recommendations'
+        })}
 
-        {hasNutritionSuggestions && (
-          <View style={styles.section}>
-            <View style={styles.sectionHeader}>
-              <Ionicons name="nutrition" size={24} color="#10b981" />
-              <Text style={[styles.sectionTitle, { color: '#10b981' }]}>Nutrition Suggestions</Text>
-            </View>
-            <Text style={styles.sectionSubtitle}>
-              Healthy eating habits and meal planning
-            </Text>
-            <View style={styles.suggestionsContainer}>
-              {nutritionSuggestions.map((suggestion, index) => 
-                renderSuggestionCard(suggestion, `nutrition-${index}`)
-              )}
-            </View>
-          </View>
-        )}
+        {renderCategorySection({
+          title: 'Nutrition Suggestions',
+          icon: 'nutrition',
+          color: '#10b981',
+          suggestions: nutritionSuggestions,
+          loading: loadingNutrition,
+          categoryKey: 'nutrition',
+          subtitle: 'Healthy eating habits and meal planning'
+        })}
 
-        {hasGeneralSuggestions && (
-          <View style={styles.section}>
-            <View style={styles.sectionHeader}>
-              <Ionicons name="bulb-outline" size={24} color="#8b5cf6" />
-              <Text style={[styles.sectionTitle, { color: '#8b5cf6' }]}>General Suggestions</Text>
-            </View>
-            <Text style={styles.sectionSubtitle}>
-              Habits to improve your daily routine
-            </Text>
-            <View style={styles.suggestionsContainer}>
-              {generalSuggestions.map((suggestion, index) => 
-                renderSuggestionCard(suggestion, `general-${index}`)
-              )}
-            </View>
-          </View>
-        )}
+        {renderCategorySection({
+          title: 'General Suggestions',
+          icon: 'bulb-outline',
+          color: '#8b5cf6',
+          suggestions: generalSuggestions,
+          loading: loading,
+          categoryKey: 'general',
+          subtitle: 'Habits to improve your daily routine'
+        })}
       </ScrollView>
     );
   };
@@ -394,26 +495,39 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   suggestionsContainer: {
-    paddingBottom: 20,
+    paddingBottom: 0,
   },
   section: {
-    marginBottom: 30,
+    marginBottom: 24,
+    backgroundColor: '#1a1a24',
+    borderRadius: 16,
+    padding: 16,
+    overflow: 'hidden',
   },
   sectionHeader: {
+    marginBottom: 16,
+  },
+  sectionTitleContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 8,
+    gap: 12,
+  },
+  sectionIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   sectionTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
+    fontSize: 16,
+    fontWeight: '600',
     color: '#fff',
-    marginLeft: 8,
+    marginBottom: 2,
   },
   sectionSubtitle: {
-    fontSize: 14,
-    color: '#999',
-    marginBottom: 16,
+    fontSize: 12,
+    color: '#888',
   },
   tipCard: {
     backgroundColor: '#22222b',
@@ -545,20 +659,22 @@ const styles = StyleSheet.create({
   // Suggestion Card Styles
   suggestionCard: {
     backgroundColor: '#22222b',
-    borderRadius: 16,
-    padding: 16,
-    marginBottom: 16,
+    borderRadius: 12,
+    padding: 0,
+    overflow: 'hidden',
   },
   suggestionHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 12,
+    padding: 16,
+    paddingBottom: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(255, 255, 255, 0.05)',
   },
   suggestionIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: PookieColors.hotPink,
+    width: 36,
+    height: 36,
+    borderRadius: 10,
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 12,
@@ -568,8 +684,29 @@ const styles = StyleSheet.create({
   },
   suggestionTitle: {
     color: '#fff',
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: '600',
+    marginBottom: 4,
+  },
+  suggestionMetaContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  categoryBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 6,
+  },
+  categoryText: {
+    fontSize: 11,
+    fontWeight: '600',
+    textTransform: 'capitalize',
+  },
+  difficultyText: {
+    color: '#888',
+    fontSize: 11,
+    fontWeight: '500',
   },
   suggestionCategory: {
     color: '#888',
@@ -577,26 +714,44 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   addButton: {
-    backgroundColor: PookieColors.hotPink,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 16,
+    width: 32,
+    height: 32,
+    borderRadius: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginLeft: 'auto',
   },
   addButtonText: {
     color: '#fff',
     fontWeight: '600',
     fontSize: 12,
   },
+  descriptionContainer: {
+    paddingHorizontal: 16,
+    paddingTop: 12,
+    paddingBottom: 16,
+  },
   suggestionDescription: {
-    color: '#ccc',
+    color: '#ddd',
     fontSize: 14,
-    lineHeight: 20,
-    marginBottom: 12,
+    lineHeight: 21,
+    letterSpacing: 0.2,
+  },
+  readMoreButton: {
+    marginTop: 8,
+    alignSelf: 'flex-start',
+  },
+  readMoreText: {
+    fontSize: 13,
+    fontWeight: '500',
   },
   suggestionMeta: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 12,
+    padding: 16,
+    paddingTop: 0,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(255, 255, 255, 0.05)',
   },
   metaItem: {
     flexDirection: 'row',
@@ -607,29 +762,56 @@ const styles = StyleSheet.create({
     fontSize: 12,
     marginLeft: 4,
   },
-  tipsContainer: {
-    backgroundColor: '#2a2a35',
+  viewAllButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 12,
     borderRadius: 12,
-    padding: 12,
+    borderWidth: 1,
     marginTop: 8,
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+  },
+  viewAllText: {
+    fontSize: 14,
+    fontWeight: '500',
+    marginRight: 4,
+  },
+  tipsContainer: {
+    backgroundColor: 'rgba(255, 255, 255, 0.03)',
+    padding: 16,
+    borderLeftWidth: 3,
+    marginTop: 4,
   },
   tipsTitle: {
     color: '#fff',
     fontWeight: '600',
-    marginBottom: 8,
+    marginBottom: 10,
     fontSize: 14,
+    opacity: 0.9,
   },
   tipItem: {
     flexDirection: 'row',
-    marginBottom: 4,
+    marginBottom: 8,
+    alignItems: 'flex-start',
+  },
+  tipBulletContainer: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 8,
+    marginTop: 1,
   },
   tipBullet: {
-    color: PookieColors.hotPink,
-    marginRight: 8,
+    fontSize: 16,
+    lineHeight: 16,
   },
   tipText: {
-    color: '#ccc',
+    color: '#bbb',
     fontSize: 13,
     flex: 1,
+    lineHeight: 18,
   },
 }); 
