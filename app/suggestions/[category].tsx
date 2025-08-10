@@ -4,6 +4,8 @@ import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-nati
 import { Ionicons } from '@expo/vector-icons';
 import { PookieColors } from '@/constants/Colors';
 import { AISuggestion } from '@/types/habit';
+import { useApi } from '@/hooks/useApi';
+import { useToast } from '@/hooks/useToast';
 
 const CategorySuggestionsScreen = () => {
   const { category, suggestions: suggestionsString } = useLocalSearchParams<{
@@ -12,7 +14,10 @@ const CategorySuggestionsScreen = () => {
   }>();
   
   const [suggestions, setSuggestions] = useState<AISuggestion[]>([]);
+  const [addingHabit, setAddingHabit] = useState<Record<string, boolean>>({});
   const router = useRouter();
+  const { fetchPost } = useApi();
+  const { showToast } = useToast();
 
   useEffect(() => {
     if (suggestionsString) {
@@ -40,13 +45,47 @@ const CategorySuggestionsScreen = () => {
   };
 
   const getCategoryColor = (category: string) => {
-    switch (category.toLowerCase()) {
+    switch (category?.toLowerCase()) {
       case 'fitness':
         return '#6366f1';
       case 'nutrition':
         return '#10b981';
       default:
         return PookieColors.hotPink;
+    }
+  };
+
+  const handleAddHabit = async (suggestion: AISuggestion) => {
+    try {
+      // Use name as a unique identifier since id might not exist
+      const suggestionKey = suggestion.name;
+      setAddingHabit(prev => ({ ...prev, [suggestionKey]: true }));
+      
+      const habitData = {
+        name: suggestion.name,
+        target_time: suggestion.target_time,
+        icon_id: suggestion.icon_id,
+        repeats: suggestion.repeats,
+        description: 'Created from AI suggestion'
+      };
+
+      const response = await fetchPost('/suggestions/create', habitData);
+      
+      if (response.success) {
+        showToast('Habit created successfully!', 'success');
+        // Navigate to home tab after a short delay
+        setTimeout(() => {
+          router.replace('/(tabs)');
+        }, 1000);
+      } else {
+        showToast(response.error || 'Failed to create habit', 'error');
+      }
+    } catch (error) {
+      console.error('Error creating habit:', error);
+      showToast('An error occurred while creating the habit', 'error');
+    } finally {
+      const suggestionKey = suggestion.name;
+      setAddingHabit(prev => ({ ...prev, [suggestionKey]: false }));
     }
   };
 
@@ -57,7 +96,10 @@ const CategorySuggestionsScreen = () => {
       'fitness': 'fitness',
       'nutrition': 'nutrition',
       'general': 'bulb-outline'
-    }[suggestion.category.toLowerCase()] || 'help-circle';
+    }[suggestion.category?.toLowerCase() || 'general'] || 'help-circle';
+
+    const categoryColor = getCategoryColor(suggestion.category);
+    const isAdding = addingHabit[suggestion.name] || false;
 
     const toggleExpand = () => {
       setExpanded(!expanded);
@@ -77,18 +119,36 @@ const CategorySuggestionsScreen = () => {
     return (
       <View key={`suggestion-${index}`} style={styles.suggestionCard}>
         <View style={styles.suggestionHeader}>
-          <View style={[styles.suggestionIcon, { backgroundColor: getCategoryColor(suggestion.category) }]}>
-            <Ionicons name={iconName as any} size={24} color="#fff" />
+          <View style={[styles.suggestionIcon, { backgroundColor: `${categoryColor}20` }]}>
+            <Ionicons name={iconName as any} size={20} color={categoryColor} />
           </View>
           <View style={styles.suggestionTitleContainer}>
             <Text style={styles.suggestionTitle}>{suggestion.name}</Text>
-            <Text style={styles.suggestionCategory}>
-              {suggestion.category} • {suggestion.difficulty}
-            </Text>
+            <View style={styles.suggestionMetaContainer}>
+              <View style={[styles.categoryBadge, { backgroundColor: `${categoryColor}20` }]}>
+                <Text style={[styles.categoryText, { color: categoryColor }]}>
+                  {suggestion.category}
+                </Text>
+              </View>
+              <Text style={styles.difficultyText}>
+                {suggestion.difficulty}
+              </Text>
+            </View>
           </View>
+          <TouchableOpacity 
+            style={[styles.addButton, { backgroundColor: isAdding ? '#666' : categoryColor }]}
+            onPress={() => !isAdding && handleAddHabit(suggestion)}
+            disabled={isAdding}
+          >
+            {isAdding ? (
+              <Ionicons name="time-outline" size={18} color="#fff" />
+            ) : (
+              <Ionicons name="add" size={18} color="#fff" />
+            )}
+          </TouchableOpacity>
         </View>
         
-        <View>
+        <View style={styles.descriptionContainer}>
           <Text 
             style={styles.suggestionDescription} 
             numberOfLines={expanded ? undefined : 3}
@@ -98,7 +158,7 @@ const CategorySuggestionsScreen = () => {
           </Text>
           {showReadMore && (
             <TouchableOpacity onPress={toggleExpand} style={styles.readMoreButton}>
-              <Text style={styles.readMoreText}>
+              <Text style={[styles.readMoreText, { color: categoryColor }]}>
                 {expanded ? 'Read Less' : 'Read More'}
               </Text>
             </TouchableOpacity>
@@ -121,11 +181,13 @@ const CategorySuggestionsScreen = () => {
         </View>
         
         {suggestion.success_tips?.length > 0 && (
-          <View style={styles.tipsContainer}>
-            <Text style={styles.tipsTitle}>Success Tips:</Text>
+          <View style={[styles.tipsContainer, { borderLeftColor: categoryColor }]}>
+            <Text style={styles.tipsTitle}>Success Tips</Text>
             {suggestion.success_tips.map((tip, i) => (
               <View key={`tip-${i}`} style={styles.tipItem}>
-                <Text style={styles.tipBullet}>•</Text>
+                <View style={[styles.tipBulletContainer, { backgroundColor: `${categoryColor}20` }]}>
+                  <Text style={[styles.tipBullet, { color: categoryColor }]}>•</Text>
+                </View>
                 <Text style={styles.tipText}>{tip}</Text>
               </View>
             ))}
@@ -205,15 +267,21 @@ const styles = StyleSheet.create({
     paddingVertical: 20,
   },
   suggestionCard: {
-    backgroundColor: '#22222b',
-    borderRadius: 16,
-    padding: 16,
+    backgroundColor: '#1e1e28',
+    borderRadius: 12,
+    padding: 0,
     marginBottom: 16,
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.05)',
   },
   suggestionHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 12,
+    padding: 16,
+    paddingBottom: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(255, 255, 255, 0.05)',
   },
   suggestionIcon: {
     width: 40,
@@ -230,11 +298,40 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 16,
     fontWeight: '600',
+    marginBottom: 4,
+    flex: 1,
+    paddingRight: 8,
   },
-  suggestionCategory: {
+  suggestionMetaContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  categoryBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 6,
+  },
+  categoryText: {
+    fontSize: 11,
+    fontWeight: '600',
+    textTransform: 'capitalize',
+  },
+  difficultyText: {
     color: '#888',
-    fontSize: 12,
-    marginTop: 2,
+    fontSize: 11,
+    fontWeight: '500',
+  },
+  addButton: {
+    width: 32,
+    height: 32,
+    borderRadius: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginLeft: 'auto',
+  },
+  descriptionContainer: {
+    padding: 16,
   },
   suggestionDescription: {
     color: '#ccc',
@@ -266,10 +363,22 @@ const styles = StyleSheet.create({
     marginLeft: 4,
   },
   tipsContainer: {
-    backgroundColor: '#2a2a35',
-    borderRadius: 12,
-    padding: 12,
-    marginTop: 8,
+    backgroundColor: 'rgba(255, 255, 255, 0.03)',
+    padding: 16,
+    borderLeftWidth: 3,
+    marginTop: 4,
+  },
+  tipBulletContainer: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 8,
+  },
+  tipBullet: {
+    fontSize: 16,
+    lineHeight: 16,
   },
   tipsTitle: {
     color: '#fff',
