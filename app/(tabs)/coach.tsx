@@ -1,21 +1,26 @@
+import SuggestionShimmer from '@/components/SuggestionShimmer';
 import { PookieColors } from '@/constants/Colors';
-import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
-import React, { useEffect, useState } from 'react';
+import { useApi } from '@/hooks/useApi';
+import { useToast } from '@/hooks/useToast';
+import { AISuggestion, AISuggestionsResponse } from '@/types/habit';
+import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
+import { useEffect, useState } from 'react';
 import {
-  ActivityIndicator,
-  Alert,
+  Platform,
   RefreshControl,
   ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
-  View,
+  UIManager,
+  View
 } from 'react-native';
-import { AISuggestion, AISuggestionsResponse } from '@/types/habit';
-import { useApi } from '@/hooks/useApi';
-import { useRouter } from 'expo-router';
-import { useToast } from '@/hooks/useToast';
-import SuggestionShimmer from '@/components/SuggestionShimmer';
+
+// Enable LayoutAnimation for Android
+if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
+  UIManager.setLayoutAnimationEnabledExperimental(true);
+}
 
 // Map day numbers to day names
 const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
