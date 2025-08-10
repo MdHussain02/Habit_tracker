@@ -1,11 +1,11 @@
+import { PookieColors } from '@/constants/Colors';
+import { useApi } from '@/hooks/useApi';
+import { useToast } from '@/hooks/useToast';
+import { AISuggestion } from '@/types/habit';
+import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { PookieColors } from '@/constants/Colors';
-import { AISuggestion } from '@/types/habit';
-import { useApi } from '@/hooks/useApi';
-import { useToast } from '@/hooks/useToast';
 
 const CategorySuggestionsScreen = () => {
   const { category, suggestions: suggestionsString } = useLocalSearchParams<{
@@ -212,7 +212,7 @@ const CategorySuggestionsScreen = () => {
           style={styles.backButton}
           onPress={() => router.back()}
         >
-          <Ionicons name="arrow-back" size={24} color="#fff" />
+          <Ionicons name="arrow-back" size={24} color="#000000ff" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>
           {category.charAt(0).toUpperCase() + category.slice(1)} Suggestions
@@ -239,8 +239,9 @@ const CategorySuggestionsScreen = () => {
 
 const styles = StyleSheet.create({
   container: {
+    // marginTop: 40,
     flex: 1,
-    backgroundColor: '#14141c',
+    backgroundColor: '#fff',
   },
   header: {
     flexDirection: 'row',
@@ -249,15 +250,16 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
     paddingHorizontal: 20,
     borderBottomWidth: 1,
-    borderBottomColor: '#2a2a35',
+    borderBottomColor: '#ccc',
   },
   backButton: {
     marginRight: 16,
+    color: '#000000ff',
   },
   headerTitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#fff',
+    color: '#000',
   },
   scrollView: {
     flex: 1,
@@ -267,13 +269,13 @@ const styles = StyleSheet.create({
     paddingVertical: 20,
   },
   suggestionCard: {
-    backgroundColor: '#1e1e28',
+    backgroundColor: '#fff',
     borderRadius: 12,
     padding: 0,
     marginBottom: 16,
     overflow: 'hidden',
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.05)',
+    borderColor: '#ccc',
   },
   suggestionHeader: {
     flexDirection: 'row',
@@ -281,7 +283,7 @@ const styles = StyleSheet.create({
     padding: 16,
     paddingBottom: 12,
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255, 255, 255, 0.05)',
+    borderBottomColor: '#ccc',
   },
   suggestionIcon: {
     width: 40,
@@ -295,7 +297,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   suggestionTitle: {
-    color: '#fff',
+    color: '#000',
     fontSize: 16,
     fontWeight: '600',
     marginBottom: 4,
@@ -334,7 +336,7 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   suggestionDescription: {
-    color: '#ccc',
+    color: '#000',
     fontSize: 14,
     lineHeight: 20,
     marginBottom: 12,
@@ -344,7 +346,7 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-start',
   },
   readMoreText: {
-    color: PookieColors.hotPink,
+    color: '#000',
     fontSize: 14,
     fontWeight: '500',
   },
@@ -352,6 +354,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginBottom: 12,
+    paddingHorizontal: 16,
   },
   metaItem: {
     flexDirection: 'row',
@@ -363,7 +366,7 @@ const styles = StyleSheet.create({
     marginLeft: 4,
   },
   tipsContainer: {
-    backgroundColor: 'rgba(255, 255, 255, 0.03)',
+    backgroundColor: '#fff',
     padding: 16,
     borderLeftWidth: 3,
     marginTop: 4,
@@ -390,12 +393,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     marginBottom: 4,
   },
-  tipBullet: {
-    color: PookieColors.hotPink,
-    marginRight: 8,
-  },
   tipText: {
-    color: '#ccc',
+    color: '#000',
     fontSize: 13,
     flex: 1,
   },
@@ -403,7 +402,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#14141c',
+    backgroundColor: '#fff',
   },
   errorText: {
     color: '#ff6b6b',
@@ -415,7 +414,7 @@ const styles = StyleSheet.create({
     padding: 40,
   },
   emptyStateText: {
-    color: '#888',
+    color: '#000',
     fontSize: 16,
     marginTop: 16,
     textAlign: 'center',

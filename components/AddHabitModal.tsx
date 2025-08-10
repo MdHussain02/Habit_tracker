@@ -1,5 +1,4 @@
 // components/AddHabitModal.tsx
-import { PookieColors } from '@/constants/Colors';
 import { FontAwesome, Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { default as React, useState } from 'react';
 import {
@@ -194,13 +193,13 @@ const styles = StyleSheet.create({
     // shadowOpacity: 0.3,
     // shadowRadius: 16,
     elevation: 2,
-    backgroundColor: '#404051',
+    backgroundColor: '#f0f0f0', // Light background
   },
   dragIndicator: {
     width: 48,
     height: 6,
     borderRadius: 3,
-    backgroundColor: "#636ae8",
+    backgroundColor: "#ff9b00", // Use orange from palette
     alignSelf: 'center',
     marginBottom: 12,
   },
@@ -216,7 +215,7 @@ const styles = StyleSheet.create({
   titleModern: {
     fontSize: 22,
     fontWeight: '700',
-    color: '#fff',
+    color: '#11181C', // Dark text
     flex: 1,
     textAlign: 'center',
   },
@@ -236,17 +235,17 @@ const styles = StyleSheet.create({
   sectionTitleModern: {
     fontSize: 15,
     fontWeight: '600',
-    color: '#fff',
+    color: '#11181C', // Dark text
     marginBottom: 10,
   },
   inputModern: {
-    backgroundColor: '#2a2a2a',
+    backgroundColor: '#fff', // White background
     borderRadius: 12,
     padding: 16,
     fontSize: 16,
-    color: '#fff',
+    color: '#11181C', // Dark text
     borderWidth: 1,
-    borderColor: '#3a3a3a',
+    borderColor: '#ccc', // Light border
     marginBottom: 4,
   },
   iconGridModern: {
@@ -259,7 +258,7 @@ const styles = StyleSheet.create({
     width: 54,
     height: 54,
     borderRadius: 27,
-    backgroundColor: '#2a2a2a',
+    backgroundColor: '#e0e0e0', // Light gray background
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 12,
@@ -272,11 +271,11 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   selectedIconButtonModern: {
-    borderColor: PookieColors.hotPink,
-    backgroundColor: PookieColors.hotPink,
+    borderColor: '#ff9b00', // Use orange from palette
+    backgroundColor: '#ff9b00', // Use orange from palette
   },
   addButtonModern: {
-    backgroundColor: PookieColors.hotPink,
+    backgroundColor: '#ff9b00', // Use orange from palette
     borderRadius: 24,
     paddingVertical: 16,
     alignItems: 'center',
@@ -289,7 +288,7 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   addButtonTextModern: {
-    color: '#fff',
+    color: '#11181C', // Dark text
     fontSize: 18,
     fontWeight: '700',
     letterSpacing: 0.5,

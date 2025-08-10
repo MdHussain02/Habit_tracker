@@ -54,31 +54,31 @@ export const DropdownModal = ({
 const styles = StyleSheet.create({
     container: {
       flex: 1,
-      backgroundColor: '#18181b',
+      backgroundColor: '#fff', // Light background
     },
     scrollContainer: {
       flexGrow: 1,
       padding: 24,
       paddingTop: 40,
-      backgroundColor: '#18181b',
+      backgroundColor: '#fff', // Light background
     },
     progressContainer: {
       marginBottom: 32,
     },
     progressBar: {
       height: 8,
-      backgroundColor: '#333',
+      backgroundColor: '#e0e0e0', // Light gray background
       borderRadius: 4,
       overflow: 'hidden',
       marginBottom: 8,
     },
     progressFill: {
       height: '100%',
-      backgroundColor: '#7066F6',
+      backgroundColor: '#ff9b00', // Use orange from palette
       borderRadius: 4,
     },
     progressText: {
-      color: '#aaa',
+      color: '#687076', // Medium gray text
       fontSize: 14,
       textAlign: 'center',
     },
@@ -96,7 +96,7 @@ const styles = StyleSheet.create({
       width: 40,
       height: 40,
       borderRadius: 20,
-      backgroundColor: '#333',
+      backgroundColor: '#e0e0e0', // Light gray background
       justifyContent: 'center',
       alignItems: 'center',
       marginBottom: 8,

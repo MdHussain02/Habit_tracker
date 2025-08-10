@@ -3,7 +3,7 @@ import { AntDesign, MaterialCommunityIcons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Image,
   Modal,
@@ -177,7 +177,7 @@ export default function ProfileScreen() {
               style={{ marginRight: 12 }}
             />
             <View>
-              <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 16 }}>
+              <Text style={{ color: '#000', fontWeight: 'bold', fontSize: 16 }}>
                 Personal Details
               </Text>
               <Text style={{ color: '#aaa', fontSize: 13 }}>{profile.email}</Text>
@@ -199,7 +199,7 @@ export default function ProfileScreen() {
               style={{ marginRight: 12 }}
             />
             <View>
-              <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 16 }}>
+              <Text style={{ color: '#000', fontWeight: 'bold', fontSize: 16 }}>
                 Achievements
               </Text>
               <Text style={{ color: '#aaa', fontSize: 13 }}>View your badges</Text>
@@ -263,18 +263,18 @@ export default function ProfileScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#14141c',
+    backgroundColor: '#fff', // Light background
     alignItems: 'center',
     paddingTop: 48,
   },
   loadingContainer: {
     flex: 1,
-    backgroundColor: '#18181b',
+    backgroundColor: '#fff', // Light background
     justifyContent: 'center',
     alignItems: 'center',
   },
   loadingText: {
-    color: '#fff',
+    color: '#11181C', // Dark text
     fontSize: 18,
     fontWeight: '600',
   },
@@ -325,7 +325,7 @@ const styles = StyleSheet.create({
     fontSize: 15,
   },
   profileHeaderBox: {
-    backgroundColor: '#23232b',
+    backgroundColor: '#f0f0f0', // Light background
     borderRadius: 16,
     padding: 24,
     width: '90%',
@@ -341,18 +341,18 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   profileName: {
-    color: '#fff',
+    color: '#11181C', // Dark text
     fontSize: 22,
     fontWeight: 'bold',
     marginBottom: 2,
   },
   profileLevel: {
-    color: '#aaa',
+    color: '#687076', // Medium gray text
     fontSize: 15,
     marginBottom: 2,
   },
   profileQuote: {
-    color: '#aaa',
+    color: '#687076', // Medium gray text
     fontSize: 14,
     marginBottom: 8,
     textAlign: 'center',
@@ -469,38 +469,38 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   modalContent: {
-    backgroundColor: '#23232b',
+    backgroundColor: '#f0f0f0', // Light background
     borderRadius: 16,
     padding: 24,
     width: '85%',
     alignItems: 'center',
   },
   modalTitle: {
-    color: '#fff',
+    color: '#11181C', // Dark text
     fontWeight: 'bold',
     fontSize: 18,
     marginBottom: 16,
   },
   input: {
-    backgroundColor: '#18181b',
-    color: '#fff',
+    backgroundColor: '#fff', // White background
+    color: '#11181C', // Dark text
     borderRadius: 8,
     padding: 10,
     width: '100%',
     marginBottom: 12,
     fontSize: 16,
     borderWidth: 1,
-    borderColor: '#333',
+    borderColor: '#ccc',
   },
   modalBtn: {
-    backgroundColor: '#333',
+    backgroundColor: '#e0e0e0', // Light gray background
     borderRadius: 8,
     paddingVertical: 10,
     paddingHorizontal: 24,
     marginHorizontal: 4,
   },
   modalBtnText: {
-    color: '#fff',
+    color: '#11181C', // Dark text
     fontWeight: 'bold',
     fontSize: 15,
   },
@@ -514,7 +514,7 @@ const styles = StyleSheet.create({
     marginTop: 32,
   },
   personalDetailsTile: {
-    backgroundColor: '#23232b',
+    backgroundColor: '#f0f0f0', // Light background
     borderRadius: 12,
     padding: 16,
     marginTop: 18,
@@ -525,7 +525,7 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   achievementsTile: {
-    backgroundColor: '#23232b',
+    backgroundColor: '#f0f0f0', // Light background
     borderRadius: 12,
     padding: 16,
     marginTop: 14,

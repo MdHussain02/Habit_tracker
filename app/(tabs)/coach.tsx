@@ -160,7 +160,7 @@ export default function CoachScreen() {
     }
   };
 
-  const SuggestionCard = ({ suggestion, key }: { suggestion: AISuggestion, key: string }) => {
+  const SuggestionCard = ({ suggestion }: { suggestion: AISuggestion }) => {
     const [expanded, setExpanded] = useState(false);
     const [showReadMore, setShowReadMore] = useState(false);
     const iconName = ICON_MAP[suggestion.icon_id] || 'help-circle';
@@ -194,7 +194,7 @@ export default function CoachScreen() {
     const categoryColor = getCategoryColor(suggestion.category);
 
     return (
-      <View key={`suggestion-${key}`} style={styles.suggestionCard}>
+      <View style={styles.suggestionCard}>
         <View style={styles.suggestionHeader}>
           <View style={[styles.suggestionIcon, { backgroundColor: `${categoryColor}20` }]}>
             <Ionicons name={iconName as any} size={20} color={categoryColor} />
@@ -202,7 +202,7 @@ export default function CoachScreen() {
           <View style={styles.suggestionTitleContainer}>
             <Text style={styles.suggestionTitle}>{suggestion.name}</Text>
             <View style={styles.suggestionMetaContainer}>
-              <View style={[styles.categoryBadge, { backgroundColor: `${categoryColor}20` }]}>
+              <View style={[styles.categoryTag, { backgroundColor: `${categoryColor}20` }]}>
                 <Text style={[styles.categoryText, { color: categoryColor }]}>
                   {suggestion.category}
                 </Text>
@@ -433,7 +433,7 @@ export default function CoachScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#14141c',
+    backgroundColor: '#fff', // Light background
   },
   centered: {
     flex: 1,
@@ -460,19 +460,19 @@ const styles = StyleSheet.create({
   emptyState: {
     alignItems: 'center',
     padding: 24,
-    backgroundColor: '#1e1e28',
+    backgroundColor: '#f0f0f0', // Light background
     borderRadius: 16,
     marginTop: 16,
   },
   emptyStateText: {
-    color: '#fff',
+    color: '#11181C', // Dark text
     fontSize: 18,
     fontWeight: '600',
     marginTop: 16,
     textAlign: 'center',
   },
   emptyStateSubtext: {
-    color: '#888',
+    color: '#687076', // Medium gray text
     fontSize: 14,
     marginTop: 8,
     textAlign: 'center',
@@ -488,7 +488,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#fff',
+    color: '#11181C', // Dark text
   },
   scrollView: {
     flex: 1,
@@ -499,7 +499,7 @@ const styles = StyleSheet.create({
   },
   section: {
     marginBottom: 24,
-    backgroundColor: '#1a1a24',
+    // backgroundColor: '#f0f0f0', // Light background
     borderRadius: 16,
     padding: 16,
     overflow: 'hidden',
@@ -522,7 +522,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#fff',
+    color: '#11181C', // Dark text
     marginBottom: 2,
   },
   sectionSubtitle: {
@@ -550,7 +550,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   aiText: {
-    color: '#fff',
+    color: '#000',
     fontWeight: 'bold',
     fontSize: 12,
   },
@@ -559,12 +559,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   shareText: {
-    color: '#fff',
+    color: '#000',
     marginLeft: 4,
     fontSize: 12,
   },
   tipText: {
-    color: '#fff',
+    color: '#000',
     fontSize: 14,
     lineHeight: 20,
   },
@@ -582,11 +582,11 @@ const styles = StyleSheet.create({
   warningTitle: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#fff',
+    color: '#000',
     marginLeft: 8,
   },
   warningText: {
-    color: '#fff',
+    color: '#000',
     fontSize: 14,
     lineHeight: 20,
     marginBottom: 16,
@@ -617,11 +617,11 @@ const styles = StyleSheet.create({
   recTitle: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#fff',
+    color: '#000',
     marginLeft: 8,
   },
   recText: {
-    color: '#fff',
+    color: '#000',
     fontSize: 14,
     lineHeight: 20,
     marginBottom: 16,
@@ -651,14 +651,14 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   addHabitText: {
-    color: '#fff',
+    color: '#000',
     fontWeight: '600',
     fontSize: 12,
     marginLeft: 4,
   },
   // Suggestion Card Styles
   suggestionCard: {
-    backgroundColor: '#22222b',
+    backgroundColor: '#f0f0f0', // Light background
     borderRadius: 12,
     padding: 0,
     overflow: 'hidden',
@@ -683,7 +683,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   suggestionTitle: {
-    color: '#fff',
+    color: '#11181C', // Dark text
     fontSize: 15,
     fontWeight: '600',
     marginBottom: 4,
@@ -693,25 +693,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 8,
   },
-  categoryBadge: {
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 6,
-  },
-  categoryText: {
-    fontSize: 11,
-    fontWeight: '600',
-    textTransform: 'capitalize',
-  },
   difficultyText: {
     color: '#888',
     fontSize: 11,
     fontWeight: '500',
-  },
-  suggestionCategory: {
-    color: '#888',
-    fontSize: 12,
-    marginTop: 2,
   },
   addButton: {
     width: 32,
@@ -722,7 +707,7 @@ const styles = StyleSheet.create({
     marginLeft: 'auto',
   },
   addButtonText: {
-    color: '#fff',
+    color: '#000',
     fontWeight: '600',
     fontSize: 12,
   },
@@ -732,7 +717,7 @@ const styles = StyleSheet.create({
     paddingBottom: 16,
   },
   suggestionDescription: {
-    color: '#ddd',
+    color: '#687076', // Darker text for contrast
     fontSize: 14,
     lineHeight: 21,
     letterSpacing: 0.2,
@@ -784,7 +769,7 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   tipsTitle: {
-    color: '#fff',
+    color: '#11181C', // Dark text
     fontWeight: '600',
     marginBottom: 10,
     fontSize: 14,
@@ -807,11 +792,5 @@ const styles = StyleSheet.create({
   tipBullet: {
     fontSize: 16,
     lineHeight: 16,
-  },
-  tipText: {
-    color: '#bbb',
-    fontSize: 13,
-    flex: 1,
-    lineHeight: 18,
   },
 }); 

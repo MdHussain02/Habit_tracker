@@ -1,8 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
-import { default as React } from 'react';
+import { useRouter } from 'expo-router';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Habit } from '../types/habit';
-import { useRouter } from 'expo-router';
 
 // Map icon_id to icon names
 const ICON_MAP: Record<number, string> = {
@@ -78,7 +77,7 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: "#22222b",
+    backgroundColor: "#f0f0f0", // Light card background
     borderRadius: 20,
     padding: 15,
     marginBottom: 10,
@@ -96,13 +95,13 @@ const styles = StyleSheet.create({
   name: {
     fontSize: 17,
     fontWeight: '700',
-    color: '#fff',
+    color: '#11181C', // Dark text for contrast
     flex: 1,
     letterSpacing: 0.5,
   },
   icon: {
     marginLeft: 10,
-    backgroundColor: '#3a3a3a',
+    backgroundColor: '#e0e0e0', // Light icon background
     borderRadius: 12,
     padding: 6,
     width: 34,
@@ -117,7 +116,7 @@ const styles = StyleSheet.create({
   },
   streakText: {
     fontSize: 14,
-    color: '#ccc',
+    color: '#687076', // Darker text for contrast
     marginLeft: 6,
     fontWeight: '600',
   },

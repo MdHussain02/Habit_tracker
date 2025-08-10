@@ -2,8 +2,8 @@ import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useFocusEffect, useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import { Alert, Animated, FlatList, RefreshControl, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import HabitCardShimmer from '../../components/HabitCardShimmer';
 import HabitCard from '../../components/HabitCard';
+import HabitCardShimmer from '../../components/HabitCardShimmer';
 import TimePicker from '../../components/TimePicker';
 import { useApi } from '../../hooks/useApi';
 import { useHabitNotifications } from '../../hooks/useHabitNotifications';
@@ -219,16 +219,16 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingTop: 60,
-    backgroundColor: '#14141c',
+    backgroundColor: '#ffffff',
   },
   loadingContainer: {
     flex: 1,
-    backgroundColor: '#14141c',
+    backgroundColor: '#ffffff',
     justifyContent: 'center',
     alignItems: 'center',
   },
   loadingText: {
-    color: '#fff',
+    color: '#333333',
     fontSize: 18,
     fontWeight: '600',
   },
@@ -238,35 +238,39 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 20,
     marginBottom: 20,
+    backgroundColor: '#ffffff',
+    paddingVertical: 10,
   },
   headerTitleMain: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#fff',
+    color: '#1a1a1a',
     flex: 1,
     textAlign: 'center',
   },
   gradientBackground: {
     flex: 1,
     paddingTop: 0,
+    backgroundColor: '#ffffff',
   },
   emptyContainerModern: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 40,
-    backgroundColor: '#14141c',
+    backgroundColor: '#ffffff',
   },
   emptyTitleModern: {
-    fontSize: 24,
+    fontSize: 22,
     fontWeight: '700',
-    color: '#fff',
+    color: '#1a1a1a',
     marginTop: 18,
     marginBottom: 8,
+    textAlign: 'center',
   },
   emptySubtitleModern: {
     fontSize: 16,
-    color: '#ccc',
+    color: '#4a4a4a',
     textAlign: 'center',
     lineHeight: 24,
   },
@@ -274,27 +278,35 @@ const styles = StyleSheet.create({
     position: 'absolute',
     right: 24,
     bottom: 36,
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    backgroundColor: '#FF1972',
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: '#ff6b35',
     justifyContent: 'center',
     alignItems: 'center',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 6,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 6,
+    elevation: 4,
   },
   habitCardModern: {
     marginBottom: 16,
-    borderRadius: 18,
+    borderRadius: 16,
     overflow: 'hidden',
-    backgroundColor: '#23232b', // keep card slightly lighter for contrast
+    backgroundColor: '#ffffff',
+    borderWidth: 1,
+    borderColor: '#eaeaea',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
   },
   habitsListModern: {
     flex: 1,
-    paddingHorizontal: 12,
-    backgroundColor: '#14141c',
+    paddingHorizontal: 16,
+    backgroundColor: '#f8f8f8',
+    paddingTop: 8,
   },
 });

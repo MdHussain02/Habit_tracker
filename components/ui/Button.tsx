@@ -16,10 +16,10 @@ interface ButtonProps {
   testID?: string;
 }
 
-const MAIN_COLOR = '#7367F0';
-const PRESSED_COLOR = '#5c62d2';
+const MAIN_COLOR = '#ff9b00'; // Use orange from palette
+const PRESSED_COLOR = '#e08a00'; // Darker orange for pressed state
 const DISABLED_COLOR = '#bcbcbc';
-const TEXT_COLOR = '#fff';
+const TEXT_COLOR = '#11181C'; // Dark text for contrast
 
 const getButtonStyle = (type: ButtonType, disabled: boolean): ViewStyle => {
   switch (type) {
