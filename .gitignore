@@ -1,8 +1,9 @@
 # Learn more https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files
+.env
 
 # dependencies
 node_modules/
-
+yarn.lock
 # Expo
 .expo/
 dist/
@@ -17,7 +18,6 @@ expo-env.d.ts
 *.p12
 *.key
 *.mobileprovision
-
 # Metro
 .metro-health-check*
 

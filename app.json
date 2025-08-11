@@ -10,13 +10,20 @@
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true
+      "googleServicesFile": "./GoogleService-Info.plist",
+      "supportsTablet": true,
+      "bundleIdentifier": "com.devzaine.habithero",
+      "infoPlist": {
+        "UIBackgroundModes": ["fetch", "remote-notification"]
+      }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
+      "googleServicesFile": "./google-services.json",
+      "useNextNotificationsApi": true,
       "edgeToEdgeEnabled": true,
       "package": "com.devzaine.habithero"
     },
@@ -33,6 +40,15 @@
           "image": "./assets/images/icon-heart.png",
           "imageWidth": 200,
           "resizeMode": "contain"
+        }
+      ],
+      "expo-background-fetch",
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/images/icon-heart.png",
+          "color": "#ffffff",
+          "sounds": ["./assets/sounds/notification.wav"]
         }
       ]
     ],

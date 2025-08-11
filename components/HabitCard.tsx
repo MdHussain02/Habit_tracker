@@ -1,76 +1,75 @@
-import { FontAwesome, Ionicons, MaterialIcons } from '@expo/vector-icons';
-import { default as React } from 'react';
+import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { PookieColors } from '../constants/Colors';
 import { Habit } from '../types/habit';
 
-function renderIcon(icon: Habit['icon'], size: number, color: string) {
-  if (!icon) return null;
-  switch (icon.set) {
-    case 'Ionicons':
-      return <Ionicons name={icon.name as any} size={size} color={color} />;
-    case 'MaterialIcons':
-      return <MaterialIcons name={icon.name as any} size={size} color={color} />;
-    case 'FontAwesome':
-      return <FontAwesome name={icon.name as any} size={size} color={color} />;
-    default:
-      return null;
-  }
+// Map icon_id to icon names
+const ICON_MAP: Record<number, string> = {
+  1: 'water',
+  2: 'book',
+  3: 'fitness',
+  4: 'cafe',
+  5: 'moon',
+  6: 'walk',
+  7: 'barbell',
+  8: 'star',
+};
+
+function renderIcon(iconId: number, size: number, color: string) {
+  const iconName = ICON_MAP[iconId] || 'help-circle';
+  return <Ionicons name={iconName as any} size={size} color={color} />;
 }
 
 interface HabitCardProps {
   habit: Habit;
-  isCompletedToday: boolean;
-  onToggleCompletion: (habitId: string) => void;
-  onDelete?: (habitId: string) => void;
 } 
 
 export default function HabitCard({ 
-  habit, 
-  isCompletedToday, 
-  onToggleCompletion,
-  onDelete 
+  habit
 }: HabitCardProps) {
+  const router = useRouter();
+  const habitId = habit._id || habit.id;
+  
+  if (!habitId) {
+    console.error('No habit ID found');
+    return null;
+  }
+
+  const handlePress = () => {
+    // @ts-ignore - We know this route exists
+    router.push(`/habits/${habitId}` as any);
+  };
+
   return (
-    <View style={styles.container}>
-      <TouchableOpacity 
-        style={styles.checkbox}
-        onPress={() => onToggleCompletion(habit.id)}
-      >
-        <Ionicons 
-          name={isCompletedToday ? 'checkmark-circle' : 'ellipse-outline'} 
-          size={28} 
-          color={isCompletedToday ? PookieColors.deepMagenta : PookieColors.mediumOrchid} 
-        />
-      </TouchableOpacity>
-      
+    <TouchableOpacity 
+      style={styles.container}
+      onPress={handlePress}
+      activeOpacity={0.8}
+    >
       <View style={styles.content}>
         <View style={styles.header}>
-          <Text style={[styles.name, isCompletedToday && styles.completedName]}>
+          <Text style={styles.name}>
             {habit.name}
           </Text>
-          {habit.icon && (
-            <View style={styles.icon}>{renderIcon(habit.icon, 22, PookieColors.deepMagenta)}</View>
+          {habit.icon_id && (
+            <View style={styles.icon}>{renderIcon(habit.icon_id, 22, '#ccc')}</View>
           )}
         </View>
         
         <View style={styles.streakContainer}>
-          <Ionicons name="flame" size={16} color={PookieColors.mediumOrchid} />
+          <Ionicons name="flame" size={16} color="#FF6B6B" />
           <Text style={styles.streakText}>
-            {habit.streak} day{habit.streak !== 1 ? 's' : ''} streak
+            {habit.streak} Days
           </Text>
         </View>
+        {habit.reminder?.time && (
+          <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 4 }}>
+            <Ionicons name="time-outline" size={16} color="#FF6B6B" style={{ marginRight: 4 }} />
+            <Text style={{ color: '#ccc', fontSize: 13 }}>Scheduled: {habit.reminder.time}</Text>
+          </View>
+        )}
       </View>
-      
-      {onDelete && (
-        <TouchableOpacity 
-          style={styles.deleteButton}
-          onPress={() => onDelete(habit.id)}
-        >
-          <Ionicons name="trash-outline" size={20} color={PookieColors.deepMagenta} />
-        </TouchableOpacity>
-      )}
-    </View>
+    </TouchableOpacity>
   );
 }
 
@@ -78,26 +77,15 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: PookieColors.pastelPink,
+    backgroundColor: "#f0f0f0", // Light card background
     borderRadius: 20,
-    padding: 18,
-    marginBottom: 14,
-    shadowColor: PookieColors.lightOrchid,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.13,
-    shadowRadius: 8,
-    elevation: 3,
-  },
-  checkbox: {
-    marginRight: 16,
-    backgroundColor: PookieColors.veryLightPink,
-    borderRadius: 16,
-    padding: 6,
-    alignItems: 'center',
-    justifyContent: 'center',
+    padding: 15,
+    marginBottom: 10,
+    marginHorizontal: 12
   },
   content: {
     flex: 1,
+    marginLeft: 8,
   },
   header: {
     flexDirection: 'row',
@@ -107,20 +95,19 @@ const styles = StyleSheet.create({
   name: {
     fontSize: 17,
     fontWeight: '700',
-    color: PookieColors.deepMagenta,
+    color: '#11181C', // Dark text for contrast
     flex: 1,
     letterSpacing: 0.5,
   },
-  completedName: {
-    textDecorationLine: 'line-through',
-    color: PookieColors.mediumOrchid,
-  },
   icon: {
     marginLeft: 10,
-    backgroundColor: PookieColors.veryLightPink,
+    backgroundColor: '#e0e0e0', // Light icon background
     borderRadius: 12,
-    padding: 4,
-    marginTop:26
+    padding: 6,
+    width: 34,
+    height: 34,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   streakContainer: {
     flexDirection: 'row',
@@ -129,14 +116,8 @@ const styles = StyleSheet.create({
   },
   streakText: {
     fontSize: 14,
-    color: PookieColors.mediumOrchid,
+    color: '#687076', // Darker text for contrast
     marginLeft: 6,
     fontWeight: '600',
   },
-  deleteButton: {
-    padding: 8,
-    marginLeft: 8,
-    backgroundColor: PookieColors.veryLightPink,
-    borderRadius: 16,
-  },
-}); 
+});

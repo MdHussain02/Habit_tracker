@@ -1,10 +1,11 @@
 // components/AddHabitModal.tsx
-import { PookieColors } from '@/constants/Colors';
 import { FontAwesome, Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { default as React, useState } from 'react';
 import {
   Alert,
+  Keyboard,
   Modal,
+  Platform,
   ScrollView,
   StyleSheet,
   Text,
@@ -22,9 +23,7 @@ const SUGGESTED_ICONS: HabitIcon[] = [
   { set: 'MaterialIcons', name: 'self-improvement' },
   { set: 'MaterialIcons', name: 'restaurant' },
   { set: 'Ionicons', name: 'bed' },
-  { set: 'FontAwesome', name: 'brain' },
   { set: 'MaterialIcons', name: 'fitness-center' },
-  { set: 'Ionicons', name: 'target' },
   { set: 'Ionicons', name: 'star' },
 ];
 
@@ -51,38 +50,46 @@ export default function AddHabitModal({ visible, onClose, onAddHabit }: AddHabit
   const [habitName, setHabitName] = useState('');
   const [selectedIcon, setSelectedIcon] = useState<HabitIcon | undefined>(undefined);
   const [reminder, setReminder] = useState<HabitReminder>({
-    enabled: false,
+    enabled: true, // Always enabled
     time: '09:00', // Default to 9:00 AM
   });
+  const [keyboardOpen, setKeyboardOpen] = useState(false);
+
+  React.useEffect(() => {
+    const showSub = Keyboard.addListener('keyboardDidShow', () => setKeyboardOpen(true));
+    const hideSub = Keyboard.addListener('keyboardDidHide', () => setKeyboardOpen(false));
+    return () => {
+      showSub.remove();
+      hideSub.remove();
+    };
+  }, []);
 
   const handleAddHabit = () => {
     if (!habitName.trim()) {
       Alert.alert('Error', 'Please enter a habit name');
       return;
     }
-
+    if (!reminder.time) {
+      Alert.alert('Error', 'Please select a time for your habit');
+      return;
+    }
     onAddHabit({
       name: habitName.trim(),
       icon: selectedIcon,
-      reminder: reminder.enabled ? reminder : undefined,
+      reminder: { enabled: true, time: reminder.time }, // Always include time
     });
-
     // Reset form
     setHabitName('');
     setSelectedIcon(undefined);
-    setReminder({ enabled: false, time: '09:00' });
+    setReminder({ enabled: true, time: '09:00' });
     onClose();
   };
 
   const handleClose = () => {
     setHabitName('');
     setSelectedIcon(undefined);
-    setReminder({ enabled: false, time: '09:00' });
+    setReminder({ enabled: true, time: '09:00' });
     onClose();
-  };
-
-  const handleReminderToggle = (enabled: boolean) => {
-    setReminder(prev => ({ ...prev, enabled }));
   };
 
   const handleTimeChange = (time: string) => {
@@ -93,70 +100,73 @@ export default function AddHabitModal({ visible, onClose, onAddHabit }: AddHabit
     <Modal
       visible={visible}
       animationType="slide"
-      presentationStyle="pageSheet"
+      presentationStyle="overFullScreen"
+      transparent
       onRequestClose={handleClose}
     >
-      <View style={styles.container}>
-        <View style={styles.header}>
-          <TouchableOpacity onPress={handleClose} style={styles.closeButton}>
-            <Ionicons name="close" size={24} color={PookieColors.deepMagenta} />
-          </TouchableOpacity>
-          <Text style={styles.title}>Add New Habit</Text>
-          <View style={{ width: 40 }} />
-        </View>
-
-        <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Habit Name</Text>
-            <TextInput
-              style={styles.input}
-              value={habitName}
-              onChangeText={setHabitName}
-              placeholder="e.g., Drink Water, Read Book"
-              placeholderTextColor={PookieColors.lightOrchid}
-              autoFocus
-            />
+      <View style={styles.overlay}>
+        <View
+          style={[
+            styles.bottomSheet,
+            Platform.OS === 'android' && keyboardOpen ? { maxHeight: 400 } : {},
+          ]}
+        >
+          <View style={styles.dragIndicator} />
+          <View style={styles.headerModern}>
+            <TouchableOpacity onPress={handleClose} style={styles.backButton}>
+              <Ionicons name="arrow-back" size={24} color="#fff" />
+            </TouchableOpacity>
+            <Text style={styles.titleModern}>Add New Habit</Text>
           </View>
-
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Choose an Icon (Optional)</Text>
-            <View style={styles.iconGrid}>
-              {SUGGESTED_ICONS.map((icon) => {
-                const isSelected =
-                  selectedIcon &&
-                  selectedIcon.set === icon.set &&
-                  selectedIcon.name === icon.name;
-                return (
-                  <TouchableOpacity
-                    key={icon.set + icon.name}
-                    style={[
-                      styles.iconButton,
-                      isSelected && styles.selectedIconButton,
-                    ]}
-                    onPress={() =>
-                      setSelectedIcon(isSelected ? undefined : icon)
-                    }
-                  >
-                    {renderIcon(icon, 28, isSelected ? PookieColors.deepMagenta : '#fff')}
-                  </TouchableOpacity>
-                );
-              })}
+          <ScrollView style={styles.contentModern} showsVerticalScrollIndicator={false}>
+            <View style={styles.sectionModern}>
+              <Text style={styles.sectionTitleModern}>Habit Name</Text>
+              <TextInput
+                style={styles.inputModern}
+                value={habitName}
+                onChangeText={setHabitName}
+                placeholder="e.g., Meditate daily"
+                placeholderTextColor="#666"
+                autoFocus
+              />
             </View>
-          </View>
-
-          <View style={styles.section}>
-            <TimePicker
-              value={reminder.time}
-              onTimeChange={handleTimeChange}
-              enabled={reminder.enabled}
-              onToggle={handleReminderToggle}
-            />
-          </View>
-        </ScrollView>
-
-        <View style={styles.footer}>
-          <TouchableOpacity style={styles.addButton} onPress={handleAddHabit}>
-            <Text style={styles.addButtonText}>Add Habit</Text>
+            <View style={styles.sectionModern}>
+              <Text style={styles.sectionTitleModern}>Choose an Icon (Optional)</Text>
+              <View style={styles.iconGridModern}>
+                {SUGGESTED_ICONS.map((icon) => {
+                  const isSelected =
+                    selectedIcon &&
+                    selectedIcon.set === icon.set &&
+                    selectedIcon.name === icon.name;
+                  return (
+                    <TouchableOpacity
+                      key={icon.set + icon.name}
+                      style={[
+                        styles.iconButtonModern,
+                        isSelected && styles.selectedIconButtonModern,
+                      ]}
+                      onPress={() =>
+                        setSelectedIcon(isSelected ? undefined : icon)
+                      }
+                    >
+                      {renderIcon(icon, 32, isSelected ? '#fff' : '#ccc')}
+                    </TouchableOpacity>
+                  );
+                })}
+              </View>
+            </View>
+            <View style={styles.sectionModern}>
+              <Text style={styles.sectionTitleModern}>Habit Time</Text>
+              <TimePicker
+                value={reminder.time}
+                onTimeChange={handleTimeChange}
+                enabled={true}
+                onToggle={() => {}}
+              />
+            </View>
+          </ScrollView>
+          <TouchableOpacity style={styles.addButtonModern} onPress={handleAddHabit}>
+            <Text style={styles.addButtonTextModern}>Save Habit</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -165,88 +175,122 @@ export default function AddHabitModal({ visible, onClose, onAddHabit }: AddHabit
 }
 
 const styles = StyleSheet.create({
-  container: {
+  overlay: {
     flex: 1,
-    backgroundColor: PookieColors.veryLightPink,
+    justifyContent: 'flex-end',
+    // marginTop:20,
+
   },
-  header: {
+  bottomSheet: {
+    borderTopLeftRadius: 32,
+    borderTopRightRadius: 32,
+    // paddingBottom: 32,
+    paddingTop: 12,
+    paddingHorizontal: 24,
+    minHeight: 600,
+    shadowColor: '#000',
+    // shadowOffset: { width: 0, height: -4 },
+    // shadowOpacity: 0.3,
+    // shadowRadius: 16,
+    elevation: 2,
+    backgroundColor: '#f0f0f0', // Light background
+  },
+  dragIndicator: {
+    width: 48,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: "#ff9b00", // Use orange from palette
+    alignSelf: 'center',
+    marginBottom: 12,
+  },
+  headerModern: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    paddingTop: 60,
-    paddingBottom: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: PookieColors.deepMagenta,
+    marginBottom: 18,
   },
-  closeButton: {
+  backButton: {
     padding: 8,
   },
-  title: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: PookieColors.deepMagenta,
-  },
-  content: {
+  titleModern: {
+    fontSize: 22,
+    fontWeight: '700',
+    color: '#11181C', // Dark text
     flex: 1,
-    paddingHorizontal: 20,
-    paddingTop: 20,
+    textAlign: 'center',
   },
-  section: {
+  closeButtonModern: {
+    padding: 8,
+    position: 'absolute',
+    right: 0,
+    top: -4,
+  },
+  contentModern: {
+    flex: 1,
+    paddingHorizontal: 0,
+  },
+  sectionModern: {
     marginBottom: 24,
   },
-  sectionTitle: {
-    fontSize: 16,
+  sectionTitleModern: {
+    fontSize: 15,
     fontWeight: '600',
-    color: PookieColors.mediumOrchid,
-    marginBottom: 12,
+    color: '#11181C', // Dark text
+    marginBottom: 10,
   },
-  input: {
-    backgroundColor: PookieColors.pastelPink,
-    borderRadius: 8,
+  inputModern: {
+    backgroundColor: '#fff', // White background
+    borderRadius: 12,
     padding: 16,
     fontSize: 16,
-    color: PookieColors.deepMagenta,
+    color: '#11181C', // Dark text
     borderWidth: 1,
-    borderColor: PookieColors.deepMagenta,
+    borderColor: '#ccc', // Light border
+    marginBottom: 4,
   },
-  iconGrid: {
+  iconGridModern: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    justifyContent: 'space-between',
-    margin: 10,
+    margin: 20,
   },
-  iconButton: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    backgroundColor: PookieColors.lightOrchid,
+  iconButtonModern: {
+    margin: 10,
+    width: 54,
+    height: 54,
+    borderRadius: 27,
+    backgroundColor: '#e0e0e0', // Light gray background
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 12,
     borderWidth: 2,
     borderColor: 'transparent',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 2,
   },
-  selectedIconButton: {
-    borderColor: PookieColors.deepMagenta,
-    backgroundColor: PookieColors.pastelPink,
+  selectedIconButtonModern: {
+    borderColor: '#ff9b00', // Use orange from palette
+    backgroundColor: '#ff9b00', // Use orange from palette
   },
-  footer: {
-    paddingHorizontal: 20,
-    paddingBottom: 40,
-    paddingTop: 20,
-    borderTopWidth: 1,
-    borderTopColor: '#333',
-  },
-  addButton: {
-    backgroundColor: PookieColors.mediumOrchid,
-    borderRadius: 12,
-    padding: 16,
+  addButtonModern: {
+    backgroundColor: '#ff9b00', // Use orange from palette
+    borderRadius: 24,
+    paddingVertical: 16,
     alignItems: 'center',
+    marginTop: 12,
+    marginBottom: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 3,
   },
-  addButtonText: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: '600',
+  addButtonTextModern: {
+    color: '#11181C', // Dark text
+    fontSize: 18,
+    fontWeight: '700',
+    letterSpacing: 0.5,
   },
 });

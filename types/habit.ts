@@ -11,18 +11,52 @@ export interface HabitReminder {
 }
 
 export interface Habit {
-  id: string;
+  _id: string;
+  id?: string; // For backward compatibility
   name: string;
-  icon?: HabitIcon;
-  createdAt: number;
+  icon_id: number;  // Numeric ID for the icon
+  icon?: HabitIcon; // Keep for backward compatibility
+  createdAt: number | string;
   streak: number;
   completedDates: string[];
   lastCompletedDate?: string;
   reminder?: HabitReminder;
+  target_time?: string;
+  repeats?: number[];
 }
 
 export interface HabitFormData {
   name: string;
   icon?: HabitIcon;
   reminder?: HabitReminder;
+}
+
+export interface AISuggestion {
+  name: string;
+  description: string;
+  target_time: string;
+  repeats: number[];
+  icon_id: number;
+  difficulty: string;
+  category: string;
+  estimated_duration: number;
+  success_tips: string[];
+}
+
+export interface AISuggestionsResponse {
+  success: boolean;
+  data: {
+    suggestions: AISuggestion[];
+    userProfile: {
+      age: number;
+      fitnessLevel: string;
+      primaryGoal: string;
+      motivationLevel: string;
+    };
+    existingHabitsCount: number;
+    options: {
+      maxSuggestions: number;
+      focusArea: string;
+    };
+  };
 }

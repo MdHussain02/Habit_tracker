@@ -1,0 +1,68 @@
+import { useCallback, useState } from 'react';
+import { getAccessToken } from '../utils/storage';
+
+// Get the base URL from environment variables
+const API_BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL || '';
+
+function isPlainObject(obj: any): obj is Record<string, string> {
+  return obj && typeof obj === 'object' && !Array.isArray(obj);
+}
+
+// Helper function to construct the full URL
+const getFullUrl = (url: string): string => {
+  // If the URL already starts with http or https, use it as is
+  if (url.startsWith('http://') || url.startsWith('https://')) {
+    return url;
+  }
+  // Otherwise, prepend the base URL
+  return `${API_BASE_URL}${url.startsWith('/') ? '' : '/'}${url}`;
+};
+
+export function useApi() {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const getAuthHeaders = async () => {
+    const access = await getAccessToken();
+    return access ? { Authorization: `Bearer ${access}` } : undefined;
+  };
+
+  const fetchApi = useCallback(async (url: string, options: RequestInit = {}, requireAuth: boolean = true) => {
+    setLoading(true);
+    setError(null);
+    try {
+      let headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+      };
+
+      if (isPlainObject(options.headers)) {
+        headers = { ...headers, ...options.headers };
+      }
+
+      if (requireAuth) {
+        const authHeaders = await getAuthHeaders();
+        if (authHeaders && authHeaders.Authorization) {
+          headers['Authorization'] = authHeaders.Authorization;
+        }
+      }
+
+      const fullUrl = getFullUrl(url);
+      const response = await fetch(fullUrl, { ...options, headers });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || 'API request failed');
+      return data;
+    } catch (err: any) {
+      setError(err.message || 'API error');
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  const fetchGet = useCallback((url: string, requireAuth: boolean = true) => fetchApi(url, { method: 'GET' }, requireAuth), [fetchApi]);
+  const fetchPost = useCallback((url: string, body: any, requireAuth: boolean = true) => fetchApi(url, { method: 'POST', body: JSON.stringify(body) }, requireAuth), [fetchApi]);
+  const fetchPut = useCallback((url: string, body: any, requireAuth: boolean = true) => fetchApi(url, { method: 'PUT', body: JSON.stringify(body) }, requireAuth), [fetchApi]);
+  const fetchDelete = useCallback((url: string, requireAuth: boolean = true) => fetchApi(url, { method: 'DELETE' }, requireAuth), [fetchApi]);
+
+  return { fetchGet, fetchPost, fetchPut, fetchDelete, loading, error };
+}
