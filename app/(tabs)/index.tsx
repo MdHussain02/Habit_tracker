@@ -4,7 +4,6 @@ import React, { useState } from 'react';
 import { Alert, Animated, FlatList, RefreshControl, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import HabitCard from '../../components/HabitCard';
 import HabitCardShimmer from '../../components/HabitCardShimmer';
-import TimePicker from '../../components/TimePicker';
 import { useApi } from '../../hooks/useApi';
 import { useHabitNotifications } from '../../hooks/useHabitNotifications';
 import { useToast } from '../../hooks/useToast';
@@ -112,12 +111,6 @@ export default function HomeScreen() {
     ]);
   };
 
-  const handleEditTime = (habit: Habit) => {
-    setEditHabitId(habit.id);
-    setEditTime(habit.reminder?.time || '09:00');
-    setShowEditModal(true);
-  };
-
   if (loading) {
     return (
       <Animated.View style={[styles.container, { opacity: loading ? 1 : 0 }]}>
@@ -135,10 +128,15 @@ export default function HomeScreen() {
 
   return (
     <View style={styles.container}>
-     
-        <View style={styles.topHeaderRow}>
-          <Text style={styles.headerTitleMain}>Today's Habits</Text>
-        </View>
+      <View style={styles.topHeaderRow}>
+        <Text style={styles.headerTitleMain}>Today's Habits</Text>
+        <TouchableOpacity
+          style={styles.fab}
+          onPress={() => router.push('/add-habit')}
+        >
+          <Ionicons name="add" size={24} color="#fff" />
+        </TouchableOpacity>
+      </View>
         {/* Habits List */}
         <View style={{ flex: 1, marginTop: 10 }}>
           {habits.length === 0 ? (
@@ -156,7 +154,6 @@ export default function HomeScreen() {
           ) : (
             <FlatList
               data={habits}
-              keyExtractor={(item) => item.id}
               refreshControl={
                 <RefreshControl
                   refreshing={refreshing}
@@ -166,51 +163,18 @@ export default function HomeScreen() {
                 />
               }
               renderItem={({ item }) => (
-                <View style={styles.habitCardModern}>
+   
                   <HabitCard habit={item} />
-                </View>
+                
               )}
               style={styles.habitsListModern}
               showsVerticalScrollIndicator={false}
               contentContainerStyle={{ paddingBottom: 40 }}
             />
           )}
+
         </View>
-        {/* Edit Time Modal */}
-        {showEditModal && (
-          <View style={{
-            position: 'absolute',
-            left: 0, right: 0, top: 0, bottom: 0,
-            backgroundColor: 'rgba(0,0,0,0.5)',
-            justifyContent: 'center', alignItems: 'center',
-            zIndex: 100,
-          }}>
-            <View style={{ backgroundColor: '#23232b', borderRadius: 20, padding: 24, width: 320 }}>
-              <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 18, marginBottom: 16 }}>Edit Habit Time</Text>
-              <TimePicker
-                value={editTime}
-                onTimeChange={setEditTime}
-                enabled={true}
-                onToggle={() => {}}
-              />
-              <View style={{ flexDirection: 'row', justifyContent: 'flex-end', marginTop: 16 }}>
-                <TouchableOpacity onPress={() => setShowEditModal(false)} style={{ marginRight: 16 }}>
-                  <Text style={{ color: '#ccc', fontSize: 16 }}>Cancel</Text>
-                </TouchableOpacity>
-                <TouchableOpacity onPress={handleSaveEditTime}>
-                  <Text style={{ color: '#FF1972', fontWeight: 'bold', fontSize: 16 }}>Save</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-          </View>
-        )}
-        {/* Floating Add Button */}
-        <TouchableOpacity
-          style={styles.fab}
-          onPress={() => router.push('/add-habit')}
-        >
-          <Ionicons name="add" size={32} color="#fff" />
-        </TouchableOpacity>
+     
     </View>
   );
 }
@@ -236,10 +200,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 20,
-    marginBottom: 20,
+    paddingHorizontal: 16,
+    marginBottom: 16,
     backgroundColor: '#ffffff',
-    paddingVertical: 10,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f0f0f0',
   },
   headerTitleMain: {
     fontSize: 24,
@@ -275,20 +241,18 @@ const styles = StyleSheet.create({
     lineHeight: 24,
   },
   fab: {
-    position: 'absolute',
-    right: 24,
-    bottom: 36,
-    width: 60,
-    height: 60,
-    borderRadius: 30,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     backgroundColor: '#ff6b35',
     justifyContent: 'center',
     alignItems: 'center',
+    marginLeft: 8,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 6,
-    elevation: 4,
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
   },
   habitCardModern: {
     marginBottom: 16,
@@ -306,7 +270,7 @@ const styles = StyleSheet.create({
   habitsListModern: {
     flex: 1,
     paddingHorizontal: 16,
-    backgroundColor: '#f8f8f8',
+    // backgroundColor: '#f8f8f8',
     paddingTop: 8,
   },
 });

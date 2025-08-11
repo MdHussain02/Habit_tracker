@@ -1,3 +1,4 @@
+import Button from '@/components/ui/Button';
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
@@ -194,16 +195,9 @@ export default function HabitDetailsScreen() {
             {habit.completed ? 'Mark as Incomplete' : 'Mark as Complete'}
           </Text>
         </TouchableOpacity>
-
-        <TouchableOpacity 
-          style={[styles.actionButton, { backgroundColor: '#2a2a35' }]}
-          onPress={() => router.back()}
-        >
-          <Ionicons name="arrow-back" size={20} color="#fff" />
-          <Text style={[styles.actionButtonText, { color: '#fff' }]}>
-            Back to Habits
-          </Text>
-        </TouchableOpacity>
+        <Button type="secondary" onPress={() => router.back()}>
+          Back to Habits
+        </Button>
       </View>
       </View>
     </View>
@@ -212,9 +206,8 @@ export default function HabitDetailsScreen() {
 
 const styles = StyleSheet.create({
   container: {
-    // marginTop: 50,
     flex: 1,
-    backgroundColor: '#14141c',
+    backgroundColor: '#ffffff',
   },
   contentContainer: {
     flex: 1,
@@ -225,34 +218,34 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     padding: 24,
-    backgroundColor: '#14141c',
+    backgroundColor: '#ffffff',
   },
   // Loading placeholders
   iconPlaceholder: {
     width: 80,
     height: 80,
     borderRadius: 40,
-    backgroundColor: '#1e1e28',
+    backgroundColor: '#f0f0f0',
     marginBottom: 16,
   },
   titlePlaceholder: {
     width: 200,
     height: 24,
-    backgroundColor: '#1e1e28',
+    backgroundColor: '#f0f0f0',
     borderRadius: 4,
     marginBottom: 8,
   },
   detailLabelPlaceholder: {
     width: 100,
     height: 16,
-    backgroundColor: '#1e1e28',
+    backgroundColor: '#f0f0f0',
     borderRadius: 4,
     marginBottom: 4,
   },
   detailValuePlaceholder: {
     width: 150,
     height: 20,
-    backgroundColor: '#1e1e28',
+    backgroundColor: '#f0f0f0',
     borderRadius: 4,
   },
   // Habit details
@@ -262,17 +255,20 @@ const styles = StyleSheet.create({
     borderBottomLeftRadius: 24,
     borderBottomRightRadius: 24,
     marginBottom: 20,
+    backgroundColor: '#ffffff',
+    borderBottomWidth: 1,
+    borderBottomColor: '#f0f0f0',
   },
   habitName: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#fff',
+    color: '#1a1a1a',
     textAlign: 'center',
     marginBottom: 8,
   },
   habitDescription: {
     fontSize: 16,
-    color: '#9ca3af',
+    color: '#666666',
     textAlign: 'center',
     marginTop: 8,
   },
@@ -283,31 +279,32 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 16,
+    backgroundColor: '#f8f8f8',
   },
   loadingText: {
     marginTop: 16,
-    color: '#9ca3af',
+    color: '#666666',
     fontSize: 16,
   },
   errorIcon: {
     marginBottom: 16,
   },
   errorText: {
-    color: '#f87171',
+    color: '#e53e3e',
     fontSize: 18,
     textAlign: 'center',
     marginBottom: 24,
     paddingHorizontal: 24,
   },
   emptyStateText: {
-    color: '#fff',
+    color: '#1a1a1a',
     fontSize: 20,
     fontWeight: '600',
     marginBottom: 8,
     textAlign: 'center',
   },
   emptyStateSubtext: {
-    color: '#9ca3af',
+    color: '#666666',
     fontSize: 14,
     textAlign: 'center',
     marginBottom: 24,
@@ -335,15 +332,22 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     padding: 16,
-    backgroundColor: '#1e1e28',
+    backgroundColor: '#ffffff',
     borderRadius: 12,
     marginBottom: 12,
+    borderWidth: 1,
+    borderColor: '#f0f0f0',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 1,
   },
   detailIcon: {
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: '#2a2a35',
+    backgroundColor: '#f8f8f8',
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 16,
@@ -353,12 +357,12 @@ const styles = StyleSheet.create({
   },
   detailLabel: {
     fontSize: 14,
-    color: '#9ca3af',
+    color: '#666666',
     marginBottom: 4,
   },
   detailValue: {
     fontSize: 16,
-    color: '#fff',
+    color: '#1a1a1a',
     fontWeight: '500',
   },
   actionsContainer: {
@@ -372,6 +376,11 @@ const styles = StyleSheet.create({
     padding: 16,
     borderRadius: 12,
     marginBottom: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
   },
   actionButtonText: {
     color: '#fff',

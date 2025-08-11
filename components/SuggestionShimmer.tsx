@@ -1,6 +1,4 @@
-import React from 'react';
-import { View, StyleSheet, Dimensions } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
+import { Dimensions, StyleSheet, View } from 'react-native';
 
 const { width } = Dimensions.get('window');
 
@@ -37,9 +35,10 @@ const SuggestionShimmer = () => {
 const styles = StyleSheet.create({
   container: {
     padding: 16,
+    backgroundColor: "#ffffffff",
   },
   card: {
-    backgroundColor: '#22222b',
+    backgroundColor: "#ffffffff",
     borderRadius: 16,
     padding: 16,
     marginBottom: 16,
@@ -54,7 +53,7 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: '#2f2f3a',
+    backgroundColor: '#9c9c9cff',
     marginRight: 12,
   },
   titleContainer: {
@@ -63,19 +62,19 @@ const styles = StyleSheet.create({
   title: {
     height: 20,
     width: '60%',
-    backgroundColor: '#2f2f3a',
+    backgroundColor: '#bdbdbdff',
     borderRadius: 4,
     marginBottom: 6,
   },
   subtitle: {
     height: 14,
     width: '40%',
-    backgroundColor: '#2f2f3a',
+    backgroundColor: '#ddddddff',
     borderRadius: 4,
   },
   description: {
     height: 16,
-    backgroundColor: '#2f2f3a',
+    backgroundColor: '#8f8f8fff',
     borderRadius: 4,
     marginBottom: 16,
   },
@@ -87,7 +86,7 @@ const styles = StyleSheet.create({
   metaItem: {
     height: 14,
     width: '30%',
-    backgroundColor: '#2f2f3a',
+    backgroundColor: '#d8d8d8ff',
     borderRadius: 4,
   },
   tipsContainer: {
@@ -96,20 +95,20 @@ const styles = StyleSheet.create({
   tipTitle: {
     height: 16,
     width: '30%',
-    backgroundColor: '#2f2f3a',
+    backgroundColor: '#ccccccff',
     borderRadius: 4,
     marginBottom: 8,
   },
   tip: {
     height: 12,
-    backgroundColor: '#2f2f3a',
+    backgroundColor: '#c9c9c9ff',
     borderRadius: 4,
     marginBottom: 4,
     width: '90%',
   },
   button: {
     height: 40,
-    backgroundColor: '#2f2f3a',
+    backgroundColor: '#c4c4c4ff',
     borderRadius: 8,
     marginTop: 8,
   },

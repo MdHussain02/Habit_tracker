@@ -1,5 +1,5 @@
-import React, { useEffect } from 'react';
-import { View, StyleSheet, Dimensions, Animated, Easing, StyleProp, ViewStyle } from 'react-native';
+import { useEffect } from 'react';
+import { Animated, Dimensions, Easing, StyleProp, StyleSheet, View, ViewStyle } from 'react-native';
 
 const { width } = Dimensions.get('window');
 
@@ -52,31 +52,42 @@ const ShimmerPlaceholder = ({ style }: ShimmerPlaceholderProps) => {
 };
 
 const HabitCardShimmer = () => {
+  // Create an array of 10 items to map over
+  const shimmerItems = Array(10).fill(null);
+
   return (
-    <View style={styles.container}>
-      <View style={styles.card}>
-        <ShimmerPlaceholder style={styles.iconPlaceholder} />
-        <View style={styles.content}>
-          <ShimmerPlaceholder style={styles.titlePlaceholder} />
-          <View style={styles.streakContainer}>
-            <ShimmerPlaceholder style={styles.streakPlaceholder} />
-            <ShimmerPlaceholder style={styles.timePlaceholder} />
+    <View style={styles.listContainer}>
+      {shimmerItems.map((_, index) => (
+        <View key={index} style={styles.container}>
+          <View style={styles.card}>
+            <ShimmerPlaceholder style={styles.iconPlaceholder} />
+            <View style={styles.content}>
+              <ShimmerPlaceholder style={styles.titlePlaceholder} />
+              <View style={styles.streakContainer}>
+                <ShimmerPlaceholder style={styles.streakPlaceholder} />
+                <ShimmerPlaceholder style={styles.timePlaceholder} />
+              </View>
+            </View>
+            <ShimmerPlaceholder style={styles.checkboxPlaceholder} />
           </View>
         </View>
-        <ShimmerPlaceholder style={styles.checkboxPlaceholder} />
-      </View>
+      ))}
     </View>
   );
 };
 
 const styles = StyleSheet.create({
+  listContainer: {
+    flex: 1,
+    paddingVertical: 8,
+  },
   container: {
     width: '100%',
     paddingHorizontal: 16,
     marginBottom: 12,
   },
   placeholder: {
-    backgroundColor: '#2d2d37',
+    backgroundColor: '#e0e0e0',
     borderRadius: 4,
     overflow: 'hidden',
   },
@@ -86,11 +97,11 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    backgroundColor: 'rgba(255, 255, 255, 0.7)',
     transform: [{ translateX: -100 }],
   },
   card: {
-    backgroundColor: '#23232b',
+    backgroundColor: '#ffffff',
     borderRadius: 18,
     padding: 16,
     flexDirection: 'row',

@@ -11,7 +11,7 @@ import {
   StyleSheet,
   Text,
   TouchableOpacity,
-  View,
+  View
 } from 'react-native';
 
 const { width } = Dimensions.get('window');
@@ -111,55 +111,42 @@ export default function AnalyticsScreen() {
 
   const { analysis, metrics, userProfile } = analysisData;
 
-  const renderProgressBar = (percentage: number) => {
-    return (
-      <View style={styles.progressBarContainer}>
-        <View style={styles.progressBarBackground}>
-          <View style={[styles.progressBarFill, { width: `${percentage}%` }]} />
-        </View>
-        <Text style={styles.progressText}>{percentage}%</Text>
-      </View>
-    );
-  };
+  // const renderProgressBar = (percentage: number) => {
+  //   return (
+  //     <View style={styles.progressBarContainer}>
+  //       <View style={styles.progressBarBackground}>
+  //         <View style={[styles.progressBarFill, { width: `${percentage}%` }]} />
+  //       </View>
+  //       <Text style={styles.progressText}>{percentage}%</Text>
+  //     </View>
+  //   );
+  // };
 
-  const renderSection = (title: string, items: string[], icon: string, color: string) => (
-    <View style={styles.section}>
-      <View style={styles.sectionHeader}>
-        <Ionicons name={icon as any} size={20} color={color} />
-        <Text style={[styles.sectionTitle, { color, marginLeft: 8 }]}>{title}</Text>
-      </View>
-      <View style={styles.listContainer}>
-        {items.map((item, index) => (
-          <View key={index} style={styles.listItem}>
-            <View style={[styles.bullet, { backgroundColor: color }]} />
-            <Text style={styles.listText}>{item}</Text>
-          </View>
-        ))}
-      </View>
-    </View>
-  );
+  // const renderSection = (title: string, items: string[], icon: string, color: string) => (
+  //   <View style={styles.section}>
+  //     <View style={styles.sectionHeader}>
+  //       <Ionicons name={icon as any} size={20} color={color} />
+  //       <Text style={[styles.sectionTitle, { color, marginLeft: 8 }]}>{title}</Text>
+  //     </View>
+  //     <View style={styles.listContainer}>
+  //       {items.map((item, index) => (
+  //         <View key={index} style={styles.listItem}>
+  //           <View style={{ backgroundColor: color }} />
+  //           <Text style={styles.listText}>{item}</Text>
+  //         </View>
+  //       ))}
+  //     </View>
+  //   </View>
+  // );
 
   return (
-    <ScrollView
-      style={styles.container}
-      refreshControl={
-        <RefreshControl
-          refreshing={isRefreshing}
-          onRefresh={onRefresh}
-          tintColor={PookieColors.hotPink}
-          colors={[PookieColors.hotPink]}
-        />
-      }
-    >
-      {/* Header */}
+    <View style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Habit Analysis</Text>
-        <Text style={styles.headerSubtitle}>Your personalized insights and recommendations</Text>
       </View>
+    
 
-      <View style={styles.content}>
-        {/* Metrics Section */}
-        <View style={styles.metricsContainer}>
+      <View style={styles.metricsContainer}>
           <View style={styles.metricCard}>
             <Ionicons name="stats-chart" size={24} color={PookieColors.hotPink} />
             <Text style={styles.metricValue}>{metrics.totalHabits}</Text>
@@ -184,9 +171,24 @@ export default function AnalyticsScreen() {
             <Text style={styles.metricLabel}>Balance</Text>
           </View>
         </View>
+          <ScrollView
+        refreshControl={
+        <RefreshControl
+            refreshing={isRefreshing}
+            onRefresh={onRefresh}
+            tintColor={PookieColors.hotPink}
+            colors={[PookieColors.hotPink]}
+          />
+       }
+ 
+    >
 
-        {/* User Profile */}
-        <View style={styles.section}>
+      <View style={styles.content}>
+        {/* Metrics Section */}
+       
+
+
+        {/* <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Ionicons name="person-circle" size={20} color={PookieColors.hotPink} />
             <Text style={[styles.sectionTitle, { marginLeft: 8 }]}>Your Profile</Text>
@@ -196,11 +198,11 @@ export default function AnalyticsScreen() {
             <Text style={styles.infoText}><Text style={styles.infoLabel}>Fitness Level:</Text> {userProfile.fitnessLevel}</Text>
             <Text style={styles.infoText}><Text style={styles.infoLabel}>Motivation:</Text> {userProfile.motivationLevel}</Text>
           </View>
-        </View>
-
+        </View> */}
         {/* Strengths */}
         {analysis.strengths.length > 0 && (
           <View style={styles.section}>
+            <ScrollView>
             <View style={styles.sectionHeader}>
               <Ionicons name="thumbs-up" size={20} color="#4CAF50" />
               <Text style={[styles.sectionTitle, { marginLeft: 8, color: '#4CAF50' }]}>
@@ -215,13 +217,15 @@ export default function AnalyticsScreen() {
                 </View>
               ))}
             </View>
+            </ScrollView>
           </View>
         )}
 
         {/* Gaps */}
         {analysis.gaps.length > 0 && (
           <View style={styles.section}>
-            <View style={styles.sectionHeader}>
+            <ScrollView>
+                <View style={styles.sectionHeader}>
               <Ionicons name="warning" size={20} color="#FF9800" />
               <Text style={[styles.sectionTitle, { marginLeft: 8, color: '#FF9800' }]}>
                 Areas for Improvement
@@ -235,7 +239,8 @@ export default function AnalyticsScreen() {
                 </View>
               ))}
             </View>
-          </View>
+            </ScrollView>
+          </View> 
         )}
 
         {/* Recommendations */}
@@ -260,6 +265,7 @@ export default function AnalyticsScreen() {
 
       </View>
     </ScrollView>
+    </View>
   );
 }
 
@@ -306,12 +312,15 @@ const styles = StyleSheet.create({
   },
   content: {
     padding: 16,
+    marginHorizontal: -4,
   },
   metricsContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginBottom: 16,
     marginHorizontal: -4,
+    marginVertical: 16,
+    paddingHorizontal: 16,
   },
   metricCard: {
     backgroundColor: '#ffffff',
