@@ -134,7 +134,7 @@ export default function ProfileScreen() {
           style={styles.settingsBtn}
           onPress={() => router.push('/profile/settings')}
         >
-          <AntDesign name="setting" size={24} color="#fff" />
+          <AntDesign name="setting" size={24} color="#000" />
         </TouchableOpacity>
       </View>
 

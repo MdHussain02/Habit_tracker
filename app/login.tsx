@@ -2,7 +2,7 @@ import Button from '@/components/ui/Button';
 import { PookieColors } from '@/constants/Colors';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { ProtectedRoute } from '../components/ProtectedRoute';
 import { useApi } from '../hooks/useApi';
@@ -48,7 +48,7 @@ export default function LoginScreen() {
         {/* Header */}
         <View style={styles.header}>
           <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
-            <Ionicons name="arrow-back" size={24} color="#fff" />
+            <Ionicons name="arrow-back" size={24} color="#4CAF50" />
           </TouchableOpacity>
 
           <View style={styles.headerContent}>
@@ -119,9 +119,8 @@ export default function LoginScreen() {
 
 const styles = StyleSheet.create({
   container: {
-
     flex: 1,
-    backgroundColor: '#14141c',
+    backgroundColor: '#ffffff',
   },
   header: {
     paddingTop: 60,
@@ -131,7 +130,7 @@ const styles = StyleSheet.create({
   },
 
   headerContent: {
-  marginTop: 150,
+    marginTop: 100,
     alignItems: 'center',
   },
   backButton: {
@@ -141,33 +140,35 @@ const styles = StyleSheet.create({
     zIndex: 10,
     padding: 8,
     borderRadius: 20,
-    backgroundColor: '#22222b',
+    backgroundColor: '#f5f5f5',
   },
   headerTitle: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: '#fff',
+    color: '#2d3748',
     marginBottom: 8,
     textAlign: 'center',
   },
   headerSubtitle: {
     fontSize: 16,
-    color: '#999',
+    color: '#718096',
     textAlign: 'center',
   },
   formCard: {
-    backgroundColor: '#22222b',
+    backgroundColor: '#ffffff',
     marginHorizontal: 24,
     borderRadius: 20,
     padding: 24,
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
-      height: 4,
+      height: 2,
     },
-    shadowOpacity: 0.3,
+    shadowOpacity: 0.05,
     shadowRadius: 8,
-    elevation: 8,
+    elevation: 2,
+    borderWidth: 1,
+    borderColor: '#edf2f7',
   },
   inputContainer: {
     marginBottom: 20,
@@ -175,10 +176,10 @@ const styles = StyleSheet.create({
   inputWrapper: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#1a1a23',
+    backgroundColor: '#f8fafc',
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: '#333',
+    borderColor: '#e2e8f0',
     paddingHorizontal: 16,
   },
   inputIcon: {
@@ -186,7 +187,7 @@ const styles = StyleSheet.create({
   },
   input: {
     flex: 1,
-    color: '#fff',
+    color: '#2d3748',
     fontSize: 16,
     paddingVertical: 16,
   },
@@ -215,10 +216,10 @@ const styles = StyleSheet.create({
   dividerLine: {
     flex: 1,
     height: 1,
-    backgroundColor: '#333',
+    backgroundColor: '#e2e8f0',
   },
   dividerText: {
-    color: '#999',
+    color: '#a0aec0',
     fontSize: 14,
     marginHorizontal: 16,
   },
@@ -228,11 +229,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   registerText: {
-    color: '#999',
+    color: '#718096',
     fontSize: 14,
   },
   registerLink: {
-    color: PookieColors.hotPink,
+    color: '#4CAF50',
     fontSize: 14,
     fontWeight: '600',
   },

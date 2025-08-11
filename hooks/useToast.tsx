@@ -1,143 +1,69 @@
 import { useCallback } from 'react';
+import { View, Text, StyleSheet, Animated, Easing } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
 import Toast, { BaseToast, ErrorToast, ToastPosition } from 'react-native-toast-message';
 
 interface ToastContextType {
   showToast: (message: string, type?: 'success' | 'error' | 'info' | 'warning', position?: ToastPosition) => void;
 }
 
-// Custom toast configuration to match your app's dark theme
+const ToastIcon = ({ type }: { type: string }) => {
+  const iconProps = {
+    size: 20,
+    color: '#fff',
+  };
+
+  switch (type) {
+    case 'success':
+      return <Ionicons name="checkmark-circle" {...iconProps} />;
+    case 'error':
+      return <Ionicons name="close-circle" {...iconProps} />;
+    case 'warning':
+      return <Ionicons name="warning" {...iconProps} />;
+    case 'info':
+    default:
+      return <Ionicons name="information-circle" {...iconProps} />;
+  }
+};
+
+const CustomToast = ({ type, text1, ...rest }: any) => {
+  const backgroundColor = {
+    success: '#4CAF50',
+    error: '#f44336',
+    info: '#2196F3',
+    warning: '#ff9800',
+  }[type] || '#4CAF50';
+
+  return (
+    <Animated.View
+      style={[
+        styles.toastContainer,
+        { backgroundColor },
+      ]}
+    >
+      <View style={styles.iconContainer}>
+        <ToastIcon type={type} />
+      </View>
+      <Text style={styles.message} numberOfLines={2}>
+        {text1}
+      </Text>
+    </Animated.View>
+  );
+};
+
 const toastConfig = {
-  success: (props: any) => (
-    <BaseToast
-      {...props}
-      style={{
-        backgroundColor: '#23232b',
-        borderLeftColor: '#4CAF50',
-        borderRadius: 12,
-        borderLeftWidth: 3,
-        shadowColor: '#4CAF50',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.3,
-        shadowRadius: 6,
-        elevation: 6,
-        minHeight: 40,
-        maxHeight: 60,
-      }}
-      contentContainerStyle={{
-        paddingHorizontal: 12,
-        paddingVertical: 8,
-      }}
-      text1Style={{
-        color: '#fff',
-        fontSize: 14,
-        fontWeight: '600',
-      }}
-      text2Style={{
-        color: '#aaa',
-        fontSize: 12,
-      }}
-    />
-  ),
-  error: (props: any) => (
-    <ErrorToast
-      {...props}
-      style={{
-        backgroundColor: '#23232b',
-        borderLeftColor: '#f44336',
-        borderRadius: 12,
-        borderLeftWidth: 3,
-        shadowColor: '#f44336',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.3,
-        shadowRadius: 6,
-        elevation: 6,
-        minHeight: 40,
-        maxHeight: 60,
-      }}
-      contentContainerStyle={{
-        paddingHorizontal: 12,
-        paddingVertical: 8,
-      }}
-      text1Style={{
-        color: '#fff',
-        fontSize: 14,
-        fontWeight: '600',
-      }}
-      text2Style={{
-        color: '#aaa',
-        fontSize: 12,
-      }}
-    />
-  ),
-  info: (props: any) => (
-    <BaseToast
-      {...props}
-      style={{
-        backgroundColor: '#23232b',
-        borderLeftColor: '#2196F3',
-        borderRadius: 12,
-        borderLeftWidth: 3,
-        shadowColor: '#2196F3',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.3,
-        shadowRadius: 6,
-        elevation: 6,
-        minHeight: 40,
-        maxHeight: 60,
-      }}
-      contentContainerStyle={{
-        paddingHorizontal: 12,
-        paddingVertical: 8,
-      }}
-      text1Style={{
-        color: '#fff',
-        fontSize: 14,
-        fontWeight: '600',
-      }}
-      text2Style={{
-        color: '#aaa',
-        fontSize: 12,
-      }}
-    />
-  ),
-  warning: (props: any) => (
-    <BaseToast
-      {...props}
-      style={{
-        backgroundColor: '#23232b',
-        borderLeftColor: '#ff9800',
-        borderRadius: 12,
-        borderLeftWidth: 3,
-        shadowColor: '#ff9800',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.3,
-        shadowRadius: 6,
-        elevation: 6,
-        minHeight: 40,
-        maxHeight: 60,
-      }}
-      contentContainerStyle={{
-        paddingHorizontal: 12,
-        paddingVertical: 8,
-      }}
-      text1Style={{
-        color: '#fff',
-        fontSize: 14,
-        fontWeight: '600',
-      }}
-      text2Style={{
-        color: '#aaa',
-        fontSize: 12,
-      }}
-    />
-  ),
+  success: (props: any) => <CustomToast {...props} type="success" />,
+  error: (props: any) => <CustomToast {...props} type="error" />,
+  info: (props: any) => <CustomToast {...props} type="info" />,
+  warning: (props: any) => <CustomToast {...props} type="warning" />,
 };
 
 export const useToast = () => {
   const showToast = useCallback((
     message: string, 
     type: 'success' | 'error' | 'info' | 'warning' = 'success',
-    position: ToastPosition = 'bottom'
+    position: ToastPosition = 'top'
   ) => {
     Toast.show({
       type: type,
@@ -145,13 +71,43 @@ export const useToast = () => {
       position: position,
       visibilityTime: 3000,
       autoHide: true,
-      topOffset: position === 'top' ? 50 : 30,
-      bottomOffset: position === 'bottom' ? 40 : 30,
+      topOffset: position === 'top' ? 60 : 30,
+      bottomOffset: position === 'bottom' ? 60 : 30,
+      props: { type },
     });
   }, []);
 
   return { showToast };
 };
+
+const styles = StyleSheet.create({
+  toastContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginHorizontal: 16,
+    marginVertical: 4,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 2,
+    minHeight: 48,
+    maxWidth: '90%',
+    alignSelf: 'center',
+  },
+  iconContainer: {
+    marginRight: 12,
+  },
+  message: {
+    color: '#fff',
+    fontSize: 14,
+    flex: 1,
+    fontWeight: '500',
+  },
+});
 
 // Export a provider that renders the Toast component with custom config
 export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {

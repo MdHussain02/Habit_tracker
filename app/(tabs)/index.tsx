@@ -1,6 +1,7 @@
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect, useRouter } from 'expo-router';
-import React, { useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Alert, Animated, FlatList, RefreshControl, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import HabitCard from '../../components/HabitCard';
 import HabitCardShimmer from '../../components/HabitCardShimmer';
@@ -10,6 +11,8 @@ import { useToast } from '../../hooks/useToast';
 import { Habit } from '../../types/habit';
 
 const HABITS_STORAGE_KEY = '@habit_hero_habits';
+const HABITS_CACHE_TIMESTAMP_KEY = '@habit_hero_habits_timestamp';
+const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes cache duration
 
 export default function HomeScreen() {
   const [habits, setHabits] = useState<Habit[]>([]);
@@ -26,47 +29,116 @@ export default function HomeScreen() {
 
   const { addHabitWithNotification, editHabitWithNotification, deleteHabitWithNotification } = useHabitNotifications(habits, setHabits);
 
+  // Load data on initial mount only
+  useEffect(() => {
+    const loadInitialData = async () => {
+      // First try to show cached data immediately
+      const cachedHabits = await loadCachedHabits();
+      if (cachedHabits) {
+        setHabits(cachedHabits);
+      }
+      
+      // Then refresh from API in the background if needed
+      const shouldRefresh = await shouldRefreshHabits();
+      if (shouldRefresh) {
+        loadHabits();
+      }
+    };
+    
+    loadInitialData();
+  }, []);
+  
+  // Only refresh on focus if explicitly requested (e.g., after adding a habit)
+  const [needsRefresh, setNeedsRefresh] = useState(false);
+  
   useFocusEffect(
-    React.useCallback(() => {
-      loadHabits();
-    }, [])
+    useCallback(() => {
+      if (needsRefresh) {
+        loadHabits();
+        setNeedsRefresh(false);
+      }
+    }, [needsRefresh])
   );
 
   const onRefresh = async () => {
     setRefreshing(true);
-    await loadHabits();
+    await loadHabits(true); // Force refresh from API
     setRefreshing(false);
   };
 
-  const loadHabits = async () => {
+  // Load habits from cache
+  const loadCachedHabits = async (): Promise<Habit[] | null> => {
+    try {
+      const cachedHabits = await AsyncStorage.getItem(HABITS_STORAGE_KEY);
+      if (cachedHabits) {
+        return JSON.parse(cachedHabits);
+      }
+    } catch (error) {
+      console.error('Error loading cached habits:', error);
+    }
+    return null;
+  };
+
+  // Save habits to cache
+  const saveHabitsToCache = async (habits: Habit[]) => {
+    try {
+      await AsyncStorage.setItem(HABITS_STORAGE_KEY, JSON.stringify(habits));
+      await AsyncStorage.setItem(HABITS_CACHE_TIMESTAMP_KEY, Date.now().toString());
+    } catch (error) {
+      console.error('Error saving habits to cache:', error);
+    }
+  };
+
+  // Check if cache is still valid
+  const isCacheValid = async (): Promise<boolean> => {
+    try {
+      const timestamp = await AsyncStorage.getItem(HABITS_CACHE_TIMESTAMP_KEY);
+      if (timestamp) {
+        const cacheAge = Date.now() - parseInt(timestamp, 10);
+        return cacheAge < CACHE_DURATION;
+      }
+    } catch (error) {
+      console.error('Error checking cache validity:', error);
+    }
+    return false;
+  };
+
+  const loadHabits = async (forceRefresh = false) => {
     try {
       if (!refreshing) {
         setLoading(true);
       }
-      // Fetch habits from API
+
+      // Try to load from cache first if not forcing refresh
+      if (!forceRefresh && await isCacheValid()) {
+        const cachedHabits = await loadCachedHabits();
+        if (cachedHabits && cachedHabits.length > 0) {
+          setHabits(cachedHabits);
+          setLoading(false);
+          return; // Exit if we have valid cached data
+        }
+      }
+
+      // Fetch from API if cache is invalid or empty
       const response = await fetchGet(`${API_BASE_URL}/habits`);
       
       if (response.success && response.data) {
-        // Map API response to app's Habit structure
         const mappedHabits: Habit[] = response.data.map((item: any) => {
-          // Extract hours and minutes from target_time for reminder
           const targetTime = new Date(item.target_time);
           const hours = targetTime.getHours().toString().padStart(2, '0');
           const minutes = targetTime.getMinutes().toString().padStart(2, '0');
           const reminderTime = `${hours}:${minutes}`;
           
-          // Map repeats array to completedDates (placeholder implementation)
-          // In a real app, you would need to track actual completion dates
           const completedDates: string[] = [];
           
           return {
             id: item._id,
             name: item.name,
-            icon_id: item.icon_id || 1, // Default to 1 (water icon) if not provided
-            icon: { set: 'Ionicons', name: 'star' }, // Keeping for backward compatibility
+            icon_id: item.icon_id || 1,
+            icon: { set: 'Ionicons', name: 'star' },
             createdAt: new Date(item.created_time).getTime(),
-            streak: 0, // You'll need to calculate this based on completion history
-            completedDates: completedDates,
+            streak: 0,
+            completedDates,
             reminder: {
               enabled: true,
               time: reminderTime
@@ -74,21 +146,53 @@ export default function HomeScreen() {
           };
         });
         
+        // Update state and cache
         setHabits(mappedHabits);
-      } else {
-        showToast('Failed to load habits', 'error');
+        await saveHabitsToCache(mappedHabits);
+      } else if (!response.success) {
+        // If API fails, try to load from cache as fallback
+        const cachedHabits = await loadCachedHabits();
+        if (cachedHabits) {
+          setHabits(cachedHabits);
+          showToast('Using cached data', 'info');
+        } else {
+          showToast('Failed to load habits', 'error');
+        }
       }
     } catch (error) {
       console.error('Error loading habits:', error);
-      showToast('Failed to load habits', 'error');
+      // Try to load from cache on error
+      const cachedHabits = await loadCachedHabits();
+      if (cachedHabits) {
+        setHabits(cachedHabits);
+        showToast('Using cached data', 'info');
+      } else {
+        showToast('Failed to load habits', 'error');
+      }
     } finally {
       setLoading(false);
+      setRefreshing(false);
+    }
+  };
+
+  // Check if we need to refresh the habits data
+  const shouldRefreshHabits = async (): Promise<boolean> => {
+    try {
+      const timestamp = await AsyncStorage.getItem(HABITS_CACHE_TIMESTAMP_KEY);
+      if (!timestamp) return true; // No cache exists
+      
+      const cacheAge = Date.now() - parseInt(timestamp, 10);
+      return cacheAge > CACHE_DURATION; // Only refresh if cache is stale
+    } catch (error) {
+      console.error('Error checking cache age:', error);
+      return true; // Refresh on error to be safe
     }
   };
 
   const addHabit = async (habit: Omit<Habit, 'id' | 'createdAt'>) => {
     await addHabitWithNotification(habit);
-    await loadHabits(); // Refresh the list after adding a new habit
+    // Immediately refresh the habits list to show the new habit
+    await loadHabits(true);
   };
 
   const handleSaveEditTime = async () => {

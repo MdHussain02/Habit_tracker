@@ -1,6 +1,5 @@
-import { Ionicons } from '@expo/vector-icons';
+import Button from '@/components/ui/Button';
 import { useRouter } from 'expo-router';
-import React from 'react';
 import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { ProtectedRoute } from '../components/ProtectedRoute';
 
@@ -14,9 +13,9 @@ export default function OnboardingScreen() {
         <Text style={styles.subtitle}>
           Build lasting habits, track your progress, and get personalized insights with your AI-powered coach.
         </Text>
-        <TouchableOpacity style={styles.button} onPress={() => router.push('/register')} activeOpacity={0.8}>
-          <Text style={styles.buttonText}>Start Your Journey   <Ionicons name="arrow-forward" size={15} color="#fff" /></Text>
-        </TouchableOpacity>
+        <Button onPress={() => router.push('/register')}>
+          Start Your Journey
+        </Button>
         <TouchableOpacity style={styles.loginLink} onPress={() => router.push('/login')} activeOpacity={0.7}>
           <Text style={styles.loginLinkText}>Already a member? <Text style={styles.loginLinkTextBold}>Log in</Text></Text>
         </TouchableOpacity>
@@ -83,7 +82,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   loginLinkTextBold: {
-    color: '#6d28d9',
+    color: '#4CAF50',
     fontWeight: 'bold',
   },
   footer: {
@@ -96,7 +95,7 @@ const styles = StyleSheet.create({
     fontSize: 13,
   },
   visily: {
-    color: '#6d28d9',
+    color: '#4CAF50',
     fontWeight: 'bold',
   },
 }); 

@@ -1,7 +1,7 @@
 import { DropdownButton } from '@/components/DropDownButton';
 import { DropdownModal } from '@/components/DropdownSelect';
+import Button from '@/components/ui/Button';
 import { Ionicons } from '@expo/vector-icons';
-import React from 'react';
 import { StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { ProtectedRoute } from '../components/ProtectedRoute';
@@ -52,7 +52,7 @@ export default function RegistrationScreen({ onRegister }: { onRegister: (user: 
       <View style={styles.container}>
         {/* Back Button */}
         <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
-          <Ionicons name="arrow-back" size={24} color="#7066F6" />
+          <Ionicons name="arrow-back" size={24} color="#4CAF50" />
         </TouchableOpacity>
 
         <KeyboardAwareScrollView
@@ -222,17 +222,23 @@ export default function RegistrationScreen({ onRegister }: { onRegister: (user: 
           {/* Navigation Buttons */}
           <View style={styles.buttonRow}>
             {step > 0 && (
-              <TouchableOpacity style={[styles.button, styles.formBackButton]} onPress={prevStep}>
-                <Text style={styles.buttonText}>Back</Text>
-              </TouchableOpacity>
+              <Button
+                onPress={prevStep}
+                disabled={step === 0}
+                type="secondary"
+                size="large"
+              >
+                Back
+              </Button>
             )}
-            <TouchableOpacity
-              style={[styles.button, !canNext() && styles.buttonDisabled]}
+            <Button
               onPress={nextStep}
               disabled={!canNext()}
+              type="primary"
+              size="large"
             >
-              <Text style={styles.buttonText}>{step === steps.length - 1 ? 'Create Account' : 'Next'}</Text>
-            </TouchableOpacity>
+              {step === steps.length - 1 ? 'Create Account' : 'Next'}
+            </Button>
           </View>
 
           {/* Dropdown Modals */}
@@ -280,7 +286,7 @@ export default function RegistrationScreen({ onRegister }: { onRegister: (user: 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#18181b',
+    backgroundColor: '#ffffff',
   },
   backButton: {
     position: 'absolute',
@@ -289,31 +295,31 @@ const styles = StyleSheet.create({
     zIndex: 10,
     padding: 8,
     borderRadius: 20,
-    backgroundColor: '#23232b',
+    backgroundColor: '#f0f0f5',
   },
   scrollContainer: {
     flexGrow: 1,
     padding: 24,
     paddingTop: 100,
-    backgroundColor: '#18181b',
+    backgroundColor: '#ffffff',
   },
   progressContainer: {
     marginBottom: 32,
   },
   progressBar: {
     height: 8,
-    backgroundColor: '#333',
+    backgroundColor: '#e0e0e0',
     borderRadius: 4,
     overflow: 'hidden',
     marginBottom: 8,
   },
   progressFill: {
     height: '100%',
-    backgroundColor: '#7066F6',
+    backgroundColor: '#4CAF50',
     borderRadius: 4,
   },
   progressText: {
-    color: '#aaa',
+    color: '#666',
     fontSize: 14,
     textAlign: 'center',
   },
@@ -331,16 +337,19 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: '#333',
+    backgroundColor: '#f0f0f5',
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 8,
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
   },
   stepCircleActive: {
-    backgroundColor: '#7066F6',
+    backgroundColor: '#4CAF50',
+    borderColor: '#4CAF50',
   },
   stepNumber: {
-    color: '#666',
+    color: '#999',
     fontSize: 16,
     fontWeight: 'bold',
   },
@@ -348,18 +357,19 @@ const styles = StyleSheet.create({
     color: '#fff',
   },
   stepLabel: {
-    color: '#666',
+    color: '#999',
     fontSize: 12,
     textAlign: 'center',
     fontWeight: '500',
   },
   stepLabelActive: {
-    color: '#fff',
+    color: '#333',
+    fontWeight: '600',
   },
   title: {
     fontSize: 32,
     fontWeight: 'bold',
-    color: '#fff',
+    color: '#333',
     marginBottom: 24,
     textAlign: 'center',
   },
@@ -369,20 +379,20 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#fff',
+    color: '#444',
     marginBottom: 16,
     textAlign: 'center',
   },
   input: {
     width: '100%',
-    backgroundColor: '#23232b',
-    color: '#fff',
+    backgroundColor: '#f8f9fa',
+    color: '#333',
     borderRadius: 16,
     padding: 16,
     marginBottom: 16,
     fontSize: 16,
     borderWidth: 1,
-    borderColor: '#333',
+    borderColor: '#e0e0e0',
   },
   row: {
     flexDirection: 'row',
@@ -392,7 +402,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   errorText: {
-    color: '#ff6b6b',
+    color: '#ff4d4f',
     fontSize: 14,
     marginBottom: 16,
     textAlign: 'center',
@@ -404,21 +414,21 @@ const styles = StyleSheet.create({
     gap: 16,
   },
   button: {
-    backgroundColor: '#7066F6',
+    backgroundColor: '#4CAF50',
     borderRadius: 20,
     paddingVertical: 16,
     paddingHorizontal: 40,
     alignItems: 'center',
     minWidth: 140,
-    shadowColor: '#7066F6',
+    shadowColor: '#4CAF50',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
+    shadowOpacity: 0.2,
     shadowRadius: 8,
-    elevation: 8,
+    elevation: 4,
   },
   formBackButton: {
-    backgroundColor: '#333',
-    shadowColor: '#333',
+    backgroundColor: '#f0f0f5',
+    shadowColor: '#999',
   },
   buttonText: {
     color: '#fff',
@@ -433,25 +443,25 @@ const styles = StyleSheet.create({
   // Dropdown styles
   dropdownButton: {
     width: '100%',
-    backgroundColor: '#23232b',
+    backgroundColor: '#f8f9fa',
     borderRadius: 16,
     padding: 18,
     marginBottom: 10,
     marginTop: 10,
     borderWidth: 1,
     minHeight: 50,
-    borderColor: '#333',
+    borderColor: '#e0e0e0',
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
   },
   dropdownButtonText: {
-    color: '#fff',
+    color: '#333',
     fontSize: 16,
     flex: 1,
   },
   placeholderText: {
-    color: '#aaa',
+    color: '#999',
   },
   dropdownArrow: {
     color: '#666',
@@ -459,21 +469,29 @@ const styles = StyleSheet.create({
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    backgroundColor: 'rgba(0, 0, 0, 0.4)',
     justifyContent: 'center',
     alignItems: 'center',
   },
   modalContent: {
-    backgroundColor: '#23232b',
+    backgroundColor: '#ffffff',
     borderRadius: 20,
     padding: 24,
     width: '90%',
     maxHeight: '70%',
     borderWidth: 1,
-    borderColor: '#333',
+    borderColor: '#e0e0e0',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 5,
   },
   modalTitle: {
-    color: '#fff',
+    color: '#333',
     fontSize: 18,
     fontWeight: 'bold',
     marginBottom: 16,
@@ -486,10 +504,10 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     paddingHorizontal: 20,
     borderBottomWidth: 1,
-    borderBottomColor: '#333',
+    borderBottomColor: '#f0f0f5',
   },
   dropdownItemText: {
-    color: '#fff',
+    color: '#333',
     fontSize: 16,
   },
 });

@@ -2,12 +2,14 @@ import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
 import { ActivityIndicator, StyleSheet, Text, TextStyle, TouchableOpacity, ViewStyle } from 'react-native';
 
-export type ButtonType = 'primary' | 'secondary' | 'outline';
+export type ButtonType = 'primary' | 'secondary' | 'outline' | 'link';
+export type sizeType = 'small' | 'medium' | 'large';
 
 interface ButtonProps {
   onPress: () => void;
   children: React.ReactNode;
   type?: ButtonType;
+  size?: sizeType;
   loading?: boolean;
   disabled?: boolean;
   style?: ViewStyle;
@@ -16,10 +18,10 @@ interface ButtonProps {
   testID?: string;
 }
 
-const MAIN_COLOR = '#ff9b00'; // Use orange from palette
+const MAIN_COLOR = '#4CAF50'; // Use orange from palette
 const PRESSED_COLOR = '#e08a00'; // Darker orange for pressed state
 const DISABLED_COLOR = '#bcbcbc';
-const TEXT_COLOR = '#11181C'; // Dark text for contrast
+const TEXT_COLOR = '#FFFFFF'; // White text for better contrast
 
 const getButtonStyle = (type: ButtonType, disabled: boolean): ViewStyle => {
   switch (type) {
@@ -40,25 +42,28 @@ const getButtonStyle = (type: ButtonType, disabled: boolean): ViewStyle => {
       return {
         backgroundColor: disabled ? DISABLED_COLOR : MAIN_COLOR,
       };
+    case 'link':
+      return {
+        backgroundColor: 'transparent',
+        borderColor: disabled ? DISABLED_COLOR : MAIN_COLOR,
+        borderWidth: 2,
+        marginBottom: 18,
+      };
   }
 };
 
 const getTextStyle = (type: ButtonType, disabled: boolean): TextStyle => {
-  switch (type) {
-    case 'secondary':
-    case 'primary':
-      return { color: TEXT_COLOR };
-    case 'outline':
-      return { color: disabled ? DISABLED_COLOR : MAIN_COLOR };
-    default:
-      return { color: TEXT_COLOR };
+  if (disabled) {
+    return { color: '#FFFFFF', opacity: 0.7 }; // White with opacity for disabled state
   }
+  return { color: '#FFFFFF' }; // White text for all button types
 };
 
 export default function Button({
   onPress,
   children,
   type = 'primary',
+  size = 'medium',
   loading = false,
   disabled = false,
   style,
@@ -88,14 +93,13 @@ export default function Button({
         />
       ) : null}
       {typeof children === 'string' || typeof children === 'number' ? (
-        <Text style={[styles.text, getTextStyle(type, isDisabled), textStyle]}>{children}</Text>
+        <Text style={[getTextStyle(type, isDisabled), textStyle]}>{children}</Text>
       ) : (
         children
       )}
       {type === 'primary' && !loading && (
-        <Text style={{ color: TEXT_COLOR, fontSize: 20, fontWeight: 'bold', marginLeft: 8 }}>
-
-          <Ionicons name="arrow-forward" size={24} color="#ffffffff" />
+        <Text style={{ color: '#FFFFFF', fontSize: 20, fontWeight: 'bold', marginLeft: 8 }}>
+          <Ionicons name="arrow-forward" size={24} color="#FFFFFF" />
         </Text>
       )}
     </TouchableOpacity>
@@ -116,8 +120,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 8,
     elevation: 2,
-  },
-  text: {
     fontSize: 17,
     fontWeight: '600',
     letterSpacing: 0.5,
