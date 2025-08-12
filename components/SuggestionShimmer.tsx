@@ -11,21 +11,33 @@ const SuggestionShimmer = () => {
             <View style={styles.icon} />
             <View style={styles.titleContainer}>
               <View style={styles.title} />
-              <View style={styles.subtitle} />
+              <View style={styles.metaContainer}>
+                <View style={styles.metaItem} />
+                <View style={styles.metaItem} />
+              </View>
             </View>
+            <View style={styles.addButton} />
           </View>
-          <View style={styles.description} />
-          <View style={styles.metaContainer}>
+          <View style={styles.descriptionContainer}>
+            <View style={styles.description} />
+            <View style={[styles.description, {width: '80%'}]} />
+          </View>
+          <View style={styles.suggestionMeta}>
             <View style={styles.metaItem} />
             <View style={styles.metaItem} />
             <View style={styles.metaItem} />
           </View>
           <View style={styles.tipsContainer}>
             <View style={styles.tipTitle} />
-            <View style={styles.tip} />
-            <View style={styles.tip} />
+            <View style={styles.tip}>
+              <View style={styles.tipBullet} />
+              <View style={styles.tipText} />
+            </View>
+            <View style={styles.tip}>
+              <View style={styles.tipBullet} />
+              <View style={styles.tipText} />
+            </View>
           </View>
-          <View style={styles.button} />
         </View>
       ))}
     </View>
@@ -34,90 +46,112 @@ const SuggestionShimmer = () => {
 
 const styles = StyleSheet.create({
   container: {
-    padding: 16,
-    backgroundColor: '#ffffff',
+    padding: 0,
   },
   card: {
-    backgroundColor: '#ffffff',
-    borderRadius: 16,
-    padding: 20,
+    backgroundColor: '#f0f0f0',
+    borderRadius: 12,
+    padding: 0,
     marginBottom: 16,
+    overflow: 'hidden',
     borderWidth: 1,
-    borderColor: '#edf2f7',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 1,
+    borderColor: 'rgba(0,0,0,0.05)',
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 16,
+    padding: 16,
+    paddingBottom: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(0,0,0,0.05)',
   },
   icon: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: '#f0f4f8',
-    marginRight: 16,
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    backgroundColor: 'rgba(0,0,0,0.1)',
+    marginRight: 12,
   },
   titleContainer: {
     flex: 1,
   },
   title: {
-    height: 18,
+    height: 15,
     width: '60%',
-    backgroundColor: '#f0f4f8',
+    backgroundColor: 'rgba(0,0,0,0.1)',
     borderRadius: 4,
     marginBottom: 8,
   },
-  subtitle: {
-    height: 14,
-    width: '40%',
-    backgroundColor: '#f8fafc',
-    borderRadius: 4,
-  },
-  description: {
-    height: 14,
-    backgroundColor: '#f8fafc',
-    borderRadius: 4,
-    marginBottom: 20,
-    width: '90%',
-  },
   metaContainer: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 20,
+    alignItems: 'center',
+    gap: 8,
   },
   metaItem: {
     height: 12,
-    width: '28%',
-    backgroundColor: '#f8fafc',
+    width: 50,
+    backgroundColor: 'rgba(0,0,0,0.1)',
     borderRadius: 4,
   },
+  addButton: {
+    width: 32,
+    height: 32,
+    borderRadius: 10,
+    backgroundColor: 'rgba(0,0,0,0.1)',
+    marginLeft: 'auto',
+  },
+  descriptionContainer: {
+    paddingHorizontal: 16,
+    paddingTop: 12,
+    paddingBottom: 16,
+  },
+  description: {
+    height: 14,
+    backgroundColor: 'rgba(0,0,0,0.1)',
+    borderRadius: 4,
+    marginBottom: 8,
+    width: '100%',
+  },
+  suggestionMeta: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    padding: 16,
+    paddingTop: 0,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(0,0,0,0.05)',
+  },
   tipsContainer: {
-    marginBottom: 20,
+    padding: 16,
+    paddingTop: 0,
+    backgroundColor: 'rgba(0,0,0,0.03)',
+    borderLeftWidth: 3,
+    borderLeftColor: 'rgba(0,0,0,0.1)',
+    marginTop: 4,
   },
   tipTitle: {
     height: 14,
-    width: '30%',
-    backgroundColor: '#f0f4f8',
+    width: 100,
+    backgroundColor: 'rgba(0,0,0,0.1)',
     borderRadius: 4,
     marginBottom: 12,
   },
   tip: {
-    height: 10,
-    backgroundColor: '#f8fafc',
-    borderRadius: 4,
+    flexDirection: 'row',
+    alignItems: 'center',
     marginBottom: 8,
-    width: '90%',
   },
-  button: {
-    height: 44,
-    backgroundColor: '#f0f4f8',
-    borderRadius: 12,
-    marginTop: 12,
+  tipBullet: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    backgroundColor: 'rgba(0,0,0,0.1)',
+    marginRight: 8,
+  },
+  tipText: {
+    height: 12,
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.1)',
+    borderRadius: 4,
   },
 });
 

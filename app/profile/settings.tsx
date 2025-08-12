@@ -309,10 +309,11 @@ export default function SettingsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#14141c",
+    backgroundColor: "#ffffff",
   },
   gradientBackground: {
     flex: 1,
+    backgroundColor: "#ffffff",
   },
 
   logoutButton: {
@@ -326,11 +327,11 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 24,
     fontWeight: "bold",
-    color: "#fff",
+    color: "#1a1a1a",
   },
   headerDescription: {
     fontSize: 16,
-    color: "#999",
+    color: "#666",
     marginTop: 8,
   },
   scrollView: {
@@ -344,19 +345,26 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 20,
     fontWeight: "bold",
-    color: "#fff",
+    color: "#1a1a1a",
     marginBottom: 8,
   },
   sectionDescription: {
     fontSize: 14,
-    color: "#999",
+    color: "#666",
     marginBottom: 16,
   },
   settingCard: {
-    backgroundColor: "#23232b",
+    backgroundColor: "#ffffff",
     borderRadius: 16,
     padding: 20,
     marginBottom: 12,
+    borderWidth: 1,
+    borderColor: "#f0f0f0",
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
   },
   settingHeader: {
     flexDirection: "row",
@@ -370,26 +378,28 @@ const styles = StyleSheet.create({
   },
   settingTitle: {
     fontSize: 16,
-    fontWeight: "bold",
-    color: "#fff",
+    fontWeight: "600",
+    color: "#1a1a1a",
     marginBottom: 8,
   },
   settingDescription: {
     fontSize: 14,
-    color: "#ccc",
+    color: "#666",
     lineHeight: 20,
   },
   settingIcon: {
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: "#333333",
+    backgroundColor: "#f8f8f8",
     justifyContent: "center",
     alignItems: "center",
+    borderWidth: 1,
+    borderColor: "#f0f0f0",
   },
   settingDivider: {
     height: 1,
-    backgroundColor: "#3a3a3a",
+    backgroundColor: "#f0f0f0",
     marginBottom: 16,
   },
   settingControl: {
@@ -399,7 +409,7 @@ const styles = StyleSheet.create({
   },
   settingLabel: {
     fontSize: 14,
-    color: "#fff",
+    color: "#4a4a4a",
     fontWeight: "500",
   },
   logoutButtonText: {
@@ -408,11 +418,13 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   errorContainer: {
-    backgroundColor: "#ff6b6b",
+    backgroundColor: "#ffebee",
     padding: 15,
     borderRadius: 10,
     marginBottom: 20,
     alignItems: "center",
+    borderLeftWidth: 4,
+    borderLeftColor: "#f44336",
   },
   errorText: {
     color: "#fff",
@@ -427,8 +439,8 @@ const styles = StyleSheet.create({
   },
   testSectionTitle: {
     fontSize: 18,
-    fontWeight: "bold",
-    color: "#fff",
+    fontWeight: "600",
+    color: "#1a1a1a",
     marginBottom: 12,
   },
   logoutSection: {

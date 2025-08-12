@@ -1,4 +1,3 @@
-import Button from '@/components/ui/Button';
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
@@ -98,6 +97,9 @@ export default function HabitDetailsScreen() {
             <View style={styles.detailValuePlaceholder} />
           </View>
         </View>
+        <View style={styles.actionsContainer}>
+          <View style={styles.actionButtonPlaceholder} />
+        </View>
         </View>
       </View>
     );
@@ -195,9 +197,6 @@ export default function HabitDetailsScreen() {
             {habit.completed ? 'Mark as Incomplete' : 'Mark as Complete'}
           </Text>
         </TouchableOpacity>
-        <Button type="secondary" onPress={() => router.back()}>
-          Back to Habits
-        </Button>
       </View>
       </View>
     </View>
@@ -221,6 +220,13 @@ const styles = StyleSheet.create({
     backgroundColor: '#ffffff',
   },
   // Loading placeholders
+  actionButtonPlaceholder: {
+    width: 350,
+    height: 50,
+    borderRadius: 20,
+    backgroundColor: '#f0f0f0',
+    marginBottom: 16,
+  },
   iconPlaceholder: {
     width: 80,
     height: 80,

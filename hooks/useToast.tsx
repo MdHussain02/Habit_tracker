@@ -4,11 +4,13 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import Toast, { BaseToast, ErrorToast, ToastPosition } from 'react-native-toast-message';
 
+type ToastType = 'success' | 'error' | 'info' | 'warning';
+
 interface ToastContextType {
-  showToast: (message: string, type?: 'success' | 'error' | 'info' | 'warning', position?: ToastPosition) => void;
+  showToast: (message: string, type?: ToastType, position?: ToastPosition) => void;
 }
 
-const ToastIcon = ({ type }: { type: string }) => {
+const ToastIcon = ({ type }: { type: ToastType }) => {
   const iconProps = {
     size: 20,
     color: '#fff',
@@ -27,13 +29,19 @@ const ToastIcon = ({ type }: { type: string }) => {
   }
 };
 
-const CustomToast = ({ type, text1, ...rest }: any) => {
+interface CustomToastProps {
+  type: ToastType;
+  text1: string;
+  [key: string]: any;
+}
+
+const CustomToast = ({ type, text1, ...rest }: CustomToastProps) => {
   const backgroundColor = {
     success: '#4CAF50',
     error: '#f44336',
     info: '#2196F3',
     warning: '#ff9800',
-  }[type] || '#4CAF50';
+  }[type];
 
   return (
     <Animated.View
@@ -60,20 +68,15 @@ const toastConfig = {
 };
 
 export const useToast = () => {
-  const showToast = useCallback((
-    message: string, 
-    type: 'success' | 'error' | 'info' | 'warning' = 'success',
-    position: ToastPosition = 'top'
-  ) => {
+  const showToast = useCallback((message: string, type: ToastType = 'success', position: ToastPosition = 'bottom') => {
     Toast.show({
-      type: type,
+      type,
+      position,
       text1: message,
-      position: position,
       visibilityTime: 3000,
       autoHide: true,
-      topOffset: position === 'top' ? 60 : 30,
-      bottomOffset: position === 'bottom' ? 60 : 30,
-      props: { type },
+      topOffset: 50,
+      bottomOffset: 40,
     });
   }, []);
 

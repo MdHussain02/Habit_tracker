@@ -35,31 +35,23 @@ export default function HabitCard({
     return null;
   }
 
-  const handlePress = () => {
-    // @ts-ignore - We know this route exists
-    router.push(`/habits/${habitId}` as any);
-  };
-
   return (
-    <TouchableOpacity 
+    <TouchableOpacity
       style={styles.container}
-      onPress={handlePress}
+      onPress={() => router.push(`/habits/${habitId}`)}
       activeOpacity={0.8}
     >
+      <View style={styles.iconContainer}>
+        {renderIcon(habit.icon_id || 1, 24, "#4B5563")}
+      </View>
       <View style={styles.content}>
-        <View style={styles.header}>
-          <Text style={styles.name}>
-            {habit.name}
-          </Text>
-          {habit.icon_id && (
-            <View style={styles.icon}>{renderIcon(habit.icon_id, 22, '#ccc')}</View>
-          )}
+        <View style={styles.headerRow}>
+          <Text style={styles.name}>{habit.name}</Text>
         </View>
-        
         <View style={styles.streakContainer}>
           <Ionicons name="flame" size={16} color="#FF6B6B" />
           <Text style={styles.streakText}>
-            {habit.streak} Days
+            {habit.streak || 0} day{habit.streak !== 1 ? 's' : ''}
           </Text>
         </View>
         {habit.reminder?.time && (
@@ -77,31 +69,41 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: "#f0f0f0", // Light card background
-    borderRadius: 20,
-    padding: 15,
-    marginBottom: 10,
-    marginHorizontal: 12
+    backgroundColor: "#ffffff",
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 12,
+    minHeight: 100,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
+    borderWidth: 1,
+    borderColor: '#f0f0f0',
   },
   content: {
     flex: 1,
-    marginLeft: 8,
+    marginLeft: 16,
   },
-  header: {
+  iconContainer: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: '#F3F4F6',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  headerRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 6,
+    marginBottom: 4,
   },
   name: {
     fontSize: 17,
-    fontWeight: '700',
-    color: '#11181C', // Dark text for contrast
-    flex: 1,
-    letterSpacing: 0.5,
-  },
-  icon: {
-    marginLeft: 10,
-    backgroundColor: '#e0e0e0', // Light icon background
+    fontWeight: '600',
+    color: '#1F2937',
+    marginRight: 8,
     borderRadius: 12,
     padding: 6,
     width: 34,

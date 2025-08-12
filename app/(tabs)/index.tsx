@@ -2,7 +2,7 @@ import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
-import { Alert, Animated, FlatList, RefreshControl, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { FlatList, RefreshControl, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import HabitCard from '../../components/HabitCard';
 import HabitCardShimmer from '../../components/HabitCardShimmer';
 import { useApi } from '../../hooks/useApi';
@@ -18,9 +18,7 @@ export default function HomeScreen() {
   const [habits, setHabits] = useState<Habit[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [editHabitId, setEditHabitId] = useState<string | null>(null);
-  const [editTime, setEditTime] = useState<string>('09:00');
-  const [showEditModal, setShowEditModal] = useState(false);
+
 
   const router = useRouter();
   const { fetchGet } = useApi();
@@ -31,21 +29,38 @@ export default function HomeScreen() {
 
   // Load data on initial mount only
   useEffect(() => {
+    let isMounted = true;
+    
     const loadInitialData = async () => {
-      // First try to show cached data immediately
-      const cachedHabits = await loadCachedHabits();
-      if (cachedHabits) {
-        setHabits(cachedHabits);
-      }
-      
-      // Then refresh from API in the background if needed
-      const shouldRefresh = await shouldRefreshHabits();
-      if (shouldRefresh) {
-        loadHabits();
+      try {
+        // First try to show cached data immediately
+        const cachedHabits = await loadCachedHabits();
+        if (cachedHabits && isMounted) {
+          setHabits(cachedHabits);
+        }
+        
+        // Then refresh from API in the background if needed
+        const shouldRefresh = await shouldRefreshHabits();
+        if (shouldRefresh) {
+          await loadHabits();
+        }
+      } catch (error) {
+        console.error('Error in loadInitialData:', error);
+        if (isMounted) {
+          showToast('Failed to load habits', 'error');
+        }
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
       }
     };
     
     loadInitialData();
+    
+    return () => {
+      isMounted = false;
+    };
   }, []);
   
   // Only refresh on focus if explicitly requested (e.g., after adding a habit)
@@ -114,60 +129,50 @@ export default function HomeScreen() {
         const cachedHabits = await loadCachedHabits();
         if (cachedHabits && cachedHabits.length > 0) {
           setHabits(cachedHabits);
-          setLoading(false);
-          return; // Exit if we have valid cached data
+          if (!forceRefresh) {
+            setLoading(false);
+          }
+          // Continue to API for fresh data
         }
       }
 
       // Fetch from API if cache is invalid or empty
       const response = await fetchGet(`${API_BASE_URL}/habits`);
       
-      if (response.success && response.data) {
-        const mappedHabits: Habit[] = response.data.map((item: any) => {
-          const targetTime = new Date(item.target_time);
-          const hours = targetTime.getHours().toString().padStart(2, '0');
-          const minutes = targetTime.getMinutes().toString().padStart(2, '0');
-          const reminderTime = `${hours}:${minutes}`;
-          
-          const completedDates: string[] = [];
-          
-          return {
-            id: item._id,
-            name: item.name,
-            icon_id: item.icon_id || 1,
-            icon: { set: 'Ionicons', name: 'star' },
-            createdAt: new Date(item.created_time).getTime(),
-            streak: 0,
-            completedDates,
-            reminder: {
-              enabled: true,
-              time: reminderTime
-            }
-          };
-        });
+      if (response?.success && response.data) {
+        const mappedHabits: Habit[] = response.data.map((item: any) => ({
+          id: item._id,
+          name: item.name,
+          icon_id: item.icon_id || 1,
+          icon: { set: 'Ionicons', name: 'star' },
+          createdAt: new Date(item.created_time).getTime(),
+          streak: 0,
+          completedDates: [],
+          reminder: {
+            enabled: true,
+            time: item.target_time 
+              ? `${new Date(item.target_time).getHours().toString().padStart(2, '0')}:${new Date(item.target_time).getMinutes().toString().padStart(2, '0')}`
+              : '09:00'
+          }
+        }));
         
         // Update state and cache
         setHabits(mappedHabits);
         await saveHabitsToCache(mappedHabits);
-      } else if (!response.success) {
-        // If API fails, try to load from cache as fallback
+      } else if (!response?.success) {
+        throw new Error('API request failed');
+      }
+    } catch (error) {
+      console.error('Error loading habits:', error);
+      // If we don't have habits yet, show empty state
+      if (habits.length === 0) {
         const cachedHabits = await loadCachedHabits();
-        if (cachedHabits) {
+        if (cachedHabits && cachedHabits.length > 0) {
           setHabits(cachedHabits);
           showToast('Using cached data', 'info');
         } else {
           showToast('Failed to load habits', 'error');
         }
-      }
-    } catch (error) {
-      console.error('Error loading habits:', error);
-      // Try to load from cache on error
-      const cachedHabits = await loadCachedHabits();
-      if (cachedHabits) {
-        setHabits(cachedHabits);
-        showToast('Using cached data', 'info');
-      } else {
-        showToast('Failed to load habits', 'error');
       }
     } finally {
       setLoading(false);
@@ -195,186 +200,221 @@ export default function HomeScreen() {
     await loadHabits(true);
   };
 
-  const handleSaveEditTime = async () => {
-    if (!editHabitId) return;
-    await editHabitWithNotification(editHabitId, editTime);
-    setShowEditModal(false);
-    setEditHabitId(null);
-  };
 
-  const handleDeleteHabit = (habitId: string) => {
-    Alert.alert('Delete Habit', 'Are you sure you want to delete this habit?', [
-      { text: 'Cancel', style: 'cancel' },
-      {
-        text: 'Delete',
-        style: 'destructive',
-        onPress: async () => {
-          await deleteHabitWithNotification(habitId);
-        },
-      },
-    ]);
-  };
-
-  if (loading) {
-    return (
-      <Animated.View style={[styles.container, { opacity: loading ? 1 : 0 }]}>
-        <View style={styles.topHeaderRow}>
-          <Text style={styles.headerTitleMain}>Today's Habits</Text>
-        </View>
-        <View style={{ flex: 1, marginTop: 10 }}>
-          {[1, 2, 3].map((i) => (
-            <HabitCardShimmer key={i} />
-          ))}
-        </View>
-      </Animated.View>
-    );
-  }
 
   return (
     <View style={styles.container}>
-      <View style={styles.topHeaderRow}>
-        <Text style={styles.headerTitleMain}>Today's Habits</Text>
+      {/* Header with Add Button - Always Visible */}
+      <View style={styles.header}>
+        <Text style={styles.headerTitle}>Today's Habits</Text>
         <TouchableOpacity
-          style={styles.fab}
+          style={styles.addButton}
           onPress={() => router.push('/add-habit')}
+          activeOpacity={0.8}
+          testID="add-habit-button"
         >
           <Ionicons name="add" size={24} color="#fff" />
         </TouchableOpacity>
       </View>
-        {/* Habits List */}
-        <View style={{ flex: 1, marginTop: 10 }}>
-          {habits.length === 0 ? (
-            <View style={styles.emptyContainerModern}>
-              <MaterialCommunityIcons
-                name="emoticon-sad-outline"
-                size={72}
-                color="#666"
-              />
-              <Text style={styles.emptyTitleModern}>No habits yet</Text>
-              <Text style={styles.emptySubtitleModern}>
-                Tap the + button to add your first habit and become a hero!
-              </Text>
-            </View>
-          ) : (
-            <FlatList
-              data={habits}
-              refreshControl={
-                <RefreshControl
-                  refreshing={refreshing}
-                  onRefresh={onRefresh}
-                  colors={['#FF1972']}
-                  tintColor="#FF1972"
-                />
-              }
-              renderItem={({ item }) => (
-   
-                  <HabitCard habit={item} />
-                
-              )}
-              style={styles.habitsListModern}
-              showsVerticalScrollIndicator={false}
-              contentContainerStyle={{ paddingBottom: 40 }}
+      
+      {/* Main Content Area */}
+      <View style={styles.content}>
+        {loading ? (
+          // Loading State
+          <View style={styles.loadingContent} testID="loading-state">
+            {[1, 2, 3 ,4 , 5].map((i) => (
+              <HabitCardShimmer key={`shimmer-${i}`} />
+            ))}
+          </View>
+        ) : habits.length === 0 ? (
+          // Empty State
+          <View style={styles.emptyState} testID="empty-state">
+            <MaterialCommunityIcons
+              name="emoticon-sad-outline"
+              size={80}
+              color="#9CA3AF"
+              accessibilityLabel="No habits"
             />
-          )}
-
-        </View>
-     
+            <Text style={styles.emptyTitle}>No habits yet</Text>
+            <Text style={styles.emptySubtitle}>
+              Tap the + button to add your first habit and start your journey to becoming a hero!
+            </Text>
+          </View>
+        ) : (
+          // Habits List
+          <FlatList
+            data={habits}
+            refreshControl={
+              <RefreshControl
+                refreshing={refreshing}
+                onRefresh={onRefresh}
+                colors={['#ff6b35']}
+                tintColor="#ff6b35"
+              />
+            }
+            renderItem={({ item }) => (
+              <HabitCard habit={item} />
+            )}
+            keyExtractor={(item, index) => item.id || `habit-${index}`}
+            style={styles.habitsList}
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={styles.habitsListContent}
+            ItemSeparatorComponent={() => <View style={styles.separator} />}
+            ListEmptyComponent={
+              <View style={styles.emptyState}>
+                <Text style={styles.emptySubtitle}>No habits found</Text>
+              </View>
+            }
+          />
+        )}
+      </View>
     </View>
   );
 }
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingTop: 60,
-    backgroundColor: '#ffffff',
+    backgroundColor: '#F8FAFC',
   },
-  loadingContainer: {
-    flex: 1,
-    backgroundColor: '#ffffff',
+  // Modal Styles
+  modalOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
     justifyContent: 'center',
     alignItems: 'center',
+    zIndex: 1000,
   },
-  loadingText: {
-    color: '#333333',
-    fontSize: 18,
+  modalContent: {
+    backgroundColor: 'white',
+    borderRadius: 16,
+    padding: 24,
+    width: '85%',
+    maxWidth: 400,
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: '600',
+    marginBottom: 20,
+    textAlign: 'center',
+    color: '#111827',
+  },
+  timeInput: {
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+    borderRadius: 8,
+    padding: 12,
+    fontSize: 16,
+    marginBottom: 20,
+    textAlign: 'center',
+  },
+  modalButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 8,
+  },
+  modalButton: {
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+    minWidth: 100,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  cancelButton: {
+    backgroundColor: '#F3F4F6',
+    marginRight: 8,
+  },
+  saveButton: {
+    backgroundColor: '#ff6b35',
+    marginLeft: 8,
+  },
+  cancelButtonText: {
+    color: '#4B5563',
     fontWeight: '600',
   },
-  topHeaderRow: {
+  saveButtonText: {
+    color: 'white',
+    fontWeight: '600',
+  },
+  header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 16,
-    marginBottom: 16,
-    backgroundColor: '#ffffff',
-    paddingVertical: 12,
+    paddingHorizontal: 20,
+    paddingTop: 50,
+    paddingBottom: 20,
+    backgroundColor: '#FFFFFF',
     borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
+    borderBottomColor: '#E5E7EB',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 1,
   },
-  headerTitleMain: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#1a1a1a',
-    flex: 1,
-    textAlign: 'center',
-  },
-  gradientBackground: {
-    flex: 1,
-    paddingTop: 0,
-    backgroundColor: '#ffffff',
-  },
-  emptyContainerModern: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: 40,
-    backgroundColor: '#ffffff',
-  },
-  emptyTitleModern: {
-    fontSize: 22,
+  headerTitle: {
+    fontSize: 28,
     fontWeight: '700',
-    color: '#1a1a1a',
-    marginTop: 18,
-    marginBottom: 8,
-    textAlign: 'center',
+    color: '#111827',
+    letterSpacing: -0.5,
   },
-  emptySubtitleModern: {
-    fontSize: 16,
-    color: '#4a4a4a',
-    textAlign: 'center',
-    lineHeight: 24,
-  },
-  fab: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+  addButton: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
     backgroundColor: '#ff6b35',
     justifyContent: 'center',
     alignItems: 'center',
-    marginLeft: 8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
+    shadowColor: '#ff6b35',
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 6,
   },
-  habitCardModern: {
-    marginBottom: 16,
-    borderRadius: 16,
-    overflow: 'hidden',
-    backgroundColor: '#ffffff',
-    borderWidth: 1,
-    borderColor: '#eaeaea',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  habitsListModern: {
+  content: {
     flex: 1,
-    paddingHorizontal: 16,
-    // backgroundColor: '#f8f8f8',
-    paddingTop: 8,
+    paddingTop: 24,
   },
+  loadingContent: {
+    flex: 1,
+    paddingHorizontal: 20,
+  },
+  emptyState: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 32,
+    paddingBottom: 80,
+  },
+  emptyTitle: {
+    fontSize: 24,
+    fontWeight: '700',
+    color: '#374151',
+    marginTop: 24,
+    marginBottom: 12,
+    textAlign: 'center',
+  },
+  emptySubtitle: {
+    fontSize: 16,
+    color: '#6B7280',
+    textAlign: 'center',
+    lineHeight: 24,
+    maxWidth: 300,
+  },
+  habitsList: {
+    flex: 1,
+    paddingHorizontal: 20,
+  },
+  habitsListContent: {
+    paddingBottom: 32,
+  },
+  separator: {
+    height: 16,
+  },    
 });

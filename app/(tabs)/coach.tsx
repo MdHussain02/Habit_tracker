@@ -300,8 +300,10 @@ export default function CoachScreen() {
     categoryKey: string;
     subtitle: string;
   }) => {
-    if (loading) return null;
-    if (suggestions.length === 0) return null;
+    // Don't render anything if no suggestions and still loading
+    if (loading && suggestions.length === 0) return null;
+    // Don't render the section if no suggestions after loading
+    if (!loading && suggestions.length === 0) return null;
 
     const mainSuggestion = suggestions[0];
     const hasMore = suggestions.length > 1;
@@ -403,9 +405,7 @@ export default function CoachScreen() {
     );
   };
 
-  if (loading && !refreshing) {
-    return <SuggestionShimmer />;
-  }
+
 
   return (
     <View style={styles.container}>
@@ -424,7 +424,13 @@ export default function CoachScreen() {
             tintColor={PookieColors.hotPink}
           />
         }>
-        {renderContent()}
+        {loading && !refreshing ? (
+          <View style={styles.loadingContainer}>
+            <SuggestionShimmer />
+          </View>
+        ) : (
+          renderContent()
+        )}
       </ScrollView>
     </View>
   );
@@ -433,7 +439,11 @@ export default function CoachScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff', // Light background
+    backgroundColor: '#fff',
+  },
+  loadingContainer: {
+    flex: 1,
+    padding: 16,
   },
   centered: {
     flex: 1,

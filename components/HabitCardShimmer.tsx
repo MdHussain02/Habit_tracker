@@ -56,35 +56,25 @@ const HabitCardShimmer = () => {
   const shimmerItems = Array(10).fill(null);
 
   return (
-    <View style={styles.listContainer}>
-      {shimmerItems.map((_, index) => (
-        <View key={index} style={styles.container}>
-          <View style={styles.card}>
-            <ShimmerPlaceholder style={styles.iconPlaceholder} />
-            <View style={styles.content}>
-              <ShimmerPlaceholder style={styles.titlePlaceholder} />
-              <View style={styles.streakContainer}>
-                <ShimmerPlaceholder style={styles.streakPlaceholder} />
-                <ShimmerPlaceholder style={styles.timePlaceholder} />
-              </View>
-            </View>
-            <ShimmerPlaceholder style={styles.checkboxPlaceholder} />
+    <View style={styles.container}>
+      <View style={styles.card}>
+        <ShimmerPlaceholder style={styles.iconPlaceholder} />
+        <View style={styles.content}>
+          <ShimmerPlaceholder style={styles.titlePlaceholder} />
+          <View style={styles.streakContainer}>
+            <ShimmerPlaceholder style={styles.streakPlaceholder} />
+            <ShimmerPlaceholder style={styles.timePlaceholder} />
           </View>
         </View>
-      ))}
+      </View>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  listContainer: {
-    flex: 1,
-    paddingVertical: 8,
-  },
   container: {
     width: '100%',
-    paddingHorizontal: 16,
-    marginBottom: 12,
+    marginBottom: 25,
   },
   placeholder: {
     backgroundColor: '#e0e0e0',
@@ -102,11 +92,18 @@ const styles = StyleSheet.create({
   },
   card: {
     backgroundColor: '#ffffff',
-    borderRadius: 18,
-    padding: 16,
+    borderRadius: 16,
+    padding: 10,
     flexDirection: 'row',
     alignItems: 'center',
-    height: 100,
+    minHeight: 117,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
+    borderWidth: 1,
+    borderColor: '#f0f0f0',
   },
   iconPlaceholder: {
     width: 48,
@@ -123,6 +120,7 @@ const styles = StyleSheet.create({
     height: 20,
     borderRadius: 4,
     marginBottom: 12,
+    backgroundColor: '#f0f0f0',
   },
   streakContainer: {
     flexDirection: 'row',
@@ -133,11 +131,13 @@ const styles = StyleSheet.create({
     height: 16,
     borderRadius: 4,
     marginRight: 12,
+    backgroundColor: '#f0f0f0',
   },
   timePlaceholder: {
     width: 80,
     height: 16,
     borderRadius: 4,
+    backgroundColor: '#f0f0f0',
   },
   checkboxPlaceholder: {
     width: 32,
