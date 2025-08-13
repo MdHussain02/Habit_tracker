@@ -145,7 +145,7 @@ export default function PersonalDetailsScreen() {
           <TextInput
             style={[styles.input, editingSection !== 'personal' && styles.disabledField]}
             placeholder="Full Name"
-            placeholderTextColor="#aaa"
+            placeholderTextColor="#9ca3af"
             value={form.name}
             onChangeText={v => handleChange('name', v)}
             editable={editingSection === 'personal'}
@@ -153,7 +153,7 @@ export default function PersonalDetailsScreen() {
           <TextInput
             style={[styles.input, editingSection !== 'personal' && styles.disabledField]}
             placeholder="Email Address"
-            placeholderTextColor="#aaa"
+            placeholderTextColor="#9ca3af"
             value={form.email}
             onChangeText={v => handleChange('email', v)}
             keyboardType="email-address"
@@ -163,7 +163,7 @@ export default function PersonalDetailsScreen() {
           <TextInput
             style={[styles.input, editingSection !== 'personal' && styles.disabledField]}
             placeholder="Password"
-            placeholderTextColor="#aaa"
+            placeholderTextColor="#9ca3af"
             value={form.password}
             onChangeText={v => handleChange('password', v)}
             secureTextEntry
@@ -172,7 +172,7 @@ export default function PersonalDetailsScreen() {
           <TextInput
             style={[styles.input, editingSection !== 'personal' && styles.disabledField]}
             placeholder="Confirm Password"
-            placeholderTextColor="#aaa"
+            placeholderTextColor="#9ca3af"
             value={form.confirmPassword}
             onChangeText={v => handleChange('confirmPassword', v)}
             secureTextEntry
@@ -184,15 +184,15 @@ export default function PersonalDetailsScreen() {
           {editingSection === 'personal' ? (
             <View style={styles.sectionButtonRow}>
               <TouchableOpacity style={[styles.button, styles.saveButton]} onPress={() => handleSave('personal')}>
-                <Text style={styles.buttonText}>Save</Text>
+                <Text style={[styles.buttonText, styles.saveButtonText]}>Save</Text>
               </TouchableOpacity>
               <TouchableOpacity style={[styles.button, styles.cancelButton]} onPress={() => handleCancel('personal')}>
-                <Text style={styles.buttonText}>Cancel</Text>
+                <Text style={[styles.buttonText, styles.cancelButtonText]}>Cancel</Text>
               </TouchableOpacity>
             </View>
           ) : (
             <TouchableOpacity style={[styles.button, styles.editButton]} onPress={() => setEditingSection('personal')}>
-              <Text style={styles.buttonText}>Edit</Text>
+              <Text style={[styles.buttonText, styles.editButtonText]}>Edit</Text>
             </TouchableOpacity>
           )}
         </View>
@@ -204,7 +204,7 @@ export default function PersonalDetailsScreen() {
             <TextInput
               style={[styles.input, styles.halfInput, editingSection !== 'health' && styles.disabledField]}
               placeholder="Height (cm)"
-              placeholderTextColor="#aaa"
+              placeholderTextColor="#9ca3af"
               value={form.height}
               onChangeText={v => handleChange('height', v)}
               keyboardType="numeric"
@@ -213,7 +213,7 @@ export default function PersonalDetailsScreen() {
             <TextInput
               style={[styles.input, styles.halfInput, editingSection !== 'health' && styles.disabledField]}
               placeholder="Weight (kg)"
-              placeholderTextColor="#aaa"
+              placeholderTextColor="#9ca3af"
               value={form.weight}
               onChangeText={v => handleChange('weight', v)}
               keyboardType="numeric"
@@ -224,7 +224,7 @@ export default function PersonalDetailsScreen() {
             <TextInput
               style={[styles.input, styles.halfInput, editingSection !== 'health' && styles.disabledField]}
               placeholder="Age"
-              placeholderTextColor="#aaa"
+              placeholderTextColor="#9ca3af"
               value={form.age}
               onChangeText={v => handleChange('age', v)}
               keyboardType="numeric"
@@ -253,7 +253,7 @@ export default function PersonalDetailsScreen() {
           <TextInput
             style={[styles.input, editingSection !== 'health' && styles.disabledField]}
             placeholder="Weekly Goal (e.g., 3 workouts per week)"
-            placeholderTextColor="#aaa"
+            placeholderTextColor="#9ca3af"
             value={form.weeklyGoal}
             onChangeText={v => handleChange('weeklyGoal', v)}
             editable={editingSection === 'health'}
@@ -261,15 +261,15 @@ export default function PersonalDetailsScreen() {
           {editingSection === 'health' ? (
             <View style={styles.sectionButtonRow}>
               <TouchableOpacity style={[styles.button, styles.saveButton]} onPress={() => handleSave('health')}>
-                <Text style={styles.buttonText}>Save</Text>
+                <Text style={[styles.buttonText, styles.saveButtonText]}>Save</Text>
               </TouchableOpacity>
               <TouchableOpacity style={[styles.button, styles.cancelButton]} onPress={() => handleCancel('health')}>
-                <Text style={styles.buttonText}>Cancel</Text>
+                <Text style={[styles.buttonText, styles.cancelButtonText]}>Cancel</Text>
               </TouchableOpacity>
             </View>
           ) : (
             <TouchableOpacity style={[styles.button, styles.editButton]} onPress={() => setEditingSection('health')}>
-              <Text style={styles.buttonText}>Edit</Text>
+              <Text style={[styles.buttonText, styles.editButtonText]}>Edit</Text>
             </TouchableOpacity>
           )}
         </View>
@@ -304,15 +304,15 @@ export default function PersonalDetailsScreen() {
           {editingSection === 'prefs' ? (
             <View style={styles.sectionButtonRow}>
               <TouchableOpacity style={[styles.button, styles.saveButton]} onPress={() => handleSave('prefs')}>
-                <Text style={styles.buttonText}>Save</Text>
+                <Text style={[styles.buttonText, styles.saveButtonText]}>Save</Text>
               </TouchableOpacity>
               <TouchableOpacity style={[styles.button, styles.cancelButton]} onPress={() => handleCancel('prefs')}>
-                <Text style={styles.buttonText}>Cancel</Text>
+                <Text style={[styles.buttonText, styles.cancelButtonText]}>Cancel</Text>
               </TouchableOpacity>
             </View>
           ) : (
             <TouchableOpacity style={[styles.button, styles.editButton]} onPress={() => setEditingSection('prefs')}>
-              <Text style={styles.buttonText}>Edit</Text>
+              <Text style={[styles.buttonText, styles.editButtonText]}>Edit</Text>
             </TouchableOpacity>
           )}
         </View>
@@ -361,89 +361,97 @@ export default function PersonalDetailsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#18181b',
+    backgroundColor: '#f8f9fa',
   },
   scrollContainer: {
     flexGrow: 1,
-    padding: 24,
-    paddingTop: 40,
+    padding: 16,
+    paddingTop: 20,
     paddingBottom: 40,
   },
   title: {
-    fontSize: 26,
+    fontSize: 24,
     fontWeight: 'bold',
-    color: '#fff',
-    marginBottom: 24,
+    color: '#1a1a1a',
+    marginBottom: 20,
     textAlign: 'center',
   },
   sectionCard: {
-    backgroundColor: '#23232b',
-    borderRadius: 18,
-    padding: 22,
-    marginBottom: 28,
+    backgroundColor: '#ffffff',
+    borderRadius: 16,
+    padding: 20,
+    marginBottom: 20,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.10,
-    shadowRadius: 8,
-    elevation: 2,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 1,
+    borderWidth: 1,
+    borderColor: '#e5e7eb',
   },
   sectionTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#7066F6',
-    marginBottom: 18,
+    fontSize: 17,
+    fontWeight: '600',
+    color: '#4CAF50',
+    marginBottom: 16,
     textAlign: 'left',
-    letterSpacing: 0.2,
   },
   input: {
     width: '100%',
-    backgroundColor: '#23232b',
-    color: '#fff',
+    backgroundColor: '#ffffff',
+    color: '#1a1a1a',
     borderRadius: 12,
     padding: 14,
-    marginBottom: 16,
-    fontSize: 16,
+    marginBottom: 14,
+    fontSize: 15,
     borderWidth: 1,
-    borderColor: '#333',
+    borderColor: '#e5e7eb',
   },
   halfInput: {
     flex: 1,
-    marginRight: 8,
+    marginRight: 12,
   },
   row: {
     flexDirection: 'row',
     gap: 12,
-    marginBottom: 0,
+    marginBottom: 14,
   },
   errorText: {
-    color: '#ff6b6b',
+    color: '#ef4444',
     fontSize: 14,
-    marginBottom: 16,
+    marginBottom: 14,
     textAlign: 'center',
   },
   button: {
-    backgroundColor: '#7066F6',
-    borderRadius: 16,
+    borderRadius: 12,
     paddingVertical: 12,
-    paddingHorizontal: 28,
+    paddingHorizontal: 20,
     alignItems: 'center',
     minWidth: 100,
     marginHorizontal: 4,
   },
   saveButton: {
-    backgroundColor: '#7066F6',
+    backgroundColor: '#4CAF50',
   },
   cancelButton: {
-    backgroundColor: '#333',
+    backgroundColor: '#f3f4f6',
   },
   editButton: {
-    backgroundColor: '#39394a',
+    backgroundColor: '#f3f4f6',
   },
   buttonText: {
-    color: '#fff',
-    fontWeight: 'bold',
-    fontSize: 16,
+    fontWeight: '600',
+    fontSize: 15,
     textAlign: 'center',
+  },
+  saveButtonText: {
+    color: '#ffffff',
+  },
+  cancelButtonText: {
+    color: '#4b5563',
+  },
+  editButtonText: {
+    color: '#4CAF50',
   },
   sectionButtonRow: {
     flexDirection: 'row',
@@ -454,30 +462,31 @@ const styles = StyleSheet.create({
   // Dropdown styles
   dropdownButton: {
     width: '100%',
-    backgroundColor: '#23232b',
+    backgroundColor: '#ffffff',
     borderRadius: 12,
     padding: 14,
-    marginBottom: 16,
+    marginBottom: 14,
     borderWidth: 1,
-    borderColor: '#333',
+    borderColor: '#e5e7eb',
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
   },
   dropdownButtonText: {
-    color: '#fff',
-    fontSize: 16,
+    color: '#1a1a1a',
+    fontSize: 15,
     flex: 1,
   },
   placeholderText: {
-    color: '#aaa',
+    color: '#9ca3af',
   },
   dropdownArrow: {
-    color: '#666',
-    fontSize: 12,
+    color: '#9ca3af',
+    fontSize: 14,
   },
   disabledField: {
-    opacity: 0.5,
+    backgroundColor: '#f9fafb',
+    opacity: 0.7,
   },
   modalOverlay: {
     position: 'absolute',
@@ -485,25 +494,25 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    backgroundColor: 'rgba(0, 0, 0, 0.4)',
     justifyContent: 'center',
     alignItems: 'center',
     zIndex: 100,
   },
   modalContent: {
-    backgroundColor: '#23232b',
+    backgroundColor: '#ffffff',
     borderRadius: 20,
     padding: 24,
     width: '90%',
     maxHeight: '70%',
     borderWidth: 1,
-    borderColor: '#333',
+    borderColor: '#e5e7eb',
     alignItems: 'center',
   },
   modalTitle: {
-    color: '#fff',
+    color: '#1a1a1a',
     fontSize: 18,
-    fontWeight: 'bold',
+    fontWeight: '600',
     marginBottom: 16,
     textAlign: 'center',
   },
@@ -513,26 +522,27 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   dropdownItem: {
-    paddingVertical: 16,
-    paddingHorizontal: 20,
+    paddingVertical: 14,
+    paddingHorizontal: 16,
     borderBottomWidth: 1,
-    borderBottomColor: '#333',
+    borderBottomColor: '#f3f4f6',
   },
   dropdownItemText: {
-    color: '#fff',
-    fontSize: 16,
+    color: '#1a1a1a',
+    fontSize: 15,
   },
   modalCloseButton: {
-    backgroundColor: '#7066F6',
+    backgroundColor: '#4CAF50',
     borderRadius: 12,
-    paddingVertical: 10,
+    paddingVertical: 12,
     paddingHorizontal: 32,
     alignItems: 'center',
-    marginTop: 8,
+    marginTop: 12,
+    width: '100%',
   },
   modalCloseButtonText: {
-    color: '#fff',
-    fontWeight: 'bold',
+    color: '#ffffff',
+    fontWeight: '600',
     fontSize: 16,
   },
-}); 
+});

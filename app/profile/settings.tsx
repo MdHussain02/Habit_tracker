@@ -211,7 +211,7 @@ export default function SettingsScreen() {
             <Text style={styles.settingDescription}>{item.description}</Text>
           </View>
           <View style={styles.settingIcon}>
-            <Ionicons name={item.icon as any} size={20} color={PookieColors.hotPink} />
+            <Ionicons name={item.icon} size={24} color={PookieColors.hotPink} />
           </View>
         </View>
         <View style={styles.settingControl}>
@@ -240,9 +240,6 @@ export default function SettingsScreen() {
       {/* Static Header */}
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Settings</Text>
-        <Text style={styles.headerDescription}>
-          Customize your Habit Hero experience
-        </Text>
       </View>
 
       {/* Scrollable Content */}
@@ -297,32 +294,33 @@ export default function SettingsScreen() {
           <View style={styles.testSection}>
             <Text style={styles.testSectionTitle}>Test Notifications</Text>
               <Button
+            type="secondary"
               onPress={handleTestNotification}
-              style={styles.testButton}
+
             >
               Send Test Notification
             </Button>
             <Button
+            type="secondary"
               onPress={handleTriggerTestNotifications}
-              style={[styles.testButton, { marginTop: 12 }] as any}
             >
               Trigger Test Notifications
             </Button>
             <Button
+            type="secondary"
               onPress={handleStartTestNotifications}
-              style={[styles.testButton, { marginTop: 12 }] as any}
             >
               Start Test Notifications
             </Button>
             <Button
+            type="secondary"
               onPress={handleStopTestNotifications}
-              style={[styles.testButton, { marginTop: 12 }] as any}
             >
               Stop Test Notifications
             </Button>
             <Button
+            type="secondary"
               onPress={handleGetJobsStatus}
-              style={[styles.testButton, { marginTop: 12 }] as any}
             >
               Get Jobs Status
             </Button>
@@ -331,6 +329,7 @@ export default function SettingsScreen() {
           {/* Logout Button */}
           <View style={styles.logoutSection}>
             <Button
+            type="primary"
               onPress={() => {
                 Alert.alert(
                   "Logout",
@@ -350,7 +349,6 @@ export default function SettingsScreen() {
                   ]
                 );
               }}
-              style={styles.logoutButton}
             >
               Logout
             </Button>
@@ -375,24 +373,20 @@ export default function SettingsScreen() {
     fontWeight: '500',
   },
   header: {
-    paddingTop: 50,
-    paddingBottom: 20,
+    flexDirection: 'row',
+    paddingTop: 60,
+    paddingBottom: 16,
+    alignItems: 'center',
+    backgroundColor: '#ffffff',
+    borderBottomWidth: 1,
+    borderBottomColor: '#eaeaea',
     paddingHorizontal: 20,
-    backgroundColor: '#fff',
-    borderBottomLeftRadius: 20,
-    borderBottomRightRadius: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 3,
-    zIndex: 10,
   },
   headerTitle: {
-    fontSize: 24,
+    fontSize: 20,
     fontWeight: '700',
-    color: '#1a1a1a',
-    marginBottom: 4,
+    color: '#111827',
+    letterSpacing: -0.5,
   },
   headerDescription: {
     fontSize: 14,

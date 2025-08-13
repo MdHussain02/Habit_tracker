@@ -58,11 +58,11 @@ export default function TimePicker({
           onPress={() => enabled && setShowPicker(true)}
           disabled={!enabled}
         >
-          <Ionicons name="time-outline" size={20} color={"#5c62d2"} />
+          <Ionicons name="time-outline" size={18} color="#4CAF50" />
           <Text style={styles.timeText}>
             {value ? formatDisplayTime(value) : "Select Time"}
           </Text>
-          <Ionicons name="chevron-down" size={20} color={"#5c62d2"} />
+          <Ionicons name="chevron-down" size={18} color="#9ca3af" />
         </TouchableOpacity>
         {showPicker && (
           <DateTimePicker
@@ -81,33 +81,41 @@ export default function TimePicker({
 
 const styles = StyleSheet.create({
   cardContainer: {
-    marginBottom: 10,
+    marginBottom: 16,
+    backgroundColor: '#ffffff',
+    borderRadius: 12,
+    padding: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 1,
   },
   cardTitle: {
-    fontSize: 17,
-    fontWeight: 'bold',
-    color: '#fff',
-    letterSpacing: 0.2,
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#374151',
+    marginBottom: 4,
   },
   timeSection: {
-    marginTop: 8,
+    marginTop: 4,
   },
   timeButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#22222b',
+    backgroundColor: '#f9fafb',
     borderRadius: 10,
-    paddingVertical: 14,
+    paddingVertical: 12,
     paddingHorizontal: 20,
     borderWidth: 1.5,
-    borderColor: "#363638",
+    borderColor: "#d1d5db",
     elevation: 2,
   },
   timeText: {
     flex: 1,
     marginLeft: 14,
     fontSize: 17,
-    color: '#fff',
+    color: '#000',
     fontWeight: '600',
     letterSpacing: 0.2,
   },

@@ -6,8 +6,7 @@ import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import {
   Image,
-  Modal,
-  ScrollView,
+  Modal, RefreshControl, ScrollView,
   StyleSheet,
   Text,
   TextInput,
@@ -47,35 +46,65 @@ export default function ProfileScreen() {
 
   const API_BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL;
 
-  const getProfileDetails = async () => {
+  const getProfileDetails = async (forceRefresh = false) => {
     try {
       setLoading(true);
+      
+      // Try to get cached profile first if not forcing refresh
+      if (!forceRefresh) {
+        const cachedProfile = await AsyncStorage.getItem(PROFILE_KEY);
+        if (cachedProfile) {
+          setProfile(JSON.parse(cachedProfile));
+          setLoading(false);
+          return; // Use cached data if available
+        }
+      }
+      
+      // Fetch fresh data from API
       const data = await fetchGet(`${API_BASE_URL}/auth/me`);
       if (data.success && data.data) {
-        setProfile({
+        const profileData = {
           name: data.data.name || '',
           email: data.data.email || '',
           height: data.data.height?.toString() || '',
           weight: data.data.weight?.toString() || '',
           age: data.data.age?.toString() || '',
           gender: data.data.gender || '',
-          avatar: '', // Update if API provides avatar
+          avatar: data.data.avatar || '',
           level: data.data.fitnessLevel || '',
           quote: data.data.motivationLevel || '',
-        });
+          lastUpdated: new Date().toISOString(),
+        };
+        
+        setProfile(profileData);
+        await AsyncStorage.setItem(PROFILE_KEY, JSON.stringify(profileData));
       } else {
         showToast('Failed to load profile', 'error');
       }
     } catch (error: any) {
-      showToast('Failed to load profile', 'error');
       console.error('Profile error:', error);
+      if (forceRefresh) {
+        showToast('Failed to refresh profile', 'error');
+      }
     } finally {
       setLoading(false);
     }
   };
+  
+  // Add pull-to-refresh handler
+  const handleRefresh = () => {
+    getProfileDetails(true); // Force refresh
+  };
 
   useEffect(() => {
     getProfileDetails();
+    
+    // Set up interval to refresh data every 30 minutes
+    const interval = setInterval(() => {
+      getProfileDetails(true);
+    }, 30 * 60 * 1000);
+    
+    return () => clearInterval(interval);
   }, []);
 
   const pickAvatar = async () => {
@@ -186,6 +215,24 @@ export default function ProfileScreen() {
           <AntDesign name="right" size={20} color="#aaa" />
         </TouchableOpacity>
 
+        {/* Health Metrics Summary */}
+        <View style={styles.healthMetricsContainer}>
+          <View style={styles.healthMetric}>
+            <Text style={styles.healthMetricValue}>{profile.height || '--'}</Text>
+            <Text style={styles.healthMetricLabel}>Height (cm)</Text>
+          </View>
+          <View style={styles.healthMetricDivider} />
+          <View style={styles.healthMetric}>
+            <Text style={styles.healthMetricValue}>{profile.weight || '--'}</Text>
+            <Text style={styles.healthMetricLabel}>Weight (kg)</Text>
+          </View>
+          <View style={styles.healthMetricDivider} />
+          <View style={styles.healthMetric}>
+            <Text style={styles.healthMetricValue}>{profile.age || '--'}</Text>
+            <Text style={styles.healthMetricLabel}>Age</Text>
+          </View>
+        </View>
+
         <TouchableOpacity
           style={styles.achievementsTile}
           onPress={() => router.push('/profile/achievements')}
@@ -209,7 +256,17 @@ export default function ProfileScreen() {
         </TouchableOpacity>
       </View>
 
-      <ScrollView contentContainerStyle={{ alignItems: 'center', paddingBottom: 40 }}>
+      <ScrollView 
+        contentContainerStyle={{ alignItems: 'center', paddingBottom: 40 }}
+        refreshControl={
+          <RefreshControl
+            refreshing={loading}
+            onRefresh={handleRefresh}
+            colors={['#4CAF50']}
+            tintColor='#4CAF50'
+          />
+        }
+      >
         <Modal
           visible={editModalVisible}
           animationType="slide"
@@ -258,7 +315,6 @@ export default function ProfileScreen() {
     </View>
   );
 }
-
 
 const styles = StyleSheet.create({
   container: {
@@ -523,6 +579,42 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     width: '100%',
+  },
+  healthMetricsContainer: {
+    backgroundColor: '#ffffff',
+    borderRadius: 12,
+    padding: 16,
+    marginVertical: 12,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 1,
+    borderWidth: 1,
+    borderColor: '#e5e7eb',
+    width: '100%',
+  },
+  healthMetric: {
+    alignItems: 'center',
+    flex: 1,
+  },
+  healthMetricValue: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#1a1a1a',
+    marginBottom: 4,
+  },
+  healthMetricLabel: {
+    fontSize: 13,
+    color: '#6b7280',
+  },
+  healthMetricDivider: {
+    width: 1,
+    height: 40,
+    backgroundColor: '#e5e7eb',
   },
   achievementsTile: {
     backgroundColor: '#f0f0f0', // Light background
