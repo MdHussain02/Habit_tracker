@@ -269,7 +269,7 @@ const styles = StyleSheet.create({
     paddingVertical: 20,
   },
   suggestionCard: {
-    backgroundColor: '#fff',
+    backgroundColor: '#dfe6f5',
     borderRadius: 12,
     padding: 0,
     marginBottom: 16,

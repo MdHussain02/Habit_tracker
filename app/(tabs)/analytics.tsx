@@ -109,35 +109,7 @@ export default function AnalyticsScreen() {
     );
   }
 
-  const { analysis, metrics, userProfile } = analysisData;
-
-  // const renderProgressBar = (percentage: number) => {
-  //   return (
-  //     <View style={styles.progressBarContainer}>
-  //       <View style={styles.progressBarBackground}>
-  //         <View style={[styles.progressBarFill, { width: `${percentage}%` }]} />
-  //       </View>
-  //       <Text style={styles.progressText}>{percentage}%</Text>
-  //     </View>
-  //   );
-  // };
-
-  // const renderSection = (title: string, items: string[], icon: string, color: string) => (
-  //   <View style={styles.section}>
-  //     <View style={styles.sectionHeader}>
-  //       <Ionicons name={icon as any} size={20} color={color} />
-  //       <Text style={[styles.sectionTitle, { color, marginLeft: 8 }]}>{title}</Text>
-  //     </View>
-  //     <View style={styles.listContainer}>
-  //       {items.map((item, index) => (
-  //         <View key={index} style={styles.listItem}>
-  //           <View style={{ backgroundColor: color }} />
-  //           <Text style={styles.listText}>{item}</Text>
-  //         </View>
-  //       ))}
-  //     </View>
-  //   </View>
-  // );
+  const { analysis, metrics } = analysisData;
 
   return (
     <View style={styles.container}>
@@ -185,20 +157,6 @@ export default function AnalyticsScreen() {
 
       <View style={styles.content}>
         {/* Metrics Section */}
-       
-
-
-        {/* <View style={styles.section}>
-          <View style={styles.sectionHeader}>
-            <Ionicons name="person-circle" size={20} color={PookieColors.hotPink} />
-            <Text style={[styles.sectionTitle, { marginLeft: 8 }]}>Your Profile</Text>
-          </View>
-          <View style={styles.profileInfo}>
-            <Text style={styles.infoText}><Text style={styles.infoLabel}>Goal:</Text> {userProfile.primaryGoal}</Text>
-            <Text style={styles.infoText}><Text style={styles.infoLabel}>Fitness Level:</Text> {userProfile.fitnessLevel}</Text>
-            <Text style={styles.infoText}><Text style={styles.infoLabel}>Motivation:</Text> {userProfile.motivationLevel}</Text>
-          </View>
-        </View> */}
         {/* Strengths */}
         {analysis.strengths.length > 0 && (
           <View style={styles.section}>
@@ -391,6 +349,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   header: {
+    flexDirection: 'row',
     paddingTop: 60,
     paddingBottom: 16,
     alignItems: 'center',
@@ -400,10 +359,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   headerTitle: {
-    fontSize: 22,
+    fontSize: 20,
     fontWeight: '700',
-    color: '#1a1a1a',
-    textAlign: 'center',
+    color: '#111827',
+    letterSpacing: -0.5,
   },
   scrollView: {
     flex: 1,

@@ -211,12 +211,11 @@ export default function SettingsScreen() {
             <Text style={styles.settingDescription}>{item.description}</Text>
           </View>
           <View style={styles.settingIcon}>
-            <Ionicons name={item.icon} size={24} color={PookieColors.hotPink} />
+            <Ionicons name={item.icon as any} size={20} color={PookieColors.hotPink} />
           </View>
         </View>
-        <View style={styles.settingDivider} />
         <View style={styles.settingControl}>
-          <Text style={styles.settingLabel}>
+          <Text style={styles.statusText}>
             {item.type === "toggle"
               ? item.value
                 ? "Enabled"
@@ -227,8 +226,8 @@ export default function SettingsScreen() {
             <Switch
               value={item.value}
               onValueChange={item.onValueChange}
-              trackColor={{ false: "#767577", true: PookieColors.hotPink }}
-              thumbColor={item.value ? "#f5dd4b" : "#f4f3f4"}
+              trackColor={{ false: "#e2e8f0", true: PookieColors.hotPink }}
+              thumbColor="#fff"
             />
           )}
         </View>
@@ -237,7 +236,8 @@ export default function SettingsScreen() {
   };
 
   return (
-    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+    <View style={styles.container}>
+      {/* Static Header */}
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Settings</Text>
         <Text style={styles.headerDescription}>
@@ -245,205 +245,280 @@ export default function SettingsScreen() {
         </Text>
       </View>
 
-      {error && (
-        <View style={styles.errorContainer}>
-          <Text style={styles.errorText}>{error}</Text>
+      {/* Scrollable Content */}
+      <ScrollView 
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollViewContent}
+        showsVerticalScrollIndicator={false}
+      >
+        {error && (
+          <View style={styles.errorContainer}>
+            <Text style={styles.errorText}>{error}</Text>
+          </View>
+        )}
+
+        <View style={styles.content}>
+          {settingsSections.map((section, index) => (
+            <View key={index} style={styles.section}>
+              <Text style={styles.sectionTitle}>{section.title}</Text>
+              <Text style={styles.sectionDescription}>{section.description}</Text>
+              
+              {section.items.map((item) => (
+                <View key={item.id} style={styles.settingCard}>
+                  <View style={styles.settingHeader}>
+                    <View style={styles.settingInfo}>
+                      <Text style={styles.settingTitle}>{item.title}</Text>
+                      <Text style={styles.settingDescription}>
+                        {item.description}
+                      </Text>
+                    </View>
+                    <View style={styles.settingIcon}>
+                      <Ionicons
+                        name={item.icon as any}
+                        size={20}
+                        color={PookieColors.hotPink}
+                      />
+                    </View>
+                  </View>
+                  <View style={styles.settingControl}>
+                    <Switch
+                      value={item.value}
+                      onValueChange={item.onValueChange}
+                      trackColor={{ false: '#e2e8f0', true: PookieColors.hotPink }}
+                      thumbColor="#fff"
+                    />
+                  </View>
+                </View>
+              ))}
+            </View>
+          ))}
+
+          {/* Test Notifications Section */}
+          <View style={styles.testSection}>
+            <Text style={styles.testSectionTitle}>Test Notifications</Text>
+              <Button
+              onPress={handleTestNotification}
+              style={styles.testButton}
+            >
+              Send Test Notification
+            </Button>
+            <Button
+              onPress={handleTriggerTestNotifications}
+              style={[styles.testButton, { marginTop: 12 }] as any}
+            >
+              Trigger Test Notifications
+            </Button>
+            <Button
+              onPress={handleStartTestNotifications}
+              style={[styles.testButton, { marginTop: 12 }] as any}
+            >
+              Start Test Notifications
+            </Button>
+            <Button
+              onPress={handleStopTestNotifications}
+              style={[styles.testButton, { marginTop: 12 }] as any}
+            >
+              Stop Test Notifications
+            </Button>
+            <Button
+              onPress={handleGetJobsStatus}
+              style={[styles.testButton, { marginTop: 12 }] as any}
+            >
+              Get Jobs Status
+            </Button>
+          </View>
+
+          {/* Logout Button */}
+          <View style={styles.logoutSection}>
+            <Button
+              onPress={() => {
+                Alert.alert(
+                  "Logout",
+                  "Are you sure you want to logout?",
+                  [
+                    {
+                      text: "Cancel",
+                      style: "cancel"
+                    },
+                    { 
+                      text: "Logout", 
+                      onPress: () => {
+                        logout();
+                        router.replace('/login');
+                      } 
+                    }
+                  ]
+                );
+              }}
+              style={styles.logoutButton}
+            >
+              Logout
+            </Button>
+          </View>
         </View>
-      )}
-
-      {settingsSections.map((section) => (
-        <View key={section.title} style={styles.section}>
-          <Text style={styles.sectionTitle}>{section.title}</Text>
-          <Text style={styles.sectionDescription}>{section.description}</Text>
-          {section.items.map(renderSettingItem)}
-        </View>
-      ))}
-
-      <View style={styles.testSection}>
-        <Text style={styles.testSectionTitle}>Test Notifications</Text>
-        <Button
-          onPress={handleTestNotification}
-          style={styles.testButton}
-        >
-          Send Test Notification
-        </Button>
-        <Button
-          onPress={handleTriggerTestNotifications}
-          style={styles.testButton}
-        >
-          Trigger Test Notifications
-        </Button>
-        <Button
-          onPress={handleStartTestNotifications}
-          style={styles.testButton}
-        >
-          Send Test Notification
-        </Button>
-        <Button
-          onPress={handleTriggerTestNotifications}
-          style={styles.testButton}
-        >
-          Trigger Test Notifications
-        </Button>
-      </View>
-
-      <View style={styles.logoutSection}>
-        <Button
-          onPress={() => {
-            Alert.alert(
-              "Logout",
-              "Are you sure you want to logout?",
-              [
-                { text: "Cancel", style: "cancel" },
-                { text: "Logout", onPress: logout, style: "destructive" },
-              ]
-            );
-          }}
-          style={styles.logoutButton}
-        >Logout</Button>
-      </View>
-    </ScrollView>
+      </ScrollView>
+    </View>
   );
 }
 
-const styles = StyleSheet.create({
+  const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#ffffff",
+    backgroundColor: "#f8f9fa",
   },
-  gradientBackground: {
+  content: {
     flex: 1,
-    backgroundColor: "#ffffff",
   },
-
-  logoutButton: {
-    marginBottom: 40,
+  statusText: {
+    fontSize: 14,
+    color: '#64748b',
+    fontWeight: '500',
   },
   header: {
-    paddingTop: 60,
+    paddingTop: 50,
     paddingBottom: 20,
-    alignItems: "center",
+    paddingHorizontal: 20,
+    backgroundColor: '#fff',
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 3,
+    zIndex: 10,
   },
   headerTitle: {
     fontSize: 24,
-    fontWeight: "bold",
-    color: "#1a1a1a",
+    fontWeight: '700',
+    color: '#1a1a1a',
+    marginBottom: 4,
   },
   headerDescription: {
-    fontSize: 16,
-    color: "#666",
-    marginTop: 8,
+    fontSize: 14,
+    color: '#64748b',
+    lineHeight: 20,
   },
   scrollView: {
     flex: 1,
-    paddingHorizontal: 20,
+  },
+  scrollViewContent: {
+    padding: 16,
+    paddingTop: 20,
     paddingBottom: 40,
   },
   section: {
-    marginBottom: 30,
-  },
-  sectionTitle: {
-    fontSize: 20,
-    fontWeight: "bold",
-    color: "#1a1a1a",
-    marginBottom: 8,
-  },
-  sectionDescription: {
-    fontSize: 14,
-    color: "#666",
-    marginBottom: 16,
-  },
-  settingCard: {
-    backgroundColor: "#ffffff",
-    borderRadius: 16,
-    padding: 20,
-    marginBottom: 12,
-    borderWidth: 1,
-    borderColor: "#f0f0f0",
+    marginBottom: 20,
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 16,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.05,
     shadowRadius: 4,
-    elevation: 2,
+    elevation: 1,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#1a1a1a',
+    marginBottom: 12,
+    letterSpacing: -0.3,
+  },
+  sectionDescription: {
+    fontSize: 14,
+    color: '#64748b',
+    marginBottom: 16,
+    lineHeight: 20,
+  },
+  settingCard: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 8,
+    borderWidth: 1,
+    borderColor: '#f1f5f9',
   },
   settingHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "flex-start",
-    marginBottom: 16,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: 12,
   },
   settingInfo: {
     flex: 1,
-    marginRight: 12,
+    marginRight: 16,
   },
   settingTitle: {
     fontSize: 16,
-    fontWeight: "600",
-    color: "#1a1a1a",
-    marginBottom: 8,
+    fontWeight: '600',
+    color: '#1e293b',
+    marginBottom: 4,
   },
   settingDescription: {
-    fontSize: 14,
-    color: "#666",
+    fontSize: 13.5,
+    color: '#64748b',
     lineHeight: 20,
   },
   settingIcon: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: "#f8f8f8",
-    justifyContent: "center",
-    alignItems: "center",
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    backgroundColor: '#f8fafc',
+    justifyContent: 'center',
+    alignItems: 'center',
     borderWidth: 1,
-    borderColor: "#f0f0f0",
-  },
-  settingDivider: {
-    height: 1,
-    backgroundColor: "#f0f0f0",
-    marginBottom: 16,
+    borderColor: '#e2e8f0',
   },
   settingControl: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingTop: 8,
   },
-  settingLabel: {
-    fontSize: 14,
-    color: "#4a4a4a",
-    fontWeight: "500",
-  },
+  logoutButton: {
+    marginTop: 8,
+    marginBottom: 40,
+    backgroundColor: '#fff',
+    borderWidth: 1,
+    borderColor: '#fee2e2',
+  } as const,
   logoutButtonText: {
-    color: "#fff",
-    fontWeight: "bold",
-    fontSize: 16,
+    color: '#dc2626',
+    fontWeight: '600',
+    fontSize: 15,
   },
   errorContainer: {
-    backgroundColor: "#ffebee",
-    padding: 15,
-    borderRadius: 10,
-    marginBottom: 20,
-    alignItems: "center",
+    backgroundColor: '#fef2f2',
+    padding: 16,
+    borderRadius: 12,
+    marginBottom: 24,
     borderLeftWidth: 4,
-    borderLeftColor: "#f44336",
+    borderLeftColor: '#ef4444',
   },
   errorText: {
-    color: "#fff",
+    color: '#b91c1c',
     fontSize: 14,
+    lineHeight: 20,
   },
   testSection: {
-    paddingHorizontal: 20,
-    marginBottom: 20,
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    padding: 20,
+    marginBottom: 16,
   },
   testButton: {
     backgroundColor: PookieColors.hotPink,
-  },
+    marginTop: 8,
+  } as const,
   testSectionTitle: {
-    fontSize: 18,
-    fontWeight: "600",
-    color: "#1a1a1a",
-    marginBottom: 12,
+    fontSize: 17,
+    fontWeight: '700',
+    color: '#1a1a1a',
+    marginBottom: 16,
   },
   logoutSection: {
-    paddingHorizontal: 20,
+    paddingHorizontal: 16,
+    marginTop: 8,
   },
 });

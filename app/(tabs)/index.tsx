@@ -207,14 +207,6 @@ export default function HomeScreen() {
       {/* Header with Add Button - Always Visible */}
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Today's Habits</Text>
-        <TouchableOpacity
-          style={styles.addButton}
-          onPress={() => router.push('/add-habit')}
-          activeOpacity={0.8}
-          testID="add-habit-button"
-        >
-          <Ionicons name="add" size={24} color="#fff" />
-        </TouchableOpacity>
       </View>
       
       {/* Main Content Area */}
@@ -267,6 +259,15 @@ export default function HomeScreen() {
             }
           />
         )}
+          <TouchableOpacity
+               
+          style={styles.addButton}
+          onPress={() => router.push('/add-habit')}
+          activeOpacity={0.8}
+          testID="add-habit-button"
+        >
+          <Ionicons name="add" size={24} color="#fff" />
+        </TouchableOpacity>
       </View>
     </View>
   );
@@ -274,7 +275,7 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F8FAFC',
+    backgroundColor: '#f8f8f8',
   },
   // Modal Styles
   modalOverlay: {
@@ -339,43 +340,31 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    paddingTop: 60,
+    paddingBottom: 16,
     alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingTop: 50,
-    paddingBottom: 20,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#ffffff',
     borderBottomWidth: 1,
-    borderBottomColor: '#E5E7EB',
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 1,
+    borderBottomColor: '#eaeaea',
+    paddingHorizontal: 20,
   },
   headerTitle: {
-    fontSize: 28,
+    fontSize: 20,
     fontWeight: '700',
     color: '#111827',
     letterSpacing: -0.5,
   },
   addButton: {
-    width: 48,
-    height: 48,
+    width: 50,
+    height: 50,
     borderRadius: 24,
-    backgroundColor: '#ff6b35',
+    backgroundColor: '#4CAF50',
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: '#ff6b35',
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
     elevation: 6,
+    position: 'absolute',
+    right: 40,
+    bottom: 100,
   },
   content: {
     flex: 1,

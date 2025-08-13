@@ -99,7 +99,7 @@ export default function AddHabitPage() {
       <ScrollView contentContainerStyle={styles.container}>
         <View style={styles.headerRow}>
           <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-            <Ionicons name="arrow-back" size={28} color="#fff" />
+            <Ionicons name="arrow-back" size={28} color="#1a1a1a" />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Add New Habit</Text>
         </View>
@@ -108,7 +108,7 @@ export default function AddHabitPage() {
         <TextInput
           style={styles.input}
           placeholder="Enter habit name"
-          placeholderTextColor="#666"
+          placeholderTextColor="#9ca3af"
           value={habitName}
           onChangeText={setHabitName}
         />
@@ -124,7 +124,7 @@ export default function AddHabitPage() {
               ]}
               onPress={() => setSelectedIconId(icon.id)}
             >
-              <Ionicons name={icon.name as any} size={32} color={selectedIconId === icon.id ? '#fff' : '#ccc'} />
+              <Ionicons name={icon.name as any} size={32} color={selectedIconId === icon.id ? '#4f46e5' : '#6b7280'} />
             </TouchableOpacity>
           ))}
         </View>
@@ -166,7 +166,7 @@ export default function AddHabitPage() {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: '#14141c',
+    backgroundColor: '#f8f9fa',
     flexGrow: 1,
     padding: 16,
     paddingTop: 50,
@@ -183,24 +183,29 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#fff',
+    color: '#1a1a1a',
   },
   label: {
     fontSize: 16,
-    color: '#fff',
+    color: '#374151',
     marginBottom: 8,
     marginTop: 16,
-    fontWeight: '500',
+    fontWeight: '600',
   },
   input: {
-    backgroundColor: '#23232b',
+    backgroundColor: '#ffffff',
     borderRadius: 12,
     padding: 16,
-    color: '#fff',
+    color: '#1a1a1a',
     fontSize: 16,
     marginBottom: 16,
     borderWidth: 1,
-    borderColor: '#333',
+    borderColor: '#e5e7eb',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 2,
   },
   iconGrid: {
     flexDirection: 'row',
@@ -212,16 +217,21 @@ const styles = StyleSheet.create({
     width: '22%',
     aspectRatio: 1,
     borderRadius: 12,
-    backgroundColor: '#23232b',
+    backgroundColor: '#ffffff',
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 12,
     borderWidth: 1,
-    borderColor: '#333',
+    borderColor: '#e5e7eb',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 1,
   },
   selectedIconButton: {
-    backgroundColor: '#3a3a3a',
-    borderColor: '#666',
+    backgroundColor: '#f3f4f6',
+    borderColor: '#d1d5db',
   },
   daysContainer: {
     flexDirection: 'row',
@@ -232,36 +242,41 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: '#23232b',
+    backgroundColor: '#ffffff',
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: '#333',
+    borderColor: '#e5e7eb',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 1,
   },
   selectedDayButton: {
-    backgroundColor: '#3a3a3a',
-    borderColor: '#666',
+    backgroundColor: '#f3f4f6',
+    borderColor: '#d1d5db',
   },
   dayText: {
-    color: '#ccc',
+    color: '#4b5563',
     fontWeight: '500',
   },
   selectedDayText: {
-    color: '#fff',
-    fontWeight: 'bold',
+    color: '#111827',
+    fontWeight: '600',
   },
   saveButton: {
     marginTop: 8,
     marginBottom: 32,
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 3,
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
   },
   saveButtonText: {
     color: '#fff',
     fontSize: 18,
     fontWeight: '700',
-    letterSpacing: 0.5,
   },
 });

@@ -491,14 +491,20 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   header: {
+    flexDirection: 'row',
     paddingTop: 60,
-    paddingBottom: 20,
+    paddingBottom: 16,
     alignItems: 'center',
+    backgroundColor: '#ffffff',
+    borderBottomWidth: 1,
+    borderBottomColor: '#eaeaea',
+    paddingHorizontal: 20,
   },
   headerTitle: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#11181C', // Dark text
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#111827',
+    letterSpacing: -0.5,
   },
   scrollView: {
     flex: 1,
@@ -509,7 +515,7 @@ const styles = StyleSheet.create({
   },
   section: {
     marginBottom: 24,
-    // backgroundColor: '#f0f0f0', // Light background
+    backgroundColor: '#dfe6f5', // Light background
     borderRadius: 16,
     padding: 16,
     overflow: 'hidden',
