@@ -409,8 +409,13 @@ export default function CoachScreen() {
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Smart Coach</Text>
+        <View style={styles.header}>
+        <View style={styles.headerTop}>
+          <View>
+            <Text style={styles.greeting}>Coach</Text>
+            <Text style={styles.headerDate}>Your Progress Overview</Text>
+          </View>
+        </View>
       </View>
 
       <ScrollView 
@@ -490,21 +495,35 @@ const styles = StyleSheet.create({
   gradientBackground: {
     flex: 1,
   },
-  header: {
-    flexDirection: 'row',
-    paddingTop: 60,
-    paddingBottom: 16,
-    alignItems: 'center',
-    backgroundColor: '#ffffff',
-    borderBottomWidth: 1,
-    borderBottomColor: '#eaeaea',
-    paddingHorizontal: 20,
+  sectionHeader: {
+    marginBottom: 16,
   },
-  headerTitle: {
-    fontSize: 20,
+
+  header: {
+    backgroundColor: '#2c3e50',
+    paddingTop: 60,
+    paddingBottom: 20,
+    paddingHorizontal: 20,
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
+  },
+
+
+  headerTop: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  greeting: {
+    fontSize: 24,
     fontWeight: '700',
-    color: '#111827',
-    letterSpacing: -0.5,
+    color: '#ffffff',
+    marginBottom: 4,
+  },
+  headerDate: {
+    fontSize: 14,
+    color: '#bdc3c7',
+    fontWeight: '500',
   },
   scrollView: {
     flex: 1,

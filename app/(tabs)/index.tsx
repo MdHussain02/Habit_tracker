@@ -205,8 +205,14 @@ export default function HomeScreen() {
   return (
     <View style={styles.container}>
       {/* Header with Add Button - Always Visible */}
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Today's Habits</Text>
+    {/* Header */}
+    <View style={styles.header}>
+        <View style={styles.headerTop}>
+          <View>
+            <Text style={styles.greeting}>Today's Habits</Text>
+            <Text style={styles.headerDate}>Your Progress Overview</Text>
+          </View>
+        </View>
       </View>
       
       {/* Main Content Area */}
@@ -277,6 +283,37 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#f8f8f8',
   },
+
+  sectionHeader: {
+    marginBottom: 16,
+  },
+
+  header: {
+    backgroundColor: '#2c3e50',
+    paddingTop: 60,
+    paddingBottom: 20,
+    paddingHorizontal: 20,
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
+  },
+
+
+  headerTop: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  greeting: {
+    fontSize: 24,
+    fontWeight: '700',
+    color: '#ffffff',
+    marginBottom: 4,
+  },
+  headerDate: {
+    fontSize: 14,
+    color: '#bdc3c7',
+    fontWeight: '500',
+  },
   // Modal Styles
   modalOverlay: {
     ...StyleSheet.absoluteFillObject,
@@ -337,23 +374,6 @@ const styles = StyleSheet.create({
     color: 'white',
     fontWeight: '600',
   },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingTop: 60,
-    paddingBottom: 16,
-    alignItems: 'center',
-    backgroundColor: '#ffffff',
-    borderBottomWidth: 1,
-    borderBottomColor: '#eaeaea',
-    paddingHorizontal: 20,
-  },
-  headerTitle: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: '#111827',
-    letterSpacing: -0.5,
-  },
   addButton: {
     width: 50,
     height: 50,
@@ -364,7 +384,7 @@ const styles = StyleSheet.create({
     elevation: 6,
     position: 'absolute',
     right: 40,
-    bottom: 100,
+    bottom: 120,
   },
   content: {
     flex: 1,

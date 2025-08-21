@@ -36,7 +36,7 @@ export default function RootLayout() {
         <PushNotificationProvider>
           <ThemeProvider value={colorScheme === 'light' ? DefaultTheme : DarkTheme}>
             <SafeAreaProvider style={{ flex: 1 }}>
-            <StatusBar style={colorScheme === 'dark' ? 'dark' : 'dark'} />
+            <StatusBar style={colorScheme === 'dark' ? 'light' : 'dark'} />
             <Stack 
               screenOptions={{ 
                 headerShown: false,

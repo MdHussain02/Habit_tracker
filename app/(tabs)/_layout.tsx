@@ -1,86 +1,136 @@
-import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+import { Ionicons } from '@expo/vector-icons';
 import { Tabs } from 'expo-router';
 import React from 'react';
-import { Animated, StyleSheet, TouchableOpacity, View } from 'react-native';
-import { ProtectedRoute } from '../../components/ProtectedRoute';
+import { Animated, Easing, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
-// Custom tab bar component with simplified animation
-const CustomTabBar = ({ state, descriptors, navigation }: any) => {
-  // Single animated value for the active tab indicator
+// Configuration for the tab bar
+const TAB_CONFIG = {
+  positions: {
+    0: '3%',    // Coach tab
+    1: '27%',   // Habits tab  
+    2: '51%',   // Stats tab
+    3: '74.5%',   // Profile tab
+  },
+  indicatorWidth: '22%',
+  animation: {
+    duration: 300,
+    easing: Easing.bezier(0.25, 0.1, 0.25, 1),
+  },
+} as const;
+
+// Tab configuration with colors and icons
+const TAB_ITEMS = [
+  {
+    name: 'coach',
+    title: 'Coach',
+    icon: 'bulb' as const,
+    color: '#8B5CF6', // Purple
+    bg: 'rgba(139, 92, 246, 0.15)',
+  },
+  {
+    name: 'index',
+    title: 'Habits',
+    icon: 'infinite' as const,
+    color: '#EC4899', // Pink
+    bg: 'rgba(236, 72, 153, 0.15)',
+  },
+  {
+    name: 'analytics',
+    title: 'Stats',
+    icon: 'analytics' as const,
+    color: '#F59E0B', // Orange/Yellow
+    bg: 'rgba(245, 158, 11, 0.15)',
+
+  },
+  {
+    name: 'profile',
+    title: 'Profile',
+    icon: 'person' as const,
+    color: '#06B6D4', // Cyan
+    bg: 'rgba(6, 182, 212, 0.15)',
+  },
+];
+
+const CustomTabBar = ({ state, navigation }: { state: any, navigation: any }) => {
   const indicatorPosition = React.useRef(new Animated.Value(0)).current;
   
-  // Calculate the position based on the active tab
   const indicatorLeft = indicatorPosition.interpolate({
     inputRange: [0, 1, 2, 3],
-    outputRange: ['2%', '26%', '50%', '74%'],
+    outputRange: Object.values(TAB_CONFIG.positions),
   });
   
-  // Animate the indicator when tab changes
   React.useEffect(() => {
-    Animated.spring(indicatorPosition, {
+    Animated.timing(indicatorPosition, {
       toValue: state.index,
+      duration: TAB_CONFIG.animation.duration,
       useNativeDriver: false,
-      tension: 100,
-      friction: 10,
+      easing: TAB_CONFIG.animation.easing,
     }).start();
   }, [state.index]);
 
+  const activeTab = TAB_ITEMS[state.index];
+
   return (
-    <View style={styles.tabContainer}>
-      <View style={styles.tabBarBackground}>
-        {/* Animated indicator */}
-        <Animated.View 
-          style={[
-            styles.activeIndicator,
-            { 
-              left: indicatorLeft,
-              transform: [{
-                translateX: Animated.multiply(
-                  indicatorPosition.interpolate({
-                    inputRange: [0, 1, 2, 3],
-                    outputRange: [0, 0, 0, 0],
-                  }),
-                  -1
-                )
-              }]
-            }
-          ]} 
-        />
-      </View>
-      
-      <View style={styles.tabBar}>
-        {state.routes.map((route: any, index: number) => {
-          const { options } = descriptors[route.key];
-          const isFocused = state.index === index;
+    <View style={styles.container}>
+      <View style={styles.tabContainer}>
+        <View style={styles.tabBarBackground}>
+          {/* Animated pill indicator */}
+          <Animated.View 
+            style={[
+              styles.activeIndicator,
+              { 
+                left: indicatorLeft,
+                backgroundColor: activeTab.bg,
+              }
+            ]} 
+          />
+        </View>
+        
+        <View style={styles.tabBar}>
+          {TAB_ITEMS.map((item, index) => {
+            const isFocused = state.index === index;
+            const route = state.routes[index];
+            
+            const onPress = () => {
+              const event = navigation.emit({
+                type: 'tabPress',
+                target: route.key,
+                canPreventDefault: true,
+              });
 
-          const onPress = () => {
-            const event = navigation.emit({
-              type: 'tabPress',
-              target: route.key,
-              canPreventDefault: true,
-            });
+              if (!isFocused && !event.defaultPrevented) {
+                navigation.navigate(route.name);
+              }
+            };
 
-            if (!isFocused && !event.defaultPrevented) {
-              navigation.navigate(route.name);
-            }
-          };
-
-          return (
-            <TouchableOpacity
-              key={route.key}
-              style={styles.tabItem}
-              onPress={onPress}
-              activeOpacity={0.7}
-            >
-              <View style={styles.iconContainer}>
-                {options.tabBarIcon({
-                  color: isFocused ? '#4CAF50' : '#7a7a7a',
-                  size: 24,
-                })}
-              </View>
-            </TouchableOpacity>
-          );
-        })}
+            return (
+              <TouchableOpacity
+                key={item.name}
+                style={styles.tabItem}
+                onPress={onPress}
+                activeOpacity={0.8}
+              >
+                <View style={styles.tabContent}>
+                  <Ionicons 
+                    name={item.icon} 
+                    size={22} 
+                    color={isFocused ? item.color : '#6B7280'} 
+                  />
+                  {isFocused && (
+                    <Text 
+                      style={[
+                        styles.tabLabel, 
+                        { color: item.color }
+                      ]}
+                    >
+                      {item.title}
+                    </Text>
+                  )}
+                </View>
+              </TouchableOpacity>
+            );
+          })}
+        </View>
       </View>
     </View>
   );
@@ -88,61 +138,44 @@ const CustomTabBar = ({ state, descriptors, navigation }: any) => {
 
 export default function TabLayout() {
   return (
-    <ProtectedRoute requireAuth={true}>
-      <Tabs
-        tabBar={(props) => <CustomTabBar {...props} />}
-        screenOptions={{
-          headerShown: false,
-        }}
-      >
+    <Tabs
+      tabBar={(props) => <CustomTabBar {...props} />}
+      screenOptions={{
+        headerShown: false,
+      }}
+    >
+      {TAB_ITEMS.map((item) => (
         <Tabs.Screen
-          name="coach"
+          key={item.name}
+          name={item.name}
           options={{
-            title: 'Coach',
+            title: item.title,
             tabBarIcon: ({ color, size }) => (
-              <Ionicons name="bulb" size={size} color={color} />
+              <Ionicons name={item.icon} size={size} color={color} />
             ),
           }}
         />
-        <Tabs.Screen
-          name="analytics"
-          options={{
-            title: 'Analytics',
-            tabBarIcon: ({ color, size }) => (
-              <MaterialCommunityIcons name="chart-line" size={size} color={color} />
-            ),
-          }}
-        />
-        <Tabs.Screen
-          name="index"
-          options={{
-            title: 'Home',
-            tabBarIcon: ({ color, size }) => (
-              <Ionicons name="home" size={size} color={color} />
-            ),
-          }}
-        />
-        <Tabs.Screen
-          name="profile"
-          options={{
-            title: 'Profile',
-            tabBarIcon: ({ color, size }) => (
-              <Ionicons name="person" size={size} color={color} />
-            ),
-          }}
-        />
-      </Tabs>
-    </ProtectedRoute>
+      ))}
+    </Tabs>
   );
 }
 
+
+
+
+
 const styles = StyleSheet.create({
-  // @ts-ignore - TypeScript has issues with complex style objects
-  tabContainer: {
+  container: {
     position: 'absolute',
-    bottom: 20,
-    left: 20,
-    right: 20,
+    bottom: 0,
+    left: 0,
+    right: 0,
+    paddingBottom: 30,
+    paddingTop: 20,
+    paddingHorizontal: 20,
+  },
+
+  tabContainer: {
     height: 70,
     alignItems: 'center',
     justifyContent: 'center',
@@ -150,29 +183,29 @@ const styles = StyleSheet.create({
   tabBarBackground: {
     position: 'absolute',
     width: '100%',
-    height: 60,
-    backgroundColor: '#ffffff',
-    borderRadius: 30,
+    height: '100%',
+    backgroundColor: '#F8FAFC',
+    borderRadius: 35,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 5,
+    shadowRadius: 24,
+    elevation: 8,
     borderWidth: 1,
     borderColor: 'rgba(0,0,0,0.05)',
   },
   activeIndicator: {
     position: 'absolute',
-    width: '23%',
-    height: '100%',
-    backgroundColor: 'rgba(76, 175, 80, 0.1)',
-    borderRadius: 30,
+    top: 8,
+    width: TAB_CONFIG.indicatorWidth,
+    height: '77%',
+    borderRadius: 28,
   },
   tabBar: {
     flexDirection: 'row',
     backgroundColor: 'transparent',
     width: '100%',
-    height: 60,
+    height: '100%',
     alignItems: 'center',
     justifyContent: 'space-around',
     paddingHorizontal: 8,
@@ -182,14 +215,36 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     height: '100%',
-    padding: 4,
+    paddingVertical: 8,
   },
-  iconContainer: {
-    padding: 10,
-    borderRadius: 20,
+  tabContent: {
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    width: 40,
-    height: 40,
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+  },
+  tabLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+    marginLeft: 6,
+    textAlign: 'center',
   },
 });
+
+
+const screenStyles = StyleSheet.create({
+  screen: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  screenText: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#1F2937',
+  },
+});
+
+// Merge the screen styles with main styles
+Object.assign(styles, screenStyles);
