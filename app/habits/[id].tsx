@@ -78,28 +78,44 @@ export default function HabitDetailsScreen() {
   if (loading) {
     return (
       <View style={styles.container}>
-        <View style={styles.contentContainer}>
+        {/* Header */}
         <View style={styles.header}>
-          <View style={styles.iconPlaceholder} />
-          <View style={styles.titlePlaceholder} />
-        </View>
-        <View style={styles.detailsContainer}>
-          <View style={styles.detailItem}>
-            <View style={styles.detailLabelPlaceholder} />
-            <View style={styles.detailValuePlaceholder} />
-          </View>
-          <View style={styles.detailItem}>
-            <View style={styles.detailLabelPlaceholder} />
-            <View style={styles.detailValuePlaceholder} />
-          </View>
-          <View style={styles.detailItem}>
-            <View style={styles.detailLabelPlaceholder} />
-            <View style={styles.detailValuePlaceholder} />
+          <View style={styles.headerTop}>
+            <View>
+              <Text style={styles.greeting}>Habit Details</Text>
+              <Text style={styles.headerDate}>View and manage your habit</Text>
+            </View>
+            <TouchableOpacity
+              style={styles.backButton}
+              onPress={() => router.back()}
+            >
+              <Ionicons name="arrow-back" size={24} color="#ffffff" />
+            </TouchableOpacity>
           </View>
         </View>
-        <View style={styles.actionsContainer}>
-          <View style={styles.actionButtonPlaceholder} />
-        </View>
+
+        <View style={styles.contentContainer}>
+          <View style={styles.habitHeader}>
+            <View style={styles.iconPlaceholder} />
+            <View style={styles.titlePlaceholder} />
+          </View>
+          <View style={styles.detailsContainer}>
+            <View style={styles.detailItem}>
+              <View style={styles.detailLabelPlaceholder} />
+              <View style={styles.detailValuePlaceholder} />
+            </View>
+            <View style={styles.detailItem}>
+              <View style={styles.detailLabelPlaceholder} />
+              <View style={styles.detailValuePlaceholder} />
+            </View>
+            <View style={styles.detailItem}>
+              <View style={styles.detailLabelPlaceholder} />
+              <View style={styles.detailValuePlaceholder} />
+            </View>
+          </View>
+          <View style={styles.actionsContainer}>
+            <View style={styles.actionButtonPlaceholder} />
+          </View>
         </View>
       </View>
     );
@@ -140,20 +156,36 @@ export default function HabitDetailsScreen() {
 
   return (
     <View style={styles.container}>
-      <View style={styles.contentContainer}>
+      {/* Header */}
       <View style={styles.header}>
-        <View style={[styles.iconContainer, { backgroundColor: PookieColors.hotPink + '20' }]}>
-          <Ionicons 
-            name={iconName as any} 
-            size={48} 
-            color={PookieColors.hotPink} 
-          />
+        <View style={styles.headerTop}>
+          <View>
+            <Text style={styles.greeting}>Habit Details</Text>
+            <Text style={styles.headerDate}>View and manage your habit</Text>
+          </View>
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => router.back()}
+          >
+            <Ionicons name="arrow-back" size={24} color="#ffffff" />
+          </TouchableOpacity>
         </View>
-        <Text style={styles.habitName}>{habit.name}</Text>
-        {habit.description && (
-          <Text style={styles.habitDescription}>{habit.description}</Text>
-        )}
       </View>
+
+      <View style={styles.contentContainer}>
+        <View style={styles.habitHeader}>
+          <View style={[styles.iconContainer, { backgroundColor: PookieColors.hotPink + '20' }]}>
+            <Ionicons 
+              name={iconName as any} 
+              size={48} 
+              color={PookieColors.hotPink} 
+            />
+          </View>
+          <Text style={styles.habitName}>{habit.name}</Text>
+          {habit.description && (
+            <Text style={styles.habitDescription}>{habit.description}</Text>
+          )}
+        </View>
 
       <View style={styles.detailsContainer}>
         <View style={styles.detailItem}>
@@ -256,6 +288,38 @@ const styles = StyleSheet.create({
   },
   // Habit details
   header: {
+    backgroundColor: '#2c3e50',
+    paddingTop: 60,
+    paddingBottom: 20,
+    paddingHorizontal: 20,
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
+  },
+  headerTop: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  greeting: {
+    fontSize: 24,
+    fontWeight: '700',
+    color: '#ffffff',
+    marginBottom: 4,
+  },
+  headerDate: {
+    fontSize: 14,
+    color: '#bdc3c7',
+    fontWeight: '500',
+  },
+  backButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 12,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  habitHeader: {
     alignItems: 'center',
     padding: 24,
     borderBottomLeftRadius: 24,

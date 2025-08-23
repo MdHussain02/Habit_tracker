@@ -1,7 +1,7 @@
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 const achievements = [
   { icon: <MaterialCommunityIcons name="chat-processing" size={36} color="#4CAF50" />, title: 'Streak Starter', subtitle: 'Achieved 7-day streak' },
@@ -14,7 +14,22 @@ export default function AchievementsScreen() {
   const router = useRouter();
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Achievements</Text>
+      {/* Header */}
+      <View style={styles.header}>
+        <View style={styles.headerTop}>
+          <View>
+            <Text style={styles.greeting}>Achievements</Text>
+            <Text style={styles.headerDate}>Celebrate your milestones</Text>
+          </View>
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => router.back()}
+          >
+            <Ionicons name="arrow-back" size={24} color="#ffffff" />
+          </TouchableOpacity>
+        </View>
+      </View>
+
       <ScrollView contentContainerStyle={styles.achievementsContainer}>
         {achievements.map((ach, idx) => (
           <View key={idx} style={styles.achievementBadge}>
@@ -36,12 +51,37 @@ const styles = StyleSheet.create({
     paddingTop: 48,
     paddingHorizontal: 16,
   },
-  title: {
-    color: '#1a1a1a',
+  header: {
+    backgroundColor: '#2c3e50',
+    paddingTop: 60,
+    paddingBottom: 20,
+    paddingHorizontal: 20,
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
+  },
+  headerTop: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  greeting: {
     fontSize: 24,
     fontWeight: '700',
-    marginBottom: 24,
-    textAlign: 'center',
+    color: '#ffffff',
+    marginBottom: 4,
+  },
+  headerDate: {
+    fontSize: 14,
+    color: '#bdc3c7',
+    fontWeight: '500',
+  },
+  backButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 12,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   achievementsContainer: {
     flexDirection: 'row',

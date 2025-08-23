@@ -207,16 +207,22 @@ const CategorySuggestionsScreen = () => {
 
   return (
     <View style={styles.container}>
+      {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity 
-          style={styles.backButton}
-          onPress={() => router.back()}
-        >
-          <Ionicons name="arrow-back" size={24} color="#000000ff" />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>
-          {category.charAt(0).toUpperCase() + category.slice(1)} Suggestions
-        </Text>
+        <View style={styles.headerTop}>
+          <View>
+            <Text style={styles.greeting}>
+              {category.charAt(0).toUpperCase() + category.slice(1)} Suggestions
+            </Text>
+            <Text style={styles.headerDate}>AI-powered habit recommendations</Text>
+          </View>
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => router.back()}
+          >
+            <Ionicons name="arrow-back" size={24} color="#ffffff" />
+          </TouchableOpacity>
+        </View>
       </View>
 
       <ScrollView style={styles.scrollView}>
@@ -244,22 +250,36 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
   header: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    backgroundColor: '#2c3e50',
     paddingTop: 60,
     paddingBottom: 20,
     paddingHorizontal: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: '#ccc',
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
+  },
+  headerTop: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  greeting: {
+    fontSize: 24,
+    fontWeight: '700',
+    color: '#ffffff',
+    marginBottom: 4,
+  },
+  headerDate: {
+    fontSize: 14,
+    color: '#bdc3c7',
+    fontWeight: '500',
   },
   backButton: {
-    marginRight: 16,
-    color: '#000000ff',
-  },
-  headerTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#000',
+    width: 44,
+    height: 44,
+    borderRadius: 12,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   scrollView: {
     flex: 1,

@@ -117,12 +117,17 @@ export default function AnalyticsScreen() {
       <View style={styles.header}>
         <View style={styles.headerTop}>
           <View>
-            <Text style={styles.greeting}>Hello!</Text>
-            <Text style={styles.headerDate}>Your Progress Overview</Text>
+            <Text style={styles.greeting}>Analytics</Text>
+            <Text style={styles.headerDate}>Track your progress & insights</Text>
+          </View>
+          <View style={styles.headerStats}>
+            <View style={styles.headerStatItem}>
+              <Text style={styles.headerStatValue}>{metrics.consistencyScore}%</Text>
+              <Text style={styles.headerStatLabel}>Consistency</Text>
+            </View>
           </View>
         </View>
       </View>
-
 
       <ScrollView
         style={styles.scrollView}
@@ -137,95 +142,101 @@ export default function AnalyticsScreen() {
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.content}>
-          {/* Main Stats Cards */}
-          <View style={styles.mainStatsContainer}>
-            <View style={styles.primaryStatCard}>
-              <View style={styles.statIcon}>
-                <Ionicons name="trophy" size={28} color={PookieColors.hotPink} />
+          {/* Progress Overview Card */}
+          <View style={styles.progressOverviewCard}>
+            <View style={styles.progressHeader}>
+              <Text style={styles.progressTitle}>Progress Overview</Text>
+              <Text style={styles.progressSubtitle}>This week's performance</Text>
+            </View>
+            <View style={styles.progressStats}>
+              <View style={styles.progressStat}>
+                <View style={[styles.progressCircle, { backgroundColor: 'rgba(76, 175, 80, 0.1)', borderColor: 'rgba(76, 175, 80, 0.3)' }]}>
+                  <Text style={[styles.progressPercentage, { color: '#4CAF50' }]}>{metrics.consistencyScore}%</Text>
+                </View>
+                <Text style={styles.progressLabel}>Consistency</Text>
               </View>
-              <Text style={styles.primaryStatValue}>{metrics.consistencyScore}%</Text>
-              <Text style={styles.primaryStatLabel}>Consistency Score</Text>
+              <View style={styles.progressStat}>
+                <View style={[styles.progressCircle, { backgroundColor: 'rgba(255, 107, 53, 0.1)', borderColor: 'rgba(255, 107, 53, 0.3)' }]}>
+                  <Text style={[styles.progressPercentage, { color: '#FF6B35' }]}>{metrics.balanceScore}%</Text>
+                </View>
+                <Text style={styles.progressLabel}>Balance</Text>
+              </View>
+              <View style={styles.progressStat}>
+                <View style={[styles.progressCircle, { backgroundColor: 'rgba(156, 39, 176, 0.1)', borderColor: 'rgba(156, 39, 176, 0.3)' }]}>
+                  <Text style={[styles.progressPercentage, { color: '#9C27B0' }]}>{metrics.activeHabits}</Text>
+                </View>
+                <Text style={styles.progressLabel}>Active Habits</Text>
+              </View>
+            </View>
+          </View>
+
+          {/* Quick Insights Grid */}
+          <View style={styles.insightsGrid}>
+            <View style={styles.insightCard}>
+              <View style={[styles.insightIcon, { backgroundColor: 'rgba(76, 175, 80, 0.1)' }]}>
+                <Ionicons name="trending-up" size={24} color="#4CAF50" />
+              </View>
+              <Text style={styles.insightValue}>{metrics.totalHabits}</Text>
+              <Text style={styles.insightLabel}>Total Habits</Text>
             </View>
             
-            <View style={styles.secondaryStatCard}>
-              <View style={styles.statIcon}>
-                <Ionicons name="flame" size={24} color="#FF6B35" />
+            <View style={styles.insightCard}>
+              <View style={[styles.insightIcon, { backgroundColor: 'rgba(33, 150, 243, 0.1)' }]}>
+                <Ionicons name="checkmark-circle" size={24} color="#2196F3" />
               </View>
-              <Text style={styles.secondaryStatValue}>{metrics.balanceScore}%</Text>
-              <Text style={styles.secondaryStatLabel}>Balance Score</Text>
+              <Text style={styles.insightValue}>{metrics.activeHabits}</Text>
+              <Text style={styles.insightLabel}>Active</Text>
+            </View>
+            
+            <View style={styles.insightCard}>
+              <View style={[styles.insightIcon, { backgroundColor: 'rgba(156, 39, 176, 0.1)' }]}>
+                <Ionicons name="calendar" size={24} color="#9C27B0" />
+              </View>
+              <Text style={styles.insightValue}>{metrics.averageFrequency.toFixed(1)}x</Text>
+              <Text style={styles.insightLabel}>Per Week</Text>
+            </View>
+            
+            <View style={styles.insightCard}>
+              <View style={[styles.insightIcon, { backgroundColor: 'rgba(255, 152, 0, 0.1)' }]}>
+                <Ionicons name="person" size={24} color="#FF9800" />
+              </View>
+              <Text style={styles.insightValue}>{userProfile.age}</Text>
+              <Text style={styles.insightLabel}>Age</Text>
             </View>
           </View>
 
-          {/* Quick Stats Grid */}
-          <View style={styles.quickStatsGrid}>
-            <View style={styles.quickStatCard}>
-              <View style={styles.quickStatTop}>
-                <Ionicons name="list" size={20} color="#4CAF50" />
-                <Text style={styles.quickStatValue}>{metrics.totalHabits}</Text>
+          {/* Profile Summary Card */}
+          <View style={styles.profileSummaryCard}>
+            <View style={styles.profileSummaryHeader}>
+              <View style={styles.profileAvatar}>
+                <Ionicons name="person-circle" size={32} color={PookieColors.hotPink} />
               </View>
-              <Text style={styles.quickStatLabel}>Total Habits</Text>
-            </View>
-
-            <View style={styles.quickStatCard}>
-              <View style={styles.quickStatTop}>
-                <Ionicons name="checkmark-circle" size={20} color="#2196F3" />
-                <Text style={styles.quickStatValue}>{metrics.activeHabits}</Text>
+              <View style={styles.profileInfo}>
+                <Text style={styles.profileLevel}>{userProfile.fitnessLevel}</Text>
+                <Text style={styles.profileGoal}>{userProfile.primaryGoal}</Text>
               </View>
-              <Text style={styles.quickStatLabel}>Active</Text>
-            </View>
-
-            <View style={styles.quickStatCard}>
-              <View style={styles.quickStatTop}>
-                <Ionicons name="trending-up" size={20} color="#9C27B0" />
-                <Text style={styles.quickStatValue}>{metrics.averageFrequency.toFixed(1)}</Text>
-              </View>
-              <Text style={styles.quickStatLabel}>Avg Frequency</Text>
-            </View>
-
-            <View style={styles.quickStatCard}>
-              <View style={styles.quickStatTop}>
-                <Ionicons name="person" size={20} color="#FF9800" />
-                <Text style={styles.quickStatValue}>{userProfile.age}</Text>
-              </View>
-              <Text style={styles.quickStatLabel}>Age</Text>
-            </View>
-          </View>
-
-          {/* Profile Info Card */}
-          <View style={styles.profileCard}>
-            <View style={styles.profileHeader}>
-              <Ionicons name="person-circle" size={24} color={PookieColors.hotPink} />
-              <Text style={styles.profileTitle}>Your Profile</Text>
-            </View>
-            <View style={styles.profileDetails}>
-              <View style={styles.profileItem}>
-                <Text style={styles.profileLabel}>Fitness Level</Text>
-                <Text style={styles.profileValue}>{userProfile.fitnessLevel}</Text>
-              </View>
-              <View style={styles.profileItem}>
-                <Text style={styles.profileLabel}>Primary Goal</Text>
-                <Text style={styles.profileValue}>{userProfile.primaryGoal}</Text>
-              </View>
-              <View style={styles.profileItem}>
-                <Text style={styles.profileLabel}>Motivation Level</Text>
-                <Text style={styles.profileValue}>{userProfile.motivationLevel}</Text>
+              <View style={styles.motivationBadge}>
+                <Text style={styles.motivationText}>{userProfile.motivationLevel}</Text>
               </View>
             </View>
           </View>
 
-          {/* Strengths Section */}
+          {/* Analysis Cards */}
           {analysis.strengths.length > 0 && (
             <View style={styles.analysisCard}>
-              <View style={styles.analysisHeader}>
-                <View style={styles.analysisIconContainer}>
-                  <Ionicons name="thumbs-up" size={20} color="#4CAF50" />
+              <View style={styles.analysisCardHeader}>
+                <View style={[styles.analysisIconContainer, { backgroundColor: 'rgba(76, 175, 80, 0.1)', borderColor: 'rgba(76, 175, 80, 0.3)' }]}>
+                  <Ionicons name="thumbs-up" size={24} color="#4CAF50" />
                 </View>
-                <Text style={[styles.analysisTitle, { color: '#4CAF50' }]}>Your Strengths</Text>
+                <View style={styles.analysisTitleContainer}>
+                  <Text style={[styles.analysisTitle, { color: '#4CAF50' }]}>Your Strengths</Text>
+                  <Text style={styles.analysisSubtitle}>Keep up the great work!</Text>
+                </View>
               </View>
               <View style={styles.analysisContent}>
                 {analysis.strengths.map((strength, index) => (
                   <View key={index} style={styles.analysisItem}>
-                    <View style={styles.analysisItemDot} />
+                    <View style={[styles.analysisItemDot, { backgroundColor: '#4CAF50' }]} />
                     <Text style={styles.analysisItemText}>{strength}</Text>
                   </View>
                 ))}
@@ -233,14 +244,16 @@ export default function AnalyticsScreen() {
             </View>
           )}
 
-          {/* Areas for Improvement */}
           {analysis.gaps.length > 0 && (
             <View style={styles.analysisCard}>
-              <View style={styles.analysisHeader}>
-                <View style={styles.analysisIconContainer}>
-                  <Ionicons name="warning" size={20} color="#FF9800" />
+              <View style={styles.analysisCardHeader}>
+                <View style={[styles.analysisIconContainer, { backgroundColor: 'rgba(255, 152, 0, 0.1)', borderColor: 'rgba(255, 152, 0, 0.3)' }]}>
+                  <Ionicons name="warning" size={24} color="#FF9800" />
                 </View>
-                <Text style={[styles.analysisTitle, { color: '#FF9800' }]}>Areas for Improvement</Text>
+                <View style={styles.analysisTitleContainer}>
+                  <Text style={[styles.analysisTitle, { color: '#FF9800' }]}>Areas for Improvement</Text>
+                  <Text style={styles.analysisSubtitle}>Focus on these areas</Text>
+                </View>
               </View>
               <View style={styles.analysisContent}>
                 {analysis.gaps.map((gap, index) => (
@@ -253,14 +266,16 @@ export default function AnalyticsScreen() {
             </View>
           )}
 
-          {/* Recommendations */}
           {analysis.recommendations.length > 0 && (
             <View style={[styles.analysisCard, { marginBottom: 40 }]}>
-              <View style={styles.analysisHeader}>
-                <View style={styles.analysisIconContainer}>
-                  <Ionicons name="bulb" size={20} color={PookieColors.hotPink} />
+              <View style={styles.analysisCardHeader}>
+                <View style={[styles.analysisIconContainer, { backgroundColor: 'rgba(255, 107, 53, 0.1)', borderColor: 'rgba(255, 107, 53, 0.3)' }]}>
+                  <Ionicons name="bulb" size={24} color={PookieColors.hotPink} />
                 </View>
-                <Text style={[styles.analysisTitle, { color: PookieColors.hotPink }]}>Recommendations</Text>
+                <View style={styles.analysisTitleContainer}>
+                  <Text style={[styles.analysisTitle, { color: PookieColors.hotPink }]}>Smart Recommendations</Text>
+                  <Text style={styles.analysisSubtitle}>AI-powered suggestions</Text>
+                </View>
               </View>
               <View style={styles.analysisContent}>
                 {analysis.recommendations.map((recommendation, index) => (
@@ -345,6 +360,24 @@ const styles = StyleSheet.create({
     color: '#bdc3c7',
     fontWeight: '500',
   },
+  headerStats: {
+    flexDirection: 'row',
+    gap: 15,
+  },
+  headerStatItem: {
+    alignItems: 'center',
+  },
+  headerStatValue: {
+    fontSize: 20,
+    fontWeight: '800',
+    color: '#ffffff',
+    marginBottom: 4,
+  },
+  headerStatLabel: {
+    fontSize: 12,
+    color: '#bdc3c7',
+    fontWeight: '500',
+  },
   avatarContainer: {
     width: 50,
     height: 50,
@@ -359,193 +392,225 @@ const styles = StyleSheet.create({
   content: {
     padding: 20,
   },
-  mainStatsContainer: {
+  progressOverviewCard: {
+    backgroundColor: '#ffffff',
+    borderRadius: 16,
+    padding: 20,
+    marginBottom: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  progressHeader: {
+    marginBottom: 16,
+  },
+  progressTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#2c3e50',
+    marginBottom: 4,
+  },
+  progressSubtitle: {
+    fontSize: 14,
+    color: '#7f8c8d',
+    fontWeight: '500',
+  },
+  progressStats: {
     flexDirection: 'row',
+    justifyContent: 'space-around',
+    gap: 10,
+  },
+  progressStat: {
+    alignItems: 'center',
+  },
+  progressCircle: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: 'rgba(76, 175, 80, 0.1)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 8,
+    borderWidth: 3,
+    borderColor: 'rgba(76, 175, 80, 0.2)',
+  },
+  progressPercentage: {
+    fontSize: 28,
+    fontWeight: '800',
+    color: '#4CAF50',
+  },
+  progressLabel: {
+    fontSize: 13,
+    color: '#7f8c8d',
+    fontWeight: '600',
+    textAlign: 'center',
+  },
+  insightsGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
     marginBottom: 20,
     gap: 12,
   },
-  primaryStatCard: {
+  insightCard: {
     backgroundColor: '#ffffff',
     borderRadius: 16,
     padding: 20,
-    flex: 2,
+    width: (width - 56) / 2,
     alignItems: 'center',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
+    shadowOpacity: 0.08,
     shadowRadius: 8,
-    elevation: 4,
+    elevation: 3,
+    borderWidth: 1,
+    borderColor: 'rgba(0, 0, 0, 0.05)',
   },
-  secondaryStatCard: {
+  insightIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: 'rgba(76, 175, 80, 0.1)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  insightValue: {
+    fontSize: 24,
+    fontWeight: '800',
+    color: '#2c3e50',
+    marginBottom: 4,
+  },
+  insightLabel: {
+    fontSize: 13,
+    color: '#7f8c8d',
+    fontWeight: '500',
+    textAlign: 'center',
+  },
+  profileSummaryCard: {
     backgroundColor: '#ffffff',
-    borderRadius: 16,
-    padding: 20,
-    flex: 1,
-    alignItems: 'center',
+    borderRadius: 20,
+    padding: 24,
+    marginBottom: 20,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 4,
+    shadowRadius: 12,
+    elevation: 6,
+    borderWidth: 1,
+    borderColor: 'rgba(0, 0, 0, 0.05)',
   },
-  statIcon: {
+  profileSummaryHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  profileAvatar: {
     width: 60,
     height: 60,
     borderRadius: 30,
     backgroundColor: 'rgba(255, 107, 53, 0.1)',
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 12,
+    marginRight: 15,
+    borderWidth: 2,
+    borderColor: 'rgba(255, 107, 53, 0.2)',
   },
-  primaryStatValue: {
-    fontSize: 32,
-    fontWeight: '800',
-    color: '#2c3e50',
-    marginBottom: 4,
+  profileInfo: {
+    flex: 1,
   },
-  primaryStatLabel: {
-    fontSize: 14,
-    color: '#7f8c8d',
-    fontWeight: '600',
-    textAlign: 'center',
-  },
-  secondaryStatValue: {
-    fontSize: 24,
-    fontWeight: '800',
-    color: '#2c3e50',
-    marginBottom: 4,
-  },
-  secondaryStatLabel: {
-    fontSize: 12,
-    color: '#7f8c8d',
-    fontWeight: '600',
-    textAlign: 'center',
-  },
-  quickStatsGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    marginBottom: 20,
-    gap: 12,
-  },
-  quickStatCard: {
-    backgroundColor: '#ffffff',
-    borderRadius: 12,
-    padding: 16,
-    width: (width - 56) / 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.08,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  quickStatTop: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  quickStatValue: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: '#2c3e50',
-  },
-  quickStatLabel: {
-    fontSize: 13,
-    color: '#7f8c8d',
-    fontWeight: '500',
-  },
-  profileCard: {
-    backgroundColor: '#ffffff',
-    borderRadius: 16,
-    padding: 20,
-    marginBottom: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 4,
-  },
-  profileHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  profileTitle: {
+  profileLevel: {
     fontSize: 18,
     fontWeight: '700',
     color: '#2c3e50',
-    marginLeft: 12,
+    marginBottom: 4,
+    textTransform: 'capitalize',
   },
-  profileDetails: {
-    gap: 12,
-  },
-  profileItem: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: 8,
-  },
-  profileLabel: {
+  profileGoal: {
     fontSize: 14,
     color: '#7f8c8d',
     fontWeight: '500',
+    textTransform: 'capitalize',
   },
-  profileValue: {
-    fontSize: 14,
-    color: '#2c3e50',
+  motivationBadge: {
+    backgroundColor: 'rgba(255, 152, 0, 0.1)',
+    borderRadius: 16,
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 152, 0, 0.2)',
+  },
+  motivationText: {
+    fontSize: 13,
     fontWeight: '600',
+    color: '#FF9800',
     textTransform: 'capitalize',
   },
   analysisCard: {
     backgroundColor: '#ffffff',
-    borderRadius: 16,
-    padding: 20,
+    borderRadius: 20,
+    padding: 24,
     marginBottom: 20,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 4,
+    shadowRadius: 12,
+    elevation: 6,
+    borderWidth: 1,
+    borderColor: 'rgba(0, 0, 0, 0.05)',
   },
-  analysisHeader: {
+  analysisCardHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 16,
+    marginBottom: 20,
   },
   analysisIconContainer: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+    width: 48,
+    height: 48,
+    borderRadius: 24,
     backgroundColor: 'rgba(76, 175, 80, 0.1)',
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 12,
+    marginRight: 16,
+    borderWidth: 2,
+    borderColor: 'rgba(76, 175, 80, 0.2)',
+  },
+  analysisTitleContainer: {
+    flex: 1,
   },
   analysisTitle: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: '700',
+    color: '#2c3e50',
+    marginBottom: 4,
+  },
+  analysisSubtitle: {
+    fontSize: 14,
+    color: '#7f8c8d',
+    fontWeight: '500',
   },
   analysisContent: {
-    gap: 12,
+    gap: 16,
   },
   analysisItem: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    paddingVertical: 4,
+    paddingVertical: 8,
   },
   analysisItemDot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
+    width: 8,
+    height: 8,
+    borderRadius: 4,
     backgroundColor: '#4CAF50',
     marginTop: 8,
-    marginRight: 12,
+    marginRight: 16,
     flexShrink: 0,
   },
   analysisItemText: {
-    fontSize: 14,
-    lineHeight: 20,
+    fontSize: 15,
+    lineHeight: 22,
     color: '#2c3e50',
     flex: 1,
+    fontWeight: '500',
   },
 });

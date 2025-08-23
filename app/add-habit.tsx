@@ -6,7 +6,6 @@ import React, { useState } from 'react';
 import { ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { ProtectedRoute } from '../components/ProtectedRoute';
 import TimePicker from '../components/TimePicker';
-import { HabitReminder } from '../types/habit';
 import { useApi } from '../hooks/useApi';
 
 // Icon options with their corresponding icon_id
@@ -96,70 +95,81 @@ export default function AddHabitPage() {
 
   return (
     <ProtectedRoute requireAuth={true}>
-      <ScrollView contentContainerStyle={styles.container}>
-        <View style={styles.headerRow}>
-          <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-            <Ionicons name="arrow-back" size={28} color="#1a1a1a" />
-          </TouchableOpacity>
-          <Text style={styles.headerTitle}>Add New Habit</Text>
-        </View>
-
-        <Text style={styles.label}>Habit Name</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="Enter habit name"
-          placeholderTextColor="#9ca3af"
-          value={habitName}
-          onChangeText={setHabitName}
-        />
-
-        <Text style={styles.label}>Select an Icon</Text>
-        <View style={styles.iconGrid}>
-          {ICON_OPTIONS.map((icon) => (
+      <View style={styles.container}>
+        {/* Header */}
+        <View style={styles.header}>
+          <View style={styles.headerTop}>
+            <View>
+              <Text style={styles.greeting}>Add New Habit</Text>
+              <Text style={styles.headerDate}>Create a new habit to track</Text>
+            </View>
             <TouchableOpacity
-              key={icon.id}
-              style={[
-                styles.iconButton,
-                selectedIconId === icon.id && styles.selectedIconButton
-              ]}
-              onPress={() => setSelectedIconId(icon.id)}
+              style={styles.backButton}
+              onPress={() => router.back()}
             >
-              <Ionicons name={icon.name as any} size={32} color={selectedIconId === icon.id ? '#4f46e5' : '#6b7280'} />
+              <Ionicons name="arrow-back" size={24} color="#ffffff" />
             </TouchableOpacity>
-          ))}
+          </View>
         </View>
 
-        <Text style={styles.label}>Habit Time</Text>
-        <TimePicker
-          value={targetTime}
-          onTimeChange={setTargetTime}
-          enabled={true}
-          onToggle={() => {}}
-        />
+        <ScrollView contentContainerStyle={styles.scrollContainer}>
+          <Text style={styles.label}>Habit Name</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Enter habit name"
+            placeholderTextColor="#9ca3af"
+            value={habitName}
+            onChangeText={setHabitName}
+          />
 
-        <Text style={styles.label}>Repeat on Days</Text>
-        <View style={styles.daysContainer}>
-          {DAYS_OF_WEEK.map((day) => (
-            <TouchableOpacity
-              key={day.id}
-              style={[styles.dayButton, selectedDays.includes(day.id) && styles.selectedDayButton]}
-              onPress={() => toggleDay(day.id)}
-            >
-              <Text style={[styles.dayText, selectedDays.includes(day.id) && styles.selectedDayText]}>
-                {day.name}
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </View>
+          <Text style={styles.label}>Select an Icon</Text>
+          <View style={styles.iconGrid}>
+            {ICON_OPTIONS.map((icon) => (
+              <TouchableOpacity
+                key={icon.id}
+                style={[
+                  styles.iconButton,
+                  selectedIconId === icon.id && styles.selectedIconButton
+                ]}
+                onPress={() => setSelectedIconId(icon.id)}
+              >
+                <Ionicons name={icon.name as any} size={32} color={selectedIconId === icon.id ? '#4f46e5' : '#6b7280'} />
+              </TouchableOpacity>
+            ))}
+          </View>
 
-        <Button
-          onPress={handleSave}
-          loading={saving}
-          style={styles.saveButton}
-        >
-          {saving ? 'Saving...' : 'Save Habit'}
-        </Button>
-      </ScrollView>
+          <Text style={styles.label}>Habit Time</Text>
+          <TimePicker
+            value={targetTime}
+            onTimeChange={setTargetTime}
+            enabled={true}
+            onToggle={() => {}}
+          />
+
+          <Text style={styles.label}>Repeat on Days</Text>
+          <View style={styles.daysContainer}>
+            {DAYS_OF_WEEK.map((day) => (
+              <TouchableOpacity
+                key={day.id}
+                style={[styles.dayButton, selectedDays.includes(day.id) && styles.selectedDayButton]}
+                onPress={() => toggleDay(day.id)}
+              >
+                <Text style={[styles.dayText, selectedDays.includes(day.id) && styles.selectedDayText]}>
+                  {day.name}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+
+          <Button
+            onPress={handleSave}
+            loading={saving}
+            style={styles.saveButton}
+          >
+            {saving ? 'Saving...' : 'Save Habit'}
+          </Button>
+        </ScrollView>
+      </View>
     </ProtectedRoute>
   );
 }
@@ -167,23 +177,50 @@ export default function AddHabitPage() {
 const styles = StyleSheet.create({
   container: {
     backgroundColor: '#f8f9fa',
-    flexGrow: 1,
-    padding: 16,
-    paddingTop: 50,
+    flex: 1,
   },
-  headerRow: {
+  header: {
+    backgroundColor: '#2c3e50',
+    paddingTop: 60,
+    paddingBottom: 20,
+    paddingHorizontal: 20,
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  headerTop: {
     flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 24,
+  },
+  greeting: {
+    fontSize: 24,
+    fontWeight: '700',
+    color: '#ffffff',
+    marginBottom: 4,
+  },
+  headerDate: {
+    fontSize: 14,
+    color: '#bdc3c7',
+    fontWeight: '500',
   },
   backButton: {
-    padding: 8,
-    marginRight: 16,
+    width: 44,
+    height: 44,
+    borderRadius: 12,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  headerTitle: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#1a1a1a',
+  scrollContainer: {
+    flexGrow: 1,
+    padding: 16,
+    paddingTop: 20,
+    paddingBottom: 32,
   },
   label: {
     fontSize: 16,

@@ -7,6 +7,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import {
+  Dimensions,
   Platform,
   RefreshControl,
   ScrollView,
@@ -16,6 +17,8 @@ import {
   UIManager,
   View
 } from 'react-native';
+
+const { width } = Dimensions.get('window');
 
 // Enable LayoutAnimation for Android
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
@@ -149,7 +152,6 @@ export default function CoachScreen() {
       
       if (response.success) {
         showToast('Habit created successfully!', 'success');
-        // Navigate to home tab
         router.replace('/(tabs)');
       } else {
         showToast(response.error || 'Failed to create habit', 'error');
@@ -170,14 +172,8 @@ export default function CoachScreen() {
     };
 
     const onTextLayout = (e: any) => {
-      const { lineHeight } = e.nativeEvent;
-      const maxLines = 3;
-      const maxHeight = lineHeight * maxLines;
-      const currentHeight = e.nativeEvent.lines.reduce((acc: number, line: any) => {
-        return acc + line.height;
-      }, 0);
-      
-      setShowReadMore(currentHeight > maxHeight);
+      const { lines } = e.nativeEvent;
+      setShowReadMore(lines.length > 3);
     };
 
     const getCategoryColor = (category: string) => {
@@ -239,15 +235,15 @@ export default function CoachScreen() {
         
         <View style={styles.suggestionMeta}>
           <View style={styles.metaItem}>
-            <Ionicons name="time-outline" size={16} color="#888" />
+            <Ionicons name="time-outline" size={16} color="#7f8c8d" />
             <Text style={styles.metaText}>{formatTime(suggestion.target_time)}</Text>
           </View>
           <View style={styles.metaItem}>
-            <Ionicons name="repeat" size={16} color="#888" />
+            <Ionicons name="repeat" size={16} color="#7f8c8d" />
             <Text style={styles.metaText}>{formatRepeats(suggestion.repeats)}</Text>
           </View>
           <View style={styles.metaItem}>
-            <Ionicons name="timer-outline" size={16} color="#888" />
+            <Ionicons name="timer-outline" size={16} color="#7f8c8d" />
             <Text style={styles.metaText}>{suggestion.estimated_duration} min</Text>
           </View>
         </View>
@@ -300,9 +296,7 @@ export default function CoachScreen() {
     categoryKey: string;
     subtitle: string;
   }) => {
-    // Don't render anything if no suggestions and still loading
     if (loading && suggestions.length === 0) return null;
-    // Don't render the section if no suggestions after loading
     if (!loading && suggestions.length === 0) return null;
 
     const mainSuggestion = suggestions[0];
@@ -327,7 +321,7 @@ export default function CoachScreen() {
           
           {hasMore && (
             <TouchableOpacity 
-              style={[styles.viewAllButton, { borderColor: color }]}
+              style={[styles.viewAllButton, { borderColor: color, backgroundColor: `${color}10` }]}
               onPress={() => navigateToAllSuggestions(categoryKey, suggestions)}
             >
               <Text style={[styles.viewAllText, { color }]}>View All {suggestions.length} Suggestions</Text>
@@ -342,7 +336,8 @@ export default function CoachScreen() {
   const renderContent = () => {
     if (error) {
       return (
-        <View style={styles.centered}>
+        <View style={styles.errorContainer}>
+          <Ionicons name="warning-outline" size={48} color="#f87171" />
           <Text style={styles.errorText}>{error}</Text>
           <TouchableOpacity 
             style={styles.retryButton}
@@ -361,7 +356,7 @@ export default function CoachScreen() {
     if (!hasGeneralSuggestions && !hasFitnessSuggestions && !hasNutritionSuggestions) {
       return (
         <View style={styles.emptyState}>
-          <Ionicons name="bulb-outline" size={48} color="#666" />
+          <Ionicons name="bulb-outline" size={48} color="#7f8c8d" />
           <Text style={styles.emptyStateText}>No suggestions available</Text>
           <Text style={styles.emptyStateSubtext}>
             Check back later for personalized habit suggestions
@@ -371,7 +366,7 @@ export default function CoachScreen() {
     }
 
     return (
-      <ScrollView>
+      <View style={styles.content}>
         {renderCategorySection({
           title: 'Fitness Suggestions',
           icon: 'fitness',
@@ -401,19 +396,35 @@ export default function CoachScreen() {
           categoryKey: 'general',
           subtitle: 'Habits to improve your daily routine'
         })}
-      </ScrollView>
+      </View>
     );
   };
 
-
+  if (loading && !refreshing) {
+    return (
+      <View style={styles.container}>
+        <View style={styles.header}>
+          <View style={styles.headerTop}>
+            <View>
+              <Text style={styles.greeting}>Smart Coach</Text>
+              <Text style={styles.headerDate}>Your Personalized Habit Coach</Text>
+            </View>
+          </View>
+        </View>
+        <View style={styles.loadingContainer}>
+          <SuggestionShimmer />
+        </View>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
-        <View style={styles.header}>
+      <View style={styles.header}>
         <View style={styles.headerTop}>
           <View>
-            <Text style={styles.greeting}>Coach</Text>
-            <Text style={styles.headerDate}>Your Progress Overview</Text>
+            <Text style={styles.greeting}>Smart Coach</Text>
+            <Text style={styles.headerDate}>Your Personalized Habit Coach</Text>
           </View>
         </View>
       </View>
@@ -428,14 +439,9 @@ export default function CoachScreen() {
             colors={[PookieColors.hotPink]}
             tintColor={PookieColors.hotPink}
           />
-        }>
-        {loading && !refreshing ? (
-          <View style={styles.loadingContainer}>
-            <SuggestionShimmer />
-          </View>
-        ) : (
-          renderContent()
-        )}
+        }
+      >
+        {renderContent()}
       </ScrollView>
     </View>
   );
@@ -444,71 +450,71 @@ export default function CoachScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#f5f7fa',
   },
   loadingContainer: {
     flex: 1,
     padding: 16,
   },
-  centered: {
+  errorContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
+    backgroundColor: '#ffffff',
   },
   errorText: {
-    color: '#ff6b6b',
+    color: '#e53e3e',
     fontSize: 16,
     textAlign: 'center',
-    marginBottom: 16,
+    marginVertical: 16,
+    lineHeight: 22,
   },
   retryButton: {
-    backgroundColor: PookieColors.hotPink,
+    backgroundColor: '#ff6b35',
     paddingHorizontal: 20,
     paddingVertical: 10,
-    borderRadius: 8,
+    borderRadius: 12,
+    marginTop: 12,
   },
   retryButtonText: {
-    color: '#fff',
+    color: '#ffffff',
     fontWeight: '600',
+    fontSize: 15,
   },
   emptyState: {
     alignItems: 'center',
-    padding: 24,
-    backgroundColor: '#f0f0f0', // Light background
+    padding: 40,
+    backgroundColor: '#ffffff',
     borderRadius: 16,
-    marginTop: 16,
+    margin: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 4,
   },
   emptyStateText: {
-    color: '#11181C', // Dark text
+    color: '#2c3e50',
     fontSize: 18,
     fontWeight: '600',
     marginTop: 16,
     textAlign: 'center',
   },
   emptyStateSubtext: {
-    color: '#687076', // Medium gray text
+    color: '#7f8c8d',
     fontSize: 14,
     marginTop: 8,
     textAlign: 'center',
   },
-  gradientBackground: {
-    flex: 1,
-  },
-  sectionHeader: {
-    marginBottom: 16,
-  },
-
   header: {
-    backgroundColor: '#2c3e50',
+    backgroundColor: 'rgba(19 230 82 / 0.39)',
     paddingTop: 60,
-    paddingBottom: 20,
     paddingHorizontal: 20,
+    paddingBottom: 20,
     borderBottomLeftRadius: 20,
     borderBottomRightRadius: 20,
   },
-
-
   headerTop: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -517,27 +523,30 @@ const styles = StyleSheet.create({
   greeting: {
     fontSize: 24,
     fontWeight: '700',
-    color: '#ffffff',
+    color: '#444343',
     marginBottom: 4,
   },
   headerDate: {
     fontSize: 14,
-    color: '#bdc3c7',
+    color: '#161616',
     fontWeight: '500',
   },
   scrollView: {
     flex: 1,
-    paddingHorizontal: 20,
   },
-  suggestionsContainer: {
-    paddingBottom: 0,
+  content: {
+    padding: 20,
   },
   section: {
     marginBottom: 24,
-    backgroundColor: '#dfe6f5', // Light background
+    backgroundColor: '#ffffff',
     borderRadius: 16,
-    padding: 16,
-    overflow: 'hidden',
+    padding: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 4,
   },
   sectionHeader: {
     marginBottom: 16,
@@ -555,156 +564,31 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   sectionTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#11181C', // Dark text
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#2c3e50',
     marginBottom: 2,
   },
   sectionSubtitle: {
     fontSize: 12,
-    color: '#888',
-  },
-  tipCard: {
-    backgroundColor: '#22222b',
-    borderRadius: 16,
-    padding: 20,
-    marginBottom: 12,
-  },
-  tipHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  aiIcon: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: PookieColors.hotPink,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  aiText: {
-    color: '#000',
-    fontWeight: 'bold',
-    fontSize: 12,
-  },
-  shareButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  shareText: {
-    color: '#000',
-    marginLeft: 4,
-    fontSize: 12,
-  },
-  tipText: {
-    color: '#000',
-    fontSize: 14,
-    lineHeight: 20,
-  },
-  warningCard: {
-    backgroundColor: '#22222b',
-    borderRadius: 16,
-    padding: 20,
-    marginBottom: 12,
-  },
-  warningHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  warningTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#000',
-    marginLeft: 8,
-  },
-  warningText: {
-    color: '#000',
-    fontSize: 14,
-    lineHeight: 20,
-    marginBottom: 16,
-  },
-  warningButton: {
-    backgroundColor: '#ff6b6b',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 8,
-    alignSelf: 'flex-start',
-  },
-  warningButtonText: {
-    color: '#fff',
-    fontWeight: '600',
-    fontSize: 12,
-  },
-  recommendationCard: {
-    backgroundColor: '#22222b',
-    borderRadius: 16,
-    padding: 20,
-    marginBottom: 12,
-  },
-  recHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  recTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#000',
-    marginLeft: 8,
-  },
-  recText: {
-    color: '#000',
-    fontSize: 14,
-    lineHeight: 20,
-    marginBottom: 16,
-  },
-  recFooter: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  categoryTag: {
-    backgroundColor: '#3a3a3a',
-    paddingHorizontal: 12,
-    paddingVertical: 4,
-    borderRadius: 12,
-  },
-  categoryText: {
-    color: '#ccc',
-    fontSize: 12,
+    color: '#7f8c8d',
     fontWeight: '500',
   },
-  addHabitButton: {
-    backgroundColor: PookieColors.hotPink,
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 8,
+  suggestionsContainer: {
+    gap: 12,
   },
-  addHabitText: {
-    color: '#000',
-    fontWeight: '600',
-    fontSize: 12,
-    marginLeft: 4,
-  },
-  // Suggestion Card Styles
   suggestionCard: {
-    backgroundColor: '#f0f0f0', // Light background
+    backgroundColor: '#f8f9fa',
     borderRadius: 12,
-    padding: 0,
     overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: '#eaeaea',
   },
   suggestionHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     padding: 16,
     paddingBottom: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255, 255, 255, 0.05)',
   },
   suggestionIcon: {
     width: 36,
@@ -718,7 +602,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   suggestionTitle: {
-    color: '#11181C', // Dark text
+    color: '#2c3e50',
     fontSize: 15,
     fontWeight: '600',
     marginBottom: 4,
@@ -728,34 +612,39 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 8,
   },
+  categoryTag: {
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 6,
+  },
+  categoryText: {
+    fontSize: 11,
+    fontWeight: '600',
+    textTransform: 'uppercase',
+  },
   difficultyText: {
-    color: '#888',
+    color: '#7f8c8d',
     fontSize: 11,
     fontWeight: '500',
+    textTransform: 'capitalize',
   },
   addButton: {
     width: 32,
     height: 32,
-    borderRadius: 10,
+    borderRadius: 8,
     justifyContent: 'center',
     alignItems: 'center',
     marginLeft: 'auto',
   },
-  addButtonText: {
-    color: '#000',
-    fontWeight: '600',
-    fontSize: 12,
-  },
   descriptionContainer: {
     paddingHorizontal: 16,
-    paddingTop: 12,
-    paddingBottom: 16,
+    paddingTop: 8,
+    paddingBottom: 12,
   },
   suggestionDescription: {
-    color: '#687076', // Darker text for contrast
+    color: '#34495e',
     fontSize: 14,
-    lineHeight: 21,
-    letterSpacing: 0.2,
+    lineHeight: 20,
   },
   readMoreButton: {
     marginTop: 8,
@@ -763,52 +652,53 @@ const styles = StyleSheet.create({
   },
   readMoreText: {
     fontSize: 13,
-    fontWeight: '500',
+    fontWeight: '600',
   },
   suggestionMeta: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    padding: 16,
-    paddingTop: 0,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
     borderTopWidth: 1,
-    borderTopColor: 'rgba(255, 255, 255, 0.05)',
+    borderTopColor: '#eaeaea',
+    backgroundColor: '#ffffff',
   },
   metaItem: {
     flexDirection: 'row',
     alignItems: 'center',
+    flex: 1,
+    justifyContent: 'center',
   },
   metaText: {
-    color: '#888',
+    color: '#7f8c8d',
     fontSize: 12,
     marginLeft: 4,
+    fontWeight: '500',
   },
   viewAllButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: 12,
-    borderRadius: 12,
+    borderRadius: 8,
     borderWidth: 1,
-    marginTop: 8,
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    marginTop: 12,
   },
   viewAllText: {
     fontSize: 14,
-    fontWeight: '500',
+    fontWeight: '600',
     marginRight: 4,
   },
   tipsContainer: {
-    backgroundColor: 'rgba(255, 255, 255, 0.03)',
+    backgroundColor: '#f8f9fa',
     padding: 16,
     borderLeftWidth: 3,
-    marginTop: 4,
   },
   tipsTitle: {
-    color: '#11181C', // Dark text
+    color: '#2c3e50',
     fontWeight: '600',
-    marginBottom: 10,
+    marginBottom: 12,
     fontSize: 14,
-    opacity: 0.9,
   },
   tipItem: {
     flexDirection: 'row',
@@ -825,7 +715,13 @@ const styles = StyleSheet.create({
     marginTop: 1,
   },
   tipBullet: {
-    fontSize: 16,
-    lineHeight: 16,
+    fontSize: 12,
+    fontWeight: '600',
   },
-}); 
+  tipText: {
+    color: '#34495e',
+    fontSize: 13,
+    lineHeight: 18,
+    flex: 1,
+  },
+});

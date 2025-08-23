@@ -2,7 +2,7 @@ import { PookieColors } from "@/constants/Colors";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
-import { Alert, ScrollView, StyleSheet, Switch, Text, View } from "react-native";
+import { Alert, ScrollView, StyleSheet, Switch, Text, TouchableOpacity, View } from "react-native";
 import Button from "../../components/ui/Button";
 import { useAuth } from "../../hooks/useAuth";
 import { usePushNotifications } from "../../hooks/usePushNotifications";
@@ -237,9 +237,20 @@ export default function SettingsScreen() {
 
   return (
     <View style={styles.container}>
-      {/* Static Header */}
+      {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>Settings</Text>
+        <View style={styles.headerTop}>
+          <View>
+            <Text style={styles.greeting}>Settings</Text>
+            <Text style={styles.headerDate}>Customize your app experience</Text>
+          </View>
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => router.back()}
+          >
+            <Ionicons name="arrow-back" size={24} color="#ffffff" />
+          </TouchableOpacity>
+        </View>
       </View>
 
       {/* Scrollable Content */}
@@ -373,25 +384,28 @@ export default function SettingsScreen() {
     fontWeight: '500',
   },
   header: {
-    flexDirection: 'row',
+    backgroundColor: '#2c3e50',
     paddingTop: 60,
-    paddingBottom: 16,
-    alignItems: 'center',
-    backgroundColor: '#ffffff',
-    borderBottomWidth: 1,
-    borderBottomColor: '#eaeaea',
+    paddingBottom: 20,
     paddingHorizontal: 20,
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
   },
-  headerTitle: {
-    fontSize: 20,
+  headerTop: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  greeting: {
+    fontSize: 24,
     fontWeight: '700',
-    color: '#111827',
-    letterSpacing: -0.5,
+    color: '#ffffff',
+    marginBottom: 4,
   },
-  headerDescription: {
+  headerDate: {
     fontSize: 14,
-    color: '#64748b',
-    lineHeight: 20,
+    color: '#bdc3c7',
+    fontWeight: '500',
   },
   scrollView: {
     flex: 1,
@@ -514,5 +528,13 @@ export default function SettingsScreen() {
   logoutSection: {
     paddingHorizontal: 16,
     marginTop: 8,
+  },
+  backButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 12,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });

@@ -1,14 +1,18 @@
-import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
-import { FlatList, RefreshControl, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Dimensions, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import HabitCard from '../../components/HabitCard';
 import HabitCardShimmer from '../../components/HabitCardShimmer';
+import { PageTransition } from '../../components/PageTransition';
+import { PaletteColors, PookieColors } from '../../constants/Colors';
 import { useApi } from '../../hooks/useApi';
 import { useHabitNotifications } from '../../hooks/useHabitNotifications';
 import { useToast } from '../../hooks/useToast';
 import { Habit } from '../../types/habit';
+
+const { width: screenWidth } = Dimensions.get('window');
 
 const HABITS_STORAGE_KEY = '@habit_hero_habits';
 const HABITS_CACHE_TIMESTAMP_KEY = '@habit_hero_habits_timestamp';
@@ -18,7 +22,6 @@ export default function HomeScreen() {
   const [habits, setHabits] = useState<Habit[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-
 
   const router = useRouter();
   const { fetchGet } = useApi();
@@ -200,81 +203,126 @@ export default function HomeScreen() {
     await loadHabits(true);
   };
 
-
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return 'Good morning';
+    if (hour < 17) return 'Good afternoon';
+    return 'Good evening';
+  };
 
   return (
     <View style={styles.container}>
-      {/* Header with Add Button - Always Visible */}
-    {/* Header */}
-    <View style={styles.header}>
-        <View style={styles.headerTop}>
-          <View>
-            <Text style={styles.greeting}>Today's Habits</Text>
-            <Text style={styles.headerDate}>Your Progress Overview</Text>
-          </View>
-        </View>
-      </View>
-      
-      {/* Main Content Area */}
-      <View style={styles.content}>
-        {loading ? (
-          // Loading State
-          <View style={styles.loadingContent} testID="loading-state">
-            {[1, 2, 3 ,4 , 5].map((i) => (
-              <HabitCardShimmer key={`shimmer-${i}`} />
-            ))}
-          </View>
-        ) : habits.length === 0 ? (
-          // Empty State
-          <View style={styles.emptyState} testID="empty-state">
-            <MaterialCommunityIcons
-              name="emoticon-sad-outline"
-              size={80}
-              color="#9CA3AF"
-              accessibilityLabel="No habits"
-            />
-            <Text style={styles.emptyTitle}>No habits yet</Text>
-            <Text style={styles.emptySubtitle}>
-              Tap the + button to add your first habit and start your journey to becoming a hero!
+      {/* Modern Header */}
+      <View style={styles.header}>
+        <View style={styles.headerContent}>
+          <View style={styles.headerText}>
+            <Text style={styles.greeting}>{getGreeting()}! 👋</Text>
+            <Text style={styles.headerSubtitle}>
+              {habits.length > 0 
+                ? `${habits.length} habit${habits.length === 1 ? '' : 's'} for today`
+                : "Let's start building healthy habits!"
+              }
             </Text>
           </View>
-        ) : (
-          // Habits List
-          <FlatList
-            data={habits}
-            refreshControl={
-              <RefreshControl
-                refreshing={refreshing}
-                onRefresh={onRefresh}
-                colors={['#ff6b35']}
-                tintColor="#ff6b35"
-              />
-            }
-            renderItem={({ item }) => (
-              <HabitCard habit={item} />
-            )}
-            keyExtractor={(item, index) => item.id || `habit-${index}`}
-            style={styles.habitsList}
-            showsVerticalScrollIndicator={false}
-            contentContainerStyle={styles.habitsListContent}
-            ItemSeparatorComponent={() => <View style={styles.separator} />}
-            ListEmptyComponent={
-              <View style={styles.emptyState}>
-                <Text style={styles.emptySubtitle}>No habits found</Text>
-              </View>
-            }
-          />
-        )}
           <TouchableOpacity
-               
-          style={styles.addButton}
-          onPress={() => router.push('/add-habit')}
-          activeOpacity={0.8}
-          testID="add-habit-button"
-        >
-          <Ionicons name="add" size={24} color="#fff" />
-        </TouchableOpacity>
+            style={styles.profileButton}
+            onPress={() => router.push('/profile')}
+          >
+            <Ionicons name="person-circle" size={40} color="#fff" />
+          </TouchableOpacity>
+        </View>
       </View>
+
+      {/* Main Content */}
+      <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Quick Actions */}
+        <PageTransition type="slide" direction="right" duration={400} delay={200}>
+          <View style={styles.quickActions}>
+            <TouchableOpacity
+              style={[styles.actionButton, { backgroundColor: PookieColors.hotPink }]}
+              onPress={() => router.push('/add-habit')}
+            >
+              <View style={styles.actionIcon}>
+                <Ionicons name="add" size={24} color="#fff" />
+              </View>
+              <Text style={styles.actionText}>Add Habit</Text>
+            </TouchableOpacity>
+            
+            <TouchableOpacity
+              style={[styles.actionButton, { backgroundColor: PaletteColors.orange }]}
+              onPress={() => router.push('/suggestions/health')}
+            >
+              <View style={styles.actionIcon}>
+                <Ionicons name="bulb" size={24} color="#fff" />
+              </View>
+              <Text style={styles.actionText}>Get Ideas</Text>
+            </TouchableOpacity>
+          </View>
+        </PageTransition>
+
+        {/* Habits Section */}
+        <PageTransition type="scale" duration={400} delay={300}>
+          <View style={styles.habitsSection}>
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionTitle}>Today's Habits</Text>
+              <TouchableOpacity 
+                style={styles.viewAllButton}
+                onPress={() => router.push('/analytics')}
+              >
+                <Text style={styles.viewAllText}>View All</Text>
+                <Ionicons name="arrow-forward" size={16} color={PaletteColors.orange} />
+              </TouchableOpacity>
+            </View>
+            
+            {loading ? (
+              <View style={styles.habitsList}>
+                {[1, 2, 3, 4].map((i) => (
+                  <HabitCardShimmer key={i} />
+                ))}
+              </View>
+            ) : habits.length > 0 ? (
+              <View style={styles.habitsList}>
+                {habits.map((habit) => (
+                  <HabitCard
+                    key={habit.id}
+                    habit={habit}
+                  />
+                ))}
+              </View>
+            ) : (
+              <View style={styles.emptyState}>
+                <View style={styles.emptyIconContainer}>
+                  <Ionicons name="leaf-outline" size={64} color={PaletteColors.orange} />
+                </View>
+                <Text style={styles.emptyStateTitle}>No habits yet</Text>
+                <Text style={styles.emptyStateSubtitle}>
+                  Start your journey to a healthier lifestyle by creating your first habit
+                </Text>
+                <TouchableOpacity
+                  style={[styles.emptyStateButton, { backgroundColor: PookieColors.hotPink }]}
+                  onPress={() => router.push('/add-habit')}
+                >
+                  <Ionicons name="add" size={20} color="#fff" style={{ marginRight: 8 }} />
+                  <Text style={styles.emptyStateButtonText}>Create Your First Habit</Text>
+                </TouchableOpacity>
+              </View>
+            )}
+          </View>
+        </PageTransition>
+      </ScrollView>
+
+      {/* Floating Add Button
+      <TouchableOpacity
+        style={styles.floatingAddButton}
+        onPress={() => router.push('/add-habit')}
+        activeOpacity={0.8}
+      >
+        <Ionicons name="add" size={28} color="#fff" />
+      </TouchableOpacity> */}
     </View>
   );
 }
@@ -282,10 +330,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f8f8f8',
-  },
-
-  sectionHeader: {
-    marginBottom: 16,
   },
 
   header: {
@@ -297,11 +341,17 @@ const styles = StyleSheet.create({
     borderBottomRightRadius: 20,
   },
 
-
-  headerTop: {
+  headerContent: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    marginBottom: 20,
+  },
+  headerText: {
+    flex: 1,
+  },
+  profileButton: {
+    padding: 8,
   },
   greeting: {
     fontSize: 24,
@@ -309,91 +359,68 @@ const styles = StyleSheet.create({
     color: '#ffffff',
     marginBottom: 4,
   },
-  headerDate: {
-    fontSize: 14,
-    color: '#bdc3c7',
-    fontWeight: '500',
-  },
-  // Modal Styles
-  modalOverlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    zIndex: 1000,
-  },
-  modalContent: {
-    backgroundColor: 'white',
-    borderRadius: 16,
-    padding: 24,
-    width: '85%',
-    maxWidth: 400,
-  },
-  modalTitle: {
-    fontSize: 20,
-    fontWeight: '600',
-    marginBottom: 20,
-    textAlign: 'center',
-    color: '#111827',
-  },
-  timeInput: {
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
-    borderRadius: 8,
-    padding: 12,
+  headerSubtitle: {
     fontSize: 16,
-    marginBottom: 20,
-    textAlign: 'center',
+    color: '#bdc3c7',
+    marginTop: 4,
   },
-  modalButtons: {
+
+  scrollView: {
+    flex: 1,
+  },
+  scrollContent: {
+    paddingBottom: 100,
+  },
+
+  quickActions: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: 8,
-  },
-  modalButton: {
-    paddingVertical: 12,
+    justifyContent: 'space-around',
     paddingHorizontal: 20,
-    borderRadius: 8,
-    minWidth: 100,
+    paddingBottom: 20,
+  },
+  actionButton: {
+    flex: 1,
     alignItems: 'center',
-    justifyContent: 'center',
+    paddingVertical: 15,
+    borderRadius: 12,
+    marginHorizontal: 5,
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
   },
-  cancelButton: {
-    backgroundColor: '#F3F4F6',
-    marginRight: 8,
-  },
-  saveButton: {
-    backgroundColor: '#ff6b35',
-    marginLeft: 8,
-  },
-  cancelButtonText: {
-    color: '#4B5563',
-    fontWeight: '600',
-  },
-  saveButtonText: {
-    color: 'white',
-    fontWeight: '600',
-  },
-  addButton: {
+  actionIcon: {
     width: 50,
     height: 50,
-    borderRadius: 24,
-    backgroundColor: '#4CAF50',
+    borderRadius: 25,
     justifyContent: 'center',
     alignItems: 'center',
-    elevation: 6,
-    position: 'absolute',
-    right: 40,
-    bottom: 120,
+    marginBottom: 10,
   },
-  content: {
-    flex: 1,
-    paddingTop: 24,
+  actionText: {
+    fontSize: 12,
+    color: '#fff',
+    fontWeight: '600',
   },
-  loadingContent: {
-    flex: 1,
+
+  habitsSection: {
     paddingHorizontal: 20,
+    paddingBottom: 20,
   },
+  sectionHeader: {
+    marginBottom: 16,
+  },
+  sectionTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#111827',
+    marginBottom: 12,
+  },
+  habitsList: {
+    gap: 16,
+  },
+
   emptyState: {
     flex: 1,
     justifyContent: 'center',
@@ -401,29 +428,58 @@ const styles = StyleSheet.create({
     paddingHorizontal: 32,
     paddingBottom: 80,
   },
-  emptyTitle: {
+  emptyIconContainer: {
+    backgroundColor: '#fff',
+    borderRadius: 32,
+    width: 80,
+    height: 80,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 15,
+  },
+  emptyStateTitle: {
     fontSize: 24,
-    fontWeight: '700',
+    fontWeight: 'bold',
     color: '#374151',
     marginTop: 24,
     marginBottom: 12,
     textAlign: 'center',
   },
-  emptySubtitle: {
+  emptyStateSubtitle: {
     fontSize: 16,
     color: '#6B7280',
     textAlign: 'center',
     lineHeight: 24,
     maxWidth: 300,
+    marginBottom: 20,
   },
-  habitsList: {
-    flex: 1,
-    paddingHorizontal: 20,
+  emptyStateButton: {
+    paddingVertical: 12,
+    paddingHorizontal: 25,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  habitsListContent: {
-    paddingBottom: 32,
+  emptyStateButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
   },
-  separator: {
-    height: 16,
-  },    
+
+  floatingAddButton: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: '#4CAF50',
+    justifyContent: 'center',
+    alignItems: 'center',
+    position: 'absolute',
+    right: 20,
+    bottom: 20,
+    elevation: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 6,
+  },
 });
