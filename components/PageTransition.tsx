@@ -20,8 +20,8 @@ export const PageTransition: React.FC<PageTransitionProps> = ({
   style,
   onAnimationComplete,
 }) => {
-  const animValue = useRef(new Animated.Value(0)).current;
-  const scaleValue = useRef(new Animated.Value(0.95)).current;
+  const animValue = useRef(new Animated.Value(1)).current;
+  const scaleValue = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
     const startAnimation = () => {
@@ -29,6 +29,8 @@ export const PageTransition: React.FC<PageTransitionProps> = ({
 
       switch (type) {
         case 'fade':
+          // Start from 0 and animate to 1
+          animValue.setValue(0);
           animation = Animated.timing(animValue, {
             toValue: 1,
             duration,
@@ -53,6 +55,8 @@ export const PageTransition: React.FC<PageTransitionProps> = ({
           break;
 
         case 'scale':
+          // Start from 0.95 and animate to 1
+          scaleValue.setValue(0.95);
           animation = Animated.timing(scaleValue, {
             toValue: 1,
             duration,
@@ -63,6 +67,8 @@ export const PageTransition: React.FC<PageTransitionProps> = ({
           break;
 
         case 'bounce':
+          // Start from 0.95 and animate through bounce sequence
+          scaleValue.setValue(0.95);
           animation = Animated.sequence([
             Animated.timing(scaleValue, {
               toValue: 1.1,
@@ -87,6 +93,8 @@ export const PageTransition: React.FC<PageTransitionProps> = ({
           break;
 
         default:
+          // Default fade animation
+          animValue.setValue(0);
           animation = Animated.timing(animValue, {
             toValue: 1,
             duration,
@@ -96,7 +104,43 @@ export const PageTransition: React.FC<PageTransitionProps> = ({
           });
       }
 
-      animation.start(onAnimationComplete);
+      // Use InteractionManager for better performance
+      const runAnimation = () => {
+        animation.start((result) => {
+          if (onAnimationComplete) {
+            onAnimationComplete();
+          }
+          // Ensure content is visible after animation
+          if (result.finished) {
+            if (type === 'fade') {
+              animValue.setValue(1);
+            } else if (type === 'scale' || type === 'bounce') {
+              scaleValue.setValue(1);
+            } else if (type === 'slide') {
+              animValue.setValue(0);
+            }
+          }
+        });
+      };
+
+      if (delay > 0) {
+        setTimeout(runAnimation, delay);
+      } else {
+        runAnimation();
+      }
+
+      // Safety timeout to ensure content becomes visible
+      const safetyTimeout = setTimeout(() => {
+        if (type === 'fade') {
+          animValue.setValue(1);
+        } else if (type === 'scale' || type === 'bounce') {
+          scaleValue.setValue(1);
+        } else if (type === 'slide') {
+          animValue.setValue(0);
+        }
+      }, duration + delay + 100);
+
+      return () => clearTimeout(safetyTimeout);
     };
 
     startAnimation();
@@ -135,6 +179,12 @@ export const PageTransition: React.FC<PageTransitionProps> = ({
           opacity: animValue,
         };
     }
+  };
+
+  // Ensure content is always visible as fallback
+  const fallbackStyle = {
+    opacity: 1,
+    transform: [{ translateX: 0 }, { translateY: 0 }, { scale: 1 }],
   };
 
   return (

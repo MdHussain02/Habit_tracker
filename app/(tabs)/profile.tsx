@@ -148,21 +148,21 @@ export default function ProfileScreen() {
 
   return (
     <View style={styles.container}>
-      {/* Header */}
-      <View style={styles.header}>
-        <View style={styles.headerTop}>
-          <View>
-            <Text style={styles.greeting}>Profile</Text>
-            <Text style={styles.headerDate}>Manage your account & settings</Text>
+        {/* Header */}
+        <View style={styles.header}>
+          <View style={styles.headerTop}>
+            <View>
+              <Text style={styles.greeting}>Profile</Text>
+              <Text style={styles.headerDate}>Manage your account & settings</Text>
+            </View>
+            <TouchableOpacity
+              style={styles.settingsButton}
+              onPress={() => router.push('/profile/settings')}
+            >
+              <AntDesign name="setting" size={24} color="#ffffff" />
+            </TouchableOpacity>
           </View>
-          <TouchableOpacity
-            style={styles.settingsButton}
-            onPress={() => router.push('/profile/settings')}
-          >
-            <AntDesign name="setting" size={24} color="#ffffff" />
-          </TouchableOpacity>
         </View>
-      </View>
 
       <ScrollView 
         style={styles.scrollView}

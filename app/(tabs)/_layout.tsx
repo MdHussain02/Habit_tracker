@@ -53,6 +53,7 @@ const TAB_ITEMS = [
 
 const CustomTabBar = ({ state, navigation }: { state: any, navigation: any }) => {
   const indicatorPosition = React.useRef(new Animated.Value(0)).current;
+  const [isTransitioning, setIsTransitioning] = React.useState(false);
   
   const indicatorLeft = indicatorPosition.interpolate({
     inputRange: [0, 1, 2, 3],
@@ -98,8 +99,13 @@ const CustomTabBar = ({ state, navigation }: { state: any, navigation: any }) =>
                 canPreventDefault: true,
               });
 
-              if (!isFocused && !event.defaultPrevented) {
-                navigation.navigate(route.name);
+              if (!isFocused && !event.defaultPrevented && !isTransitioning) {
+                setIsTransitioning(true);
+                // Add a small delay for smooth transition
+                setTimeout(() => {
+                  navigation.navigate(route.name);
+                  setIsTransitioning(false);
+                }, 100);
               }
             };
 

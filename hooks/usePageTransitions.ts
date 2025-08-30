@@ -1,5 +1,5 @@
-import { useRef } from 'react';
-import { Animated, Easing } from 'react-native';
+import { useEffect, useRef } from 'react';
+import { Animated, Easing, InteractionManager } from 'react-native';
 
 export const usePageTransitions = () => {
   const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -114,6 +114,35 @@ export const usePageTransitions = () => {
     scaleAnim.setValue(1);
   };
 
+  // Enhanced screen transition with interaction management
+  const screenTransition = (type: 'fade' | 'slide' | 'scale' | 'bounce', duration: number = 300) => {
+    return new Promise<void>((resolve) => {
+      InteractionManager.runAfterInteractions(() => {
+        switch (type) {
+          case 'fade':
+            fadeIn(duration);
+            break;
+          case 'slide':
+            slideIn('right', duration);
+            break;
+          case 'scale':
+            scaleIn(duration);
+            break;
+          case 'bounce':
+            bounceIn(duration);
+            break;
+        }
+        
+        setTimeout(resolve, duration);
+      });
+    });
+  };
+
+  // Auto-transition on mount
+  useEffect(() => {
+    fadeIn(400);
+  }, []);
+
   return {
     fadeAnim,
     slideAnim,
@@ -127,6 +156,7 @@ export const usePageTransitions = () => {
     bounceIn,
     pulse,
     stopPulse,
+    screenTransition,
   };
 };
 
