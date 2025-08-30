@@ -224,21 +224,8 @@ export default function HomeScreen() {
               }
             </Text>
           </View>
-          <TouchableOpacity
-            style={styles.profileButton}
-            onPress={() => router.push('/profile')}
-          >
-            <Ionicons name="person-circle" size={40} color="#fff" />
-          </TouchableOpacity>
         </View>
       </View>
-
-      {/* Main Content */}
-      <ScrollView
-        style={styles.scrollView}
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
-      >
         {/* Quick Actions */}
         <PageTransition type="slide" direction="right" duration={400} delay={200}>
           <View style={styles.quickActions}>
@@ -253,7 +240,7 @@ export default function HomeScreen() {
             </TouchableOpacity>
             
             <TouchableOpacity
-              style={[styles.actionButton, { backgroundColor: PaletteColors.orange }]}
+              style={[styles.actionButton, { backgroundColor: 'rgb(139, 92, 246)' }]}
               onPress={() => router.push('/suggestions/health')}
             >
               <View style={styles.actionIcon}>
@@ -264,6 +251,12 @@ export default function HomeScreen() {
           </View>
         </PageTransition>
 
+      {/* Main Content */}
+      <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
         {/* Habits Section */}
         <PageTransition type="scale" duration={400} delay={300}>
           <View style={styles.habitsSection}>
@@ -333,10 +326,10 @@ const styles = StyleSheet.create({
   },
 
   header: {
-    backgroundColor: '#2c3e50',
+    backgroundColor: 'rgb(236, 73, 153)',
     paddingTop: 60,
-    paddingBottom: 20,
     paddingHorizontal: 20,
+    paddingBottom: 20,
     borderBottomLeftRadius: 20,
     borderBottomRightRadius: 20,
   },
@@ -345,7 +338,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 20,
   },
   headerText: {
     flex: 1,
@@ -361,7 +353,7 @@ const styles = StyleSheet.create({
   },
   headerSubtitle: {
     fontSize: 16,
-    color: '#bdc3c7',
+    color: '#F7F7F7',
     marginTop: 4,
   },
 
@@ -379,10 +371,11 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
   },
   actionButton: {
+    marginTop: 10,
     flex: 1,
     alignItems: 'center',
     paddingVertical: 15,
-    borderRadius: 12,
+    borderRadius: 19,
     marginHorizontal: 5,
     elevation: 3,
     shadowColor: '#000',

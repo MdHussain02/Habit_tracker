@@ -508,7 +508,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   header: {
-    backgroundColor: 'rgba(19 230 82 / 0.39)',
+    backgroundColor: 'rgb(139, 92, 246)',
     paddingTop: 60,
     paddingHorizontal: 20,
     paddingBottom: 20,
@@ -523,12 +523,12 @@ const styles = StyleSheet.create({
   greeting: {
     fontSize: 24,
     fontWeight: '700',
-    color: '#444343',
+    color: '#FFFFFF',
     marginBottom: 4,
   },
   headerDate: {
     fontSize: 14,
-    color: '#161616',
+    color: '#FFFFFF',
     fontWeight: '500',
   },
   scrollView: {
