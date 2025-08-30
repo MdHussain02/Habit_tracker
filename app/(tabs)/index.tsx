@@ -241,7 +241,7 @@ export default function HomeScreen() {
             
             <TouchableOpacity
               style={[styles.actionButton, { backgroundColor: 'rgb(139, 92, 246)' }]}
-              onPress={() => router.push('/suggestions/health')}
+              onPress={() => router.push('/coach')}
             >
               <View style={styles.actionIcon}>
                 <Ionicons name="bulb" size={24} color="#fff" />

@@ -328,7 +328,7 @@ const styles = StyleSheet.create({
     fontSize: 15,
   },
   header: {
-    backgroundColor: '#2c3e50',
+    backgroundColor: 'rgb(245, 166, 32)',
     paddingTop: 60,
     paddingBottom: 20,
     paddingHorizontal: 20,
@@ -348,7 +348,7 @@ const styles = StyleSheet.create({
   },
   headerDate: {
     fontSize: 14,
-    color: '#bdc3c7',
+    color: '#FFFFFF',
     fontWeight: '500',
   },
   headerStats: {
@@ -366,7 +366,7 @@ const styles = StyleSheet.create({
   },
   headerStatLabel: {
     fontSize: 12,
-    color: '#bdc3c7',
+    color: '#FFFFFF',
     fontWeight: '500',
   },
   avatarContainer: {

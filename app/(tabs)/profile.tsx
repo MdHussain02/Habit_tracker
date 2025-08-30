@@ -344,7 +344,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#f5f7fa',
   },
   header: {
-    backgroundColor: '#2c3e50',
+    backgroundColor: 'rgb(0, 182, 212)',
     paddingTop: 60,
     paddingBottom: 20,
     paddingHorizontal: 20,
@@ -364,7 +364,7 @@ const styles = StyleSheet.create({
   },
   headerDate: {
     fontSize: 14,
-    color: '#bdc3c7',
+    color: '#FFFFFF',
     fontWeight: '500',
   },
   settingsButton: {

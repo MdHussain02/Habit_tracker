@@ -81,16 +81,17 @@ export default function HabitDetailsScreen() {
         {/* Header */}
         <View style={styles.header}>
           <View style={styles.headerTop}>
-            <View>
-              <Text style={styles.greeting}>Habit Details</Text>
-              <Text style={styles.headerDate}>View and manage your habit</Text>
-            </View>
-            <TouchableOpacity
+          <TouchableOpacity
               style={styles.backButton}
               onPress={() => router.back()}
             >
               <Ionicons name="arrow-back" size={24} color="#ffffff" />
             </TouchableOpacity>
+            <View>
+              <Text style={styles.greeting}>Habit Details</Text>
+              <Text style={styles.headerDate}>View and manage your habit</Text>
+            </View>
+            
           </View>
         </View>
 
@@ -159,16 +160,18 @@ export default function HabitDetailsScreen() {
       {/* Header */}
       <View style={styles.header}>
         <View style={styles.headerTop}>
+
+        <TouchableOpacity
+              style={styles.backButton}
+              onPress={() => router.back()}
+            >
+              <Ionicons name="arrow-back" size={24} color="#ffffff" />
+            </TouchableOpacity>
           <View>
             <Text style={styles.greeting}>Habit Details</Text>
             <Text style={styles.headerDate}>View and manage your habit</Text>
           </View>
-          <TouchableOpacity
-            style={styles.backButton}
-            onPress={() => router.back()}
-          >
-            <Ionicons name="arrow-back" size={24} color="#ffffff" />
-          </TouchableOpacity>
+          
         </View>
       </View>
 
@@ -288,7 +291,7 @@ const styles = StyleSheet.create({
   },
   // Habit details
   header: {
-    backgroundColor: '#2c3e50',
+    backgroundColor: 'rgb(236, 74, 153)',
     paddingTop: 60,
     paddingBottom: 20,
     paddingHorizontal: 20,
@@ -297,8 +300,9 @@ const styles = StyleSheet.create({
   },
   headerTop: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    // justifyContent: 'space-between',
     alignItems: 'center',
+    gap: 10,
   },
   greeting: {
     fontSize: 24,
@@ -308,7 +312,7 @@ const styles = StyleSheet.create({
   },
   headerDate: {
     fontSize: 14,
-    color: '#bdc3c7',
+    color: '#FFFFFF',
     fontWeight: '500',
   },
   backButton: {
