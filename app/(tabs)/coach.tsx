@@ -1,5 +1,5 @@
 import SuggestionShimmer from '@/components/SuggestionShimmer';
-import { PookieColors } from '@/constants/Colors';
+import colors from '@/constants/Colors';
 import { useApi } from '@/hooks/useApi';
 import { useToast } from '@/hooks/useToast';
 import { AISuggestion, AISuggestionsResponse } from '@/types/habit';
@@ -179,11 +179,11 @@ export default function CoachScreen() {
     const getCategoryColor = (category: string) => {
       switch (category.toLowerCase()) {
         case 'fitness':
-          return '#6366f1';
+          return   colors.primary;
         case 'nutrition':
-          return '#10b981';
+          return colors.primary;
         default:
-          return PookieColors.hotPink;
+          return colors.primary;
       }
     };
 
@@ -370,7 +370,7 @@ export default function CoachScreen() {
         {renderCategorySection({
           title: 'Fitness Suggestions',
           icon: 'fitness',
-          color: '#6366f1',
+          color: colors.primary,
           suggestions: fitnessSuggestions,
           loading: loadingFitness,
           categoryKey: 'fitness',
@@ -380,7 +380,7 @@ export default function CoachScreen() {
         {renderCategorySection({
           title: 'Nutrition Suggestions',
           icon: 'nutrition',
-          color: '#10b981',
+          color: colors.primary,
           suggestions: nutritionSuggestions,
           loading: loadingNutrition,
           categoryKey: 'nutrition',
@@ -390,7 +390,7 @@ export default function CoachScreen() {
         {renderCategorySection({
           title: 'General Suggestions',
           icon: 'bulb-outline',
-          color: '#8b5cf6',
+          color: colors.primary,
           suggestions: generalSuggestions,
           loading: loading,
           categoryKey: 'general',
@@ -436,8 +436,8 @@ export default function CoachScreen() {
           <RefreshControl
             refreshing={refreshing}
             onRefresh={onRefresh}
-            colors={[PookieColors.hotPink]}
-            tintColor={PookieColors.hotPink}
+            colors={[colors['text-danger']]}
+            tintColor={colors['text-danger']}
           />
         }
       >
@@ -450,7 +450,7 @@ export default function CoachScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f7fa',
+    backgroundColor: colors["bg-light"],
   },
   loadingContainer: {
     flex: 1,
@@ -461,17 +461,17 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
-    backgroundColor: '#ffffff',
+    backgroundColor: colors['bg-light'],
   },
   errorText: {
-    color: '#e53e3e',
+    color: colors['text-danger'],
     fontSize: 16,
     textAlign: 'center',
     marginVertical: 16,
     lineHeight: 22,
   },
   retryButton: {
-    backgroundColor: '#ff6b35',
+    backgroundColor: colors['bg-dark'],
     paddingHorizontal: 20,
     paddingVertical: 10,
     borderRadius: 12,
@@ -485,7 +485,7 @@ const styles = StyleSheet.create({
   emptyState: {
     alignItems: 'center',
     padding: 40,
-    backgroundColor: '#ffffff',
+    backgroundColor: colors['bg-light'],
     borderRadius: 16,
     margin: 20,
     shadowColor: '#000',
@@ -495,20 +495,20 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   emptyStateText: {
-    color: '#2c3e50',
+    color: colors['text-dark'],
     fontSize: 18,
     fontWeight: '600',
     marginTop: 16,
     textAlign: 'center',
   },
   emptyStateSubtext: {
-    color: '#7f8c8d',
+    color: colors['text-light'],
     fontSize: 14,
     marginTop: 8,
     textAlign: 'center',
   },
   header: {
-    backgroundColor: 'rgb(139, 92, 246)',
+    backgroundColor: colors['bg-primary'],
     paddingTop: 60,
     paddingHorizontal: 20,
     paddingBottom: 20,
@@ -523,12 +523,12 @@ const styles = StyleSheet.create({
   greeting: {
     fontSize: 24,
     fontWeight: '700',
-    color: '#FFFFFF',
+    color: colors['text-light'],
     marginBottom: 4,
   },
   headerDate: {
     fontSize: 14,
-    color: '#FFFFFF',
+    color: colors['text-light'],
     fontWeight: '500',
   },
   scrollView: {
@@ -539,10 +539,10 @@ const styles = StyleSheet.create({
   },
   section: {
     marginBottom: 24,
-    backgroundColor: '#ffffff',
+    backgroundColor: colors['bg-light'],
     borderRadius: 16,
     padding: 20,
-    shadowColor: '#000',
+    shadowColor: colors['shadow'],
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 8,
@@ -578,11 +578,11 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   suggestionCard: {
-    backgroundColor: '#f8f9fa',
+    backgroundColor: colors['bg-light'],
     borderRadius: 12,
     overflow: 'hidden',
     borderWidth: 1,
-    borderColor: '#eaeaea',
+    borderColor: colors['border-dark'],
   },
   suggestionHeader: {
     flexDirection: 'row',
@@ -602,7 +602,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   suggestionTitle: {
-    color: '#2c3e50',
+    color: colors['text-primary'],
     fontSize: 15,
     fontWeight: '600',
     marginBottom: 4,
@@ -623,7 +623,7 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
   },
   difficultyText: {
-    color: '#7f8c8d',
+    color: colors['text-primary'],
     fontSize: 11,
     fontWeight: '500',
     textTransform: 'capitalize',
@@ -642,7 +642,7 @@ const styles = StyleSheet.create({
     paddingBottom: 12,
   },
   suggestionDescription: {
-    color: '#34495e',
+    color: colors['text-secondary'],
     fontSize: 14,
     lineHeight: 20,
   },
@@ -661,7 +661,7 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     borderTopWidth: 1,
     borderTopColor: '#eaeaea',
-    backgroundColor: '#ffffff',
+    backgroundColor: colors['bg-light'],
   },
   metaItem: {
     flexDirection: 'row',
@@ -670,7 +670,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   metaText: {
-    color: '#7f8c8d',
+    color: colors['text-primary'],
     fontSize: 12,
     marginLeft: 4,
     fontWeight: '500',
@@ -690,12 +690,12 @@ const styles = StyleSheet.create({
     marginRight: 4,
   },
   tipsContainer: {
-    backgroundColor: '#f8f9fa',
+    backgroundColor: colors['bg-accent'],
     padding: 16,
     borderLeftWidth: 3,
   },
   tipsTitle: {
-    color: '#2c3e50',
+    color: colors['text-primary'],
     fontWeight: '600',
     marginBottom: 12,
     fontSize: 14,
@@ -719,7 +719,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   tipText: {
-    color: '#34495e',
+    color: colors['text-secondary'],
     fontSize: 13,
     lineHeight: 18,
     flex: 1,

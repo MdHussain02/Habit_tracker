@@ -3,7 +3,14 @@ import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import {
+  RefreshControl,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import HabitCard from '../../components/HabitCard';
 import HabitCardShimmer from '../../components/HabitCardShimmer';
 import { PageTransition } from '../../components/PageTransition';
@@ -20,6 +27,7 @@ export default function HomeScreen() {
   const [habits, setHabits] = useState<Habit[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [needsRefresh, setNeedsRefresh] = useState(false);
 
   const router = useRouter();
   const { fetchGet } = useApi();
@@ -29,72 +37,20 @@ export default function HomeScreen() {
   const { addHabitWithNotification, editHabitWithNotification, deleteHabitWithNotification } =
     useHabitNotifications(habits, setHabits);
 
-  // Load data on initial mount
-  useEffect(() => {
-    let isMounted = true;
-
-    const loadInitialData = async () => {
-      try {
-        const cachedHabits = await loadCachedHabits();
-        if (cachedHabits && isMounted) {
-          setHabits(cachedHabits);
-        }
-
-        const shouldRefresh = await shouldRefreshHabits();
-        if (shouldRefresh) {
-          await loadHabits();
-        }
-      } catch (error) {
-        console.error('Error in loadInitialData:', error);
-        if (isMounted) {
-          showToast('Failed to load habits', 'error');
-        }
-      } finally {
-        if (isMounted) {
-          setLoading(false);
-        }
-      }
-    };
-
-    loadInitialData();
-
-    return () => {
-      isMounted = false;
-    };
-  }, []);
-
-  const [needsRefresh, setNeedsRefresh] = useState(false);
-
-  useFocusEffect(
-    useCallback(() => {
-      if (needsRefresh) {
-        loadHabits();
-        setNeedsRefresh(false);
-      }
-    }, [needsRefresh])
-  );
-
-  const onRefresh = async () => {
-    setRefreshing(true);
-    await loadHabits(true);
-    setRefreshing(false);
-  };
-
+  /** ---------------- Cache Helpers ---------------- */
   const loadCachedHabits = async (): Promise<Habit[] | null> => {
     try {
       const cachedHabits = await AsyncStorage.getItem(HABITS_STORAGE_KEY);
-      if (cachedHabits) {
-        return JSON.parse(cachedHabits);
-      }
+      return cachedHabits ? JSON.parse(cachedHabits) : null;
     } catch (error) {
       console.error('Error loading cached habits:', error);
+      return null;
     }
-    return null;
   };
 
-  const saveHabitsToCache = async (habits: Habit[]) => {
+  const saveHabitsToCache = async (data: Habit[]) => {
     try {
-      await AsyncStorage.setItem(HABITS_STORAGE_KEY, JSON.stringify(habits));
+      await AsyncStorage.setItem(HABITS_STORAGE_KEY, JSON.stringify(data));
       await AsyncStorage.setItem(HABITS_CACHE_TIMESTAMP_KEY, Date.now().toString());
     } catch (error) {
       console.error('Error saving habits to cache:', error);
@@ -104,34 +60,31 @@ export default function HomeScreen() {
   const isCacheValid = async (): Promise<boolean> => {
     try {
       const timestamp = await AsyncStorage.getItem(HABITS_CACHE_TIMESTAMP_KEY);
-      if (timestamp) {
-        const cacheAge = Date.now() - parseInt(timestamp, 10);
-        return cacheAge < CACHE_DURATION;
-      }
+      if (!timestamp) return false;
+      return Date.now() - parseInt(timestamp, 10) < CACHE_DURATION;
     } catch (error) {
       console.error('Error checking cache validity:', error);
+      return false;
     }
-    return false;
   };
 
+  /** ---------------- API Fetch ---------------- */
   const loadHabits = async (forceRefresh = false) => {
     try {
-      if (!refreshing) {
-        setLoading(true);
-      }
+      if (!refreshing) setLoading(true);
 
+      // Use cache if valid
       if (!forceRefresh && (await isCacheValid())) {
         const cachedHabits = await loadCachedHabits();
-        if (cachedHabits && cachedHabits.length > 0) {
+        if (cachedHabits?.length) {
           setHabits(cachedHabits);
-          if (!forceRefresh) {
-            setLoading(false);
-          }
+          setLoading(false);
+          return;
         }
       }
 
+      // Fetch fresh data
       const response = await fetchGet(`${API_BASE_URL}/habits`);
-
       if (response?.success && response.data) {
         const mappedHabits: Habit[] = response.data.map((item: any) => ({
           id: item._id,
@@ -153,19 +106,18 @@ export default function HomeScreen() {
 
         setHabits(mappedHabits);
         await saveHabitsToCache(mappedHabits);
-      } else if (!response?.success) {
+      } else {
         throw new Error('API request failed');
       }
     } catch (error) {
       console.error('Error loading habits:', error);
-      if (habits.length === 0) {
-        const cachedHabits = await loadCachedHabits();
-        if (cachedHabits && cachedHabits.length > 0) {
-          setHabits(cachedHabits);
-          showToast('Using cached data', 'info');
-        } else {
-          showToast('Failed to load habits', 'error');
-        }
+      // fallback to cached
+      const cachedHabits = await loadCachedHabits();
+      if (cachedHabits?.length) {
+        setHabits(cachedHabits);
+        showToast('Using cached data', 'info');
+      } else {
+        showToast('Failed to load habits', 'error');
       }
     } finally {
       setLoading(false);
@@ -173,18 +125,26 @@ export default function HomeScreen() {
     }
   };
 
-  const shouldRefreshHabits = async (): Promise<boolean> => {
-    try {
-      const timestamp = await AsyncStorage.getItem(HABITS_CACHE_TIMESTAMP_KEY);
-      if (!timestamp) return true;
-      const cacheAge = Date.now() - parseInt(timestamp, 10);
-      return cacheAge > CACHE_DURATION;
-    } catch (error) {
-      console.error('Error checking cache age:', error);
-      return true;
-    }
+  /** ---------------- Effects ---------------- */
+  useEffect(() => {
+    loadHabits();
+  }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      if (needsRefresh) {
+        loadHabits(true);
+        setNeedsRefresh(false);
+      }
+    }, [needsRefresh])
+  );
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await loadHabits(true);
   };
 
+  /** ---------------- Helpers ---------------- */
   const addHabit = async (habit: Omit<Habit, 'id' | 'createdAt'>) => {
     await addHabitWithNotification(habit);
     await loadHabits(true);
@@ -197,6 +157,7 @@ export default function HomeScreen() {
     return 'Good evening';
   };
 
+  /** ---------------- UI ---------------- */
   return (
     <View style={styles.container}>
       {/* Header */}
@@ -214,15 +175,13 @@ export default function HomeScreen() {
       </View>
 
       {/* Quick Actions */}
-      <PageTransition type="slide" direction="right" duration={400} delay={200}>
+      <PageTransition type="slide" direction="right" duration={10} delay={0}>
         <View style={styles.quickActions}>
           <TouchableOpacity
             style={[styles.actionButton, { backgroundColor: colors.primary }]}
             onPress={() => router.push('/add-habit')}
           >
-            <View style={styles.actionIcon}>
-              <Ionicons name="add" size={24} color={colors['text-light']} />
-            </View>
+            <Ionicons name="add" size={24} color={colors['text-light']} />
             <Text style={styles.actionText}>Add Habit</Text>
           </TouchableOpacity>
 
@@ -230,21 +189,27 @@ export default function HomeScreen() {
             style={[styles.actionButton, { backgroundColor: colors.secondary }]}
             onPress={() => router.push('/coach')}
           >
-            <View style={styles.actionIcon}>
-              <Ionicons name="bulb" size={24} color={colors['text-light']} />
-            </View>
+            <Ionicons name="bulb" size={24} color={colors['text-light']} />
             <Text style={styles.actionText}>Get Ideas</Text>
           </TouchableOpacity>
         </View>
       </PageTransition>
 
       {/* Main Content */}
-      <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+      >
         <PageTransition type="scale" duration={400} delay={300}>
           <View style={styles.habitsSection}>
             <View style={styles.sectionHeader}>
               <Text style={styles.sectionTitle}>Today's Habits</Text>
-              <TouchableOpacity style={styles.viewAllButton} onPress={() => router.push('/analytics')}>
+              <TouchableOpacity
+                style={styles.viewAllButton}
+                onPress={() => router.push('/analytics')}
+              >
                 <Text style={styles.viewAllText}>View All</Text>
                 <Ionicons name="arrow-forward" size={16} color={colors.primary} />
               </TouchableOpacity>
@@ -264,9 +229,7 @@ export default function HomeScreen() {
               </View>
             ) : (
               <View style={styles.emptyState}>
-                <View style={styles.emptyIconContainer}>
-                  <Ionicons name="leaf-outline" size={64} color={colors.primary} />
-                </View>
+                <Ionicons name="leaf-outline" size={64} color={colors.primary} />
                 <Text style={styles.emptyStateTitle}>No habits yet</Text>
                 <Text style={styles.emptyStateSubtitle}>
                   Start your journey to a healthier lifestyle by creating your first habit
@@ -275,7 +238,12 @@ export default function HomeScreen() {
                   style={[styles.emptyStateButton, { backgroundColor: colors.primary }]}
                   onPress={() => router.push('/add-habit')}
                 >
-                  <Ionicons name="add" size={20} color={colors['text-light']} style={{ marginRight: 8 }} />
+                  <Ionicons
+                    name="add"
+                    size={20}
+                    color={colors['text-light']}
+                    style={{ marginRight: 8 }}
+                  />
                   <Text style={styles.emptyStateButtonText}>Create Your First Habit</Text>
                 </TouchableOpacity>
               </View>
@@ -287,6 +255,7 @@ export default function HomeScreen() {
   );
 }
 
+/** ---------------- Styles ---------------- */
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -302,7 +271,6 @@ const styles = StyleSheet.create({
   },
   headerContent: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
   },
   headerText: {
@@ -312,7 +280,6 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: '700',
     color: colors['text-light'],
-    marginBottom: 4,
   },
   headerSubtitle: {
     fontSize: 16,
@@ -328,11 +295,10 @@ const styles = StyleSheet.create({
   quickActions: {
     flexDirection: 'row',
     justifyContent: 'space-around',
-    paddingHorizontal: 20,
     paddingBottom: 20,
+    margin:20
   },
   actionButton: {
-    marginTop: 10,
     flex: 1,
     alignItems: 'center',
     paddingVertical: 15,
@@ -344,18 +310,11 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 4,
   },
-  actionIcon: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 10,
-  },
   actionText: {
     fontSize: 12,
     color: colors['text-light'],
     fontWeight: '600',
+    marginTop: 8,
   },
   habitsSection: {
     paddingHorizontal: 20,
@@ -363,31 +322,31 @@ const styles = StyleSheet.create({
   },
   sectionHeader: {
     marginBottom: 16,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
   sectionTitle: {
     fontSize: 24,
     fontWeight: 'bold',
     color: colors['text-dark'],
-    marginBottom: 12,
+  },
+  viewAllButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  viewAllText: {
+    fontSize: 14,
+    color: colors.primary,
+    marginRight: 4,
   },
   habitsList: {
     gap: 16,
   },
   emptyState: {
-    flex: 1,
-    justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 32,
     paddingBottom: 80,
-  },
-  emptyIconContainer: {
-    backgroundColor: colors['bg-light'],
-    borderRadius: 32,
-    width: 80,
-    height: 80,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 15,
   },
   emptyStateTitle: {
     fontSize: 24,
