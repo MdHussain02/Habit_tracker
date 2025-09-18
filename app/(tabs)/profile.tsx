@@ -1,3 +1,4 @@
+import colors from '@/constants/Colors';
 import { useToast } from '@/hooks/useToast';
 import { AntDesign, MaterialCommunityIcons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -159,7 +160,7 @@ export default function ProfileScreen() {
               style={styles.settingsButton}
               onPress={() => router.push('/profile/settings')}
             >
-              <AntDesign name="setting" size={24} color="#ffffff" />
+              <AntDesign name="setting" size={24} color={colors["text-light"]} />
             </TouchableOpacity>
           </View>
         </View>
@@ -171,8 +172,8 @@ export default function ProfileScreen() {
           <RefreshControl
             refreshing={loading}
             onRefresh={handleRefresh}
-            colors={['#4CAF50']}
-            tintColor='#4CAF50'
+            colors={[colors.primary]}
+            tintColor={colors.primary}
           />
         }
       >
@@ -190,7 +191,7 @@ export default function ProfileScreen() {
                   style={styles.avatarLarge}
                 />
                 <TouchableOpacity style={styles.editAvatarBtn} onPress={pickAvatar}>
-                  <AntDesign name="edit" size={14} color="#fff" />
+                  <AntDesign name="edit" size={14} color={colors["text-light"]} />
                 </TouchableOpacity>
               </View>
               <View style={styles.profileInfo}>
@@ -204,7 +205,7 @@ export default function ProfileScreen() {
                   </Text>
                 </Text>
                 <TouchableOpacity style={styles.editButton} onPress={openEditModal}>
-                  <AntDesign name="edit" size={16} color="#6366f1" />
+                  <AntDesign name="edit" size={16} color={colors.primary} />
                   <Text style={styles.editButtonText}>Edit Profile</Text>
                 </TouchableOpacity>
               </View>
@@ -217,21 +218,21 @@ export default function ProfileScreen() {
             <View style={styles.metricsGrid}>
               <View style={styles.metricItem}>
                 <View style={styles.metricIcon}>
-                  <MaterialCommunityIcons name="human-male-height" size={20} color="#6366f1" />
+                  <MaterialCommunityIcons name="human-male-height" size={20} color={colors.primary} />
                 </View>
                 <Text style={styles.metricValue}>{profile.height || '--'}</Text>
                 <Text style={styles.metricLabel}>Height (cm)</Text>
               </View>
               <View style={styles.metricItem}>
                 <View style={styles.metricIcon}>
-                  <MaterialCommunityIcons name="weight-kilogram" size={20} color="#10b981" />
+                  <MaterialCommunityIcons name="weight-kilogram" size={20} color={colors.secondary} />
                 </View>
                 <Text style={styles.metricValue}>{profile.weight || '--'}</Text>
                 <Text style={styles.metricLabel}>Weight (kg)</Text>
               </View>
               <View style={styles.metricItem}>
                 <View style={styles.metricIcon}>
-                  <MaterialCommunityIcons name="calendar" size={20} color="#f59e0b" />
+                  <MaterialCommunityIcons name="calendar" size={20} color={colors.accent} />
                 </View>
                 <Text style={styles.metricValue}>{profile.age || '--'}</Text>
                 <Text style={styles.metricLabel}>Age</Text>
@@ -248,15 +249,15 @@ export default function ProfileScreen() {
               activeOpacity={0.7}
             >
               <View style={styles.optionLeft}>
-                <View style={[styles.optionIcon, { backgroundColor: '#6366f120' }]}>
-                  <MaterialCommunityIcons name="account-details" size={20} color="#6366f1" />
+                <View style={[styles.optionIcon, { backgroundColor: `${colors.primary}20` }]}>
+                  <MaterialCommunityIcons name="account-details" size={20} color={colors.primary} />
                 </View>
                 <View>
                   <Text style={styles.optionTitle}>Personal Details</Text>
                   <Text style={styles.optionSubtitle}>{profile.email}</Text>
                 </View>
               </View>
-              <AntDesign name="right" size={16} color="#7f8c8d" />
+              <AntDesign name="right" size={16} color={colors["text-secondary"]} />
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -265,23 +266,17 @@ export default function ProfileScreen() {
               activeOpacity={0.7}
             >
               <View style={styles.optionLeft}>
-                <View style={[styles.optionIcon, { backgroundColor: '#f59e0b20' }]}>
-                  <MaterialCommunityIcons name="trophy-award" size={20} color="#f59e0b" />
+                <View style={[styles.optionIcon, { backgroundColor: `${colors.accent}20` }]}>
+                  <MaterialCommunityIcons name="trophy-award" size={20} color={colors.accent} />
                 </View>
                 <View>
                   <Text style={styles.optionTitle}>Achievements</Text>
                   <Text style={styles.optionSubtitle}>View your badges & progress</Text>
                 </View>
               </View>
-              <AntDesign name="right" size={16} color="#7f8c8d" />
+              <AntDesign name="right" size={16} color={colors["text-secondary"]} />
             </TouchableOpacity>
           </View>
-
-          {/* Logout Button */}
-          {/* <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-            <MaterialCommunityIcons name="logout" size={20} color="#ffffff" />
-            <Text style={styles.logoutButtonText}>Logout</Text>
-          </TouchableOpacity> */}
         </View>
 
         {/* Edit Profile Modal */}
@@ -297,21 +292,21 @@ export default function ProfileScreen() {
               <TextInput
                 style={styles.input}
                 placeholder="Name"
-                placeholderTextColor="#7f8c8d"
+                placeholderTextColor={colors["text-secondary"]}
                 value={editProfile.name}
                 onChangeText={(text) => setEditProfile({ ...editProfile, name: text })}
               />
               <TextInput
                 style={styles.input}
                 placeholder="Level"
-                placeholderTextColor="#7f8c8d"
+                placeholderTextColor={colors["text-secondary"]}
                 value={editProfile.level}
                 onChangeText={(text) => setEditProfile({ ...editProfile, level: text })}
               />
               <TextInput
                 style={styles.input}
                 placeholder="Motivational Quote"
-                placeholderTextColor="#7f8c8d"
+                placeholderTextColor={colors["text-secondary"]}
                 value={editProfile.quote}
                 onChangeText={(text) => setEditProfile({ ...editProfile, quote: text })}
                 multiline
@@ -341,10 +336,10 @@ export default function ProfileScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f7fa',
+    backgroundColor: colors.light,
   },
   header: {
-    backgroundColor: 'rgb(0, 182, 212)',
+    backgroundColor: colors.primary,
     paddingTop: 60,
     paddingBottom: 20,
     paddingHorizontal: 20,
@@ -359,36 +354,36 @@ const styles = StyleSheet.create({
   greeting: {
     fontSize: 24,
     fontWeight: '700',
-    color: '#ffffff',
+    color: colors["text-light"],
     marginBottom: 4,
   },
   headerDate: {
     fontSize: 14,
-    color: '#FFFFFF',
+    color: colors["text-light"],
     fontWeight: '500',
   },
   settingsButton: {
     width: 44,
     height: 44,
     borderRadius: 12,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    backgroundColor: `${colors["text-light"]}20`,
     justifyContent: 'center',
     alignItems: 'center',
   },
   scrollView: {
     flex: 1,
     marginBottom: 95,
-    backgroundColor: '#f5f7fa',
+    backgroundColor: colors.light,
   },
   content: {
     padding: 20,
   },
   profileCard: {
-    backgroundColor: '#ffffff',
+    backgroundColor: colors["text-light"],
     borderRadius: 16,
     padding: 24,
     marginBottom: 20,
-    shadowColor: '#000',
+    shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 8,
@@ -405,20 +400,20 @@ const styles = StyleSheet.create({
     width: 100,
     height: 100,
     borderRadius: 50,
-    backgroundColor: '#e5e7eb',
+    backgroundColor: colors["bg-light"],
   },
   editAvatarBtn: {
     position: 'absolute',
     bottom: 0,
     right: 0,
-    backgroundColor: '#6366f1',
+    backgroundColor: colors.primary,
     borderRadius: 16,
     width: 32,
     height: 32,
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 3,
-    borderColor: '#ffffff',
+    borderColor: colors["text-light"],
   },
   profileInfo: {
     alignItems: 'center',
@@ -426,12 +421,12 @@ const styles = StyleSheet.create({
   profileName: {
     fontSize: 24,
     fontWeight: '700',
-    color: '#2c3e50',
+    color: colors["text-dark"],
     marginBottom: 4,
   },
   profileLevel: {
     fontSize: 16,
-    color: '#7f8c8d',
+    color: colors["text-secondary"],
     fontWeight: '500',
     marginBottom: 8,
   },
@@ -440,7 +435,7 @@ const styles = StyleSheet.create({
   },
   quoteText: {
     fontSize: 14,
-    color: '#7f8c8d',
+    color: colors["text-secondary"],
     fontStyle: 'italic',
     textAlign: 'center',
     lineHeight: 20,
@@ -448,23 +443,23 @@ const styles = StyleSheet.create({
   editButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#6366f120',
+    backgroundColor: `${colors.primary}20`,
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 8,
     gap: 6,
   },
   editButtonText: {
-    color: '#6366f1',
+    color: colors.primary,
     fontWeight: '600',
     fontSize: 14,
   },
   metricsCard: {
-    backgroundColor: '#ffffff',
+    backgroundColor: colors["text-light"],
     borderRadius: 16,
     padding: 20,
     marginBottom: 20,
-    shadowColor: '#000',
+    shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 8,
@@ -473,7 +468,7 @@ const styles = StyleSheet.create({
   cardTitle: {
     fontSize: 18,
     fontWeight: '700',
-    color: '#2c3e50',
+    color: colors["text-dark"],
     marginBottom: 16,
   },
   metricsGrid: {
@@ -488,7 +483,7 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 12,
-    backgroundColor: '#6366f120',
+    backgroundColor: `${colors.primary}20`,
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 8,
@@ -496,21 +491,21 @@ const styles = StyleSheet.create({
   metricValue: {
     fontSize: 20,
     fontWeight: '700',
-    color: '#2c3e50',
+    color: colors["text-dark"],
     marginBottom: 4,
   },
   metricLabel: {
     fontSize: 12,
-    color: '#7f8c8d',
+    color: colors["text-secondary"],
     textAlign: 'center',
     fontWeight: '500',
   },
   optionsCard: {
-    backgroundColor: '#ffffff',
+    backgroundColor: colors["text-light"],
     borderRadius: 16,
     padding: 20,
     marginBottom: 20,
-    shadowColor: '#000',
+    shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 8,
@@ -522,7 +517,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: '#f1f3f4',
+    borderBottomColor: colors["border-light"],
   },
   optionLeft: {
     flexDirection: 'row',
@@ -540,15 +535,15 @@ const styles = StyleSheet.create({
   optionTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#2c3e50',
+    color: colors["text-dark"],
     marginBottom: 2,
   },
   optionSubtitle: {
     fontSize: 13,
-    color: '#7f8c8d',
+    color: colors["text-secondary"],
   },
   logoutButton: {
-    backgroundColor: '#e74c3c',
+    backgroundColor: colors["text-danger"],
     borderRadius: 12,
     paddingVertical: 16,
     paddingHorizontal: 20,
@@ -556,14 +551,14 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     gap: 8,
-    shadowColor: '#000',
+    shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 2,
   },
   logoutButtonText: {
-    color: '#ffffff',
+    color: colors["text-light"],
     fontSize: 16,
     fontWeight: '600',
   },
@@ -575,12 +570,12 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   modalContent: {
-    backgroundColor: '#ffffff',
+    backgroundColor: colors["text-light"],
     borderRadius: 16,
     padding: 24,
     width: '100%',
     maxWidth: 400,
-    shadowColor: '#000',
+    shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,
@@ -589,19 +584,19 @@ const styles = StyleSheet.create({
   modalTitle: {
     fontSize: 20,
     fontWeight: '700',
-    color: '#2c3e50',
+    color: colors["text-dark"],
     marginBottom: 20,
     textAlign: 'center',
   },
   input: {
-    backgroundColor: '#f8f9fa',
-    color: '#2c3e50',
+    backgroundColor: colors["bg-light"],
+    color: colors["text-dark"],
     borderRadius: 8,
     padding: 12,
     fontSize: 16,
     marginBottom: 12,
     borderWidth: 1,
-    borderColor: '#e9ecef',
+    borderColor: colors["border-light"],
   },
   modalButtons: {
     flexDirection: 'row',
@@ -610,27 +605,27 @@ const styles = StyleSheet.create({
   },
   modalCancelButton: {
     flex: 1,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: colors["bg-light"],
     borderRadius: 8,
     paddingVertical: 12,
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: '#e9ecef',
+    borderColor: colors["border-light"],
   },
   modalCancelText: {
-    color: '#6c757d',
+    color: colors["text-secondary"],
     fontSize: 16,
     fontWeight: '600',
   },
   modalSaveButton: {
     flex: 1,
-    backgroundColor: '#6366f1',
+    backgroundColor: colors.primary,
     borderRadius: 8,
     paddingVertical: 12,
     alignItems: 'center',
   },
   modalSaveText: {
-    color: '#ffffff',
+    color: colors["text-light"],
     fontSize: 16,
     fontWeight: '600',
   },
