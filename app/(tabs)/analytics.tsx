@@ -1,5 +1,5 @@
 import AnalyticsShimmer from '@/components/AnalyticsShimmer';
-import { PookieColors } from '@/constants/Colors';
+import colors from '@/constants/Colors';
 import { useApi } from '@/hooks/useApi';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
@@ -131,8 +131,8 @@ export default function AnalyticsScreen() {
           <RefreshControl
             refreshing={isRefreshing}
             onRefresh={onRefresh}
-            tintColor={PookieColors.hotPink}
-            colors={[PookieColors.hotPink]}
+            tintColor={colors.primary}
+            colors={[colors.primary]}
           />
         }
         showsVerticalScrollIndicator={false}
@@ -205,7 +205,7 @@ export default function AnalyticsScreen() {
           <View style={styles.profileSummaryCard}>
             <View style={styles.profileSummaryHeader}>
               <View style={styles.profileAvatar}>
-                <Ionicons name="person-circle" size={32} color={PookieColors.hotPink} />
+                <Ionicons name="person-circle" size={32} color={colors.primary} />
               </View>
               <View style={styles.profileInfo}>
                 <Text style={styles.profileLevel}>{userProfile.fitnessLevel}</Text>
@@ -266,17 +266,17 @@ export default function AnalyticsScreen() {
             <View style={[styles.analysisCard, { marginBottom: 40 }]}>
               <View style={styles.analysisCardHeader}>
                 <View style={[styles.analysisIconContainer, { backgroundColor: 'rgba(255, 107, 53, 0.1)', borderColor: 'rgba(255, 107, 53, 0.3)' }]}>
-                  <Ionicons name="bulb" size={24} color={PookieColors.hotPink} />
+                  <Ionicons name="bulb" size={24} color={colors.primary} />
                 </View>
                 <View style={styles.analysisTitleContainer}>
-                  <Text style={[styles.analysisTitle, { color: PookieColors.hotPink }]}>Smart Recommendations</Text>
+                  <Text style={[styles.analysisTitle, { color: colors.primary }]}>Smart Recommendations</Text>
                   <Text style={styles.analysisSubtitle}>AI-powered suggestions</Text>
                 </View>
               </View>
               <View style={styles.analysisContent}>
                 {analysis.recommendations.map((recommendation, index) => (
                   <View key={`rec-${index}`} style={styles.analysisItem}>
-                    <View style={[styles.analysisItemDot, { backgroundColor: PookieColors.hotPink }]} />
+                    <View style={[styles.analysisItemDot, { backgroundColor: colors.primary }]} />
                     <Text style={styles.analysisItemText}>{recommendation}</Text>
                   </View>
                 ))}
@@ -292,7 +292,7 @@ export default function AnalyticsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f7fa',
+    backgroundColor: colors['bg-light'],
   },
 
   sectionHeader: {
@@ -306,10 +306,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
-    backgroundColor: '#ffffff',
+    backgroundColor: colors['bg-light'],
   },
   errorText: {
-    color: '#e53e3e',
+    color: colors['text-danger'],
     fontSize: 16,
     textAlign: 'center',
     marginVertical: 16,
@@ -328,7 +328,7 @@ const styles = StyleSheet.create({
     fontSize: 15,
   },
   header: {
-    backgroundColor: 'rgb(245, 166, 32)',
+    backgroundColor: colors['bg-primary'],
     paddingTop: 60,
     paddingBottom: 20,
     paddingHorizontal: 20,
@@ -343,12 +343,12 @@ const styles = StyleSheet.create({
   greeting: {
     fontSize: 24,
     fontWeight: '700',
-    color: '#ffffff',
+    color: colors['text-light'],
     marginBottom: 4,
   },
   headerDate: {
     fontSize: 14,
-    color: '#FFFFFF',
+    color: colors['text-light'],
     fontWeight: '500',
   },
   headerStats: {
@@ -361,19 +361,19 @@ const styles = StyleSheet.create({
   headerStatValue: {
     fontSize: 20,
     fontWeight: '800',
-    color: '#ffffff',
+    color: colors['text-light'],
     marginBottom: 4,
   },
   headerStatLabel: {
     fontSize: 12,
-    color: '#FFFFFF',
+    color: colors['text-light'],
     fontWeight: '500',
   },
   avatarContainer: {
     width: 50,
     height: 50,
     borderRadius: 25,
-    backgroundColor: PookieColors.hotPink,
+    backgroundColor: colors['bg-primary'],
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -384,11 +384,11 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   progressOverviewCard: {
-    backgroundColor: '#ffffff',
+    backgroundColor:colors['bg-accent'],
     borderRadius: 16,
     padding: 20,
     marginBottom: 20,
-    shadowColor: '#000',
+    shadowColor: colors['shadow'],
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 8,
@@ -400,12 +400,12 @@ const styles = StyleSheet.create({
   progressTitle: {
     fontSize: 20,
     fontWeight: '700',
-    color: '#2c3e50',
+    color: colors['text-secondary'],
     marginBottom: 4,
   },
   progressSubtitle: {
     fontSize: 14,
-    color: '#7f8c8d',
+    color: colors['text-secondary'],
     fontWeight: '500',
   },
   progressStats: {
@@ -420,21 +420,21 @@ const styles = StyleSheet.create({
     width: 80,
     height: 80,
     borderRadius: 40,
-    backgroundColor: 'rgba(76, 175, 80, 0.1)',
+    backgroundColor: colors['bg-accent'],
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 8,
     borderWidth: 3,
-    borderColor: 'rgba(76, 175, 80, 0.2)',
+    borderColor: colors['border-light'],
   },
   progressPercentage: {
     fontSize: 28,
     fontWeight: '800',
-    color: '#4CAF50',
+    color: colors['text-primary'],
   },
   progressLabel: {
     fontSize: 13,
-    color: '#7f8c8d',
+    color: colors['text-secondary'],
     fontWeight: '600',
     textAlign: 'center',
   },
@@ -445,7 +445,7 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   insightCard: {
-    backgroundColor: '#ffffff',
+    backgroundColor: colors['bg-light'],
     borderRadius: 16,
     padding: 20,
     width: (width - 56) / 2,
@@ -456,13 +456,13 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 3,
     borderWidth: 1,
-    borderColor: 'rgba(0, 0, 0, 0.05)',
+    borderColor: colors['border-light'],
   },
   insightIcon: {
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: 'rgba(76, 175, 80, 0.1)',
+    backgroundColor: colors['bg-dark'],
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 12,
@@ -475,12 +475,12 @@ const styles = StyleSheet.create({
   },
   insightLabel: {
     fontSize: 13,
-    color: '#7f8c8d',
+    color: colors['text-secondary'],
     fontWeight: '500',
     textAlign: 'center',
   },
   profileSummaryCard: {
-    backgroundColor: '#ffffff',
+    backgroundColor: colors['bg-light'],
     borderRadius: 20,
     padding: 24,
     marginBottom: 20,
@@ -490,7 +490,7 @@ const styles = StyleSheet.create({
     shadowRadius: 12,
     elevation: 6,
     borderWidth: 1,
-    borderColor: 'rgba(0, 0, 0, 0.05)',
+    borderColor: colors['border-light'], 
   },
   profileSummaryHeader: {
     flexDirection: 'row',
@@ -500,12 +500,12 @@ const styles = StyleSheet.create({
     width: 60,
     height: 60,
     borderRadius: 30,
-    backgroundColor: 'rgba(255, 107, 53, 0.1)',
+    backgroundColor: colors['bg-accent'],
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 15,
     borderWidth: 2,
-    borderColor: 'rgba(255, 107, 53, 0.2)',
+    borderColor: colors['border-light'],
   },
   profileInfo: {
     flex: 1,
@@ -513,42 +513,42 @@ const styles = StyleSheet.create({
   profileLevel: {
     fontSize: 18,
     fontWeight: '700',
-    color: '#2c3e50',
+    color: colors['text-primary'],
     marginBottom: 4,
     textTransform: 'capitalize',
   },
   profileGoal: {
     fontSize: 14,
-    color: '#7f8c8d',
+    color: colors['text-primary'],
     fontWeight: '500',
     textTransform: 'capitalize',
   },
   motivationBadge: {
-    backgroundColor: 'rgba(255, 152, 0, 0.1)',
+    backgroundColor: colors['bg-accent'],
     borderRadius: 16,
     paddingVertical: 8,
     paddingHorizontal: 16,
     borderWidth: 1,
-    borderColor: 'rgba(255, 152, 0, 0.2)',
+    borderColor: colors['border-light'],
   },
   motivationText: {
     fontSize: 13,
     fontWeight: '600',
-    color: '#FF9800',
+    color: colors['text-dark'],
     textTransform: 'capitalize',
   },
   analysisCard: {
-    backgroundColor: '#ffffff',
+    backgroundColor: colors['bg-light'],
     borderRadius: 20,
     padding: 24,
     marginBottom: 20,
-    shadowColor: '#000',
+    shadowColor: colors['shadow'],
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.1,
     shadowRadius: 12,
     elevation: 6,
     borderWidth: 1,
-    borderColor: 'rgba(0, 0, 0, 0.05)',
+    borderColor: colors['border-light'],
   },
   analysisCardHeader: {
     flexDirection: 'row',
@@ -559,12 +559,12 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: 'rgba(76, 175, 80, 0.1)',
+    backgroundColor: colors['bg-primary'],
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 16,
     borderWidth: 2,
-    borderColor: 'rgba(76, 175, 80, 0.2)',
+    borderColor: colors['border-light'],
   },
   analysisTitleContainer: {
     flex: 1,
@@ -572,12 +572,12 @@ const styles = StyleSheet.create({
   analysisTitle: {
     fontSize: 20,
     fontWeight: '700',
-    color: '#2c3e50',
+    color: colors['text-secondary'],
     marginBottom: 4,
   },
   analysisSubtitle: {
     fontSize: 14,
-    color: '#7f8c8d',
+    color: colors['text-secondary'],
     fontWeight: '500',
   },
   analysisContent: {
@@ -592,7 +592,7 @@ const styles = StyleSheet.create({
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: '#4CAF50',
+    backgroundColor: colors['bg-primary'],
     marginTop: 8,
     marginRight: 16,
     flexShrink: 0,
@@ -600,7 +600,7 @@ const styles = StyleSheet.create({
   analysisItemText: {
     fontSize: 15,
     lineHeight: 22,
-    color: '#2c3e50',
+    color: colors['text-secondary'],
     flex: 1,
     fontWeight: '500',
   },

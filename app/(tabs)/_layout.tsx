@@ -1,3 +1,4 @@
+import colors from '@/constants/Colors';
 import { Ionicons } from '@expo/vector-icons';
 import { Tabs } from 'expo-router';
 import React from 'react';
@@ -24,30 +25,29 @@ const TAB_ITEMS = [
     name: 'coach',
     title: 'Coach',
     icon: 'bulb' as const,
-    color: '#8B5CF6', // Purple
-    bg: 'rgba(139, 92, 246, 0.15)',
+    color: colors.primary, // Purple
+    bg: colors['bg-accent'],
   },
   {
     name: 'index',
     title: 'Habits',
     icon: 'infinite' as const,
-    color: '#EC4899', // Pink
-    bg: 'rgba(236, 72, 153, 0.15)',
+    color: colors.primary, // Pink
+    bg: colors['bg-accent'],
   },
   {
     name: 'analytics',
     title: 'Stats',
     icon: 'analytics' as const,
-    color: '#F59E0B', // Orange/Yellow
-    bg: 'rgba(245, 158, 11, 0.15)',
-
+    color: colors.primary, // Orange/Yellow
+    bg: colors['bg-accent'],
   },
   {
     name: 'profile',
     title: 'Profile',
     icon: 'person' as const,
-    color: '#06B6D4', // Cyan
-    bg: 'rgba(6, 182, 212, 0.15)',
+    color: colors.primary, // Cyan
+    bg: colors['bg-accent'],
   },
 ];
 
@@ -198,7 +198,7 @@ const styles = StyleSheet.create({
     shadowRadius: 24,
     elevation: 8,
     borderWidth: 1,
-    borderColor: 'rgba(0,0,0,0.05)',
+    borderColor: colors['border-light'],
   },
   activeIndicator: {
     position: 'absolute',
@@ -248,7 +248,7 @@ const screenStyles = StyleSheet.create({
   screenText: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#1F2937',
+    color: colors['text-secondary'],
   },
 });
 

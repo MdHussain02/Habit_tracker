@@ -195,16 +195,8 @@ export default function HomeScreen() {
         </View>
       </PageTransition>
 
-      {/* Main Content */}
-      <ScrollView
-        style={styles.scrollView}
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
-      >
-        <PageTransition type="scale" duration={400} delay={300}>
-          <View style={styles.habitsSection}>
-            <View style={styles.sectionHeader}>
+
+          <View style={styles.sectionHeader}>
               <Text style={styles.sectionTitle}>Today's Habits</Text>
               <TouchableOpacity
                 style={styles.viewAllButton}
@@ -214,6 +206,16 @@ export default function HomeScreen() {
                 <Ionicons name="arrow-forward" size={16} color={colors.primary} />
               </TouchableOpacity>
             </View>
+      {/* Main Content */}
+      <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+      >
+        <PageTransition type="scale" duration={400} delay={300}>
+          <View style={styles.habitsSection}>
+  
 
             {loading ? (
               <View style={styles.habitsList}>
@@ -317,14 +319,15 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   habitsSection: {
-    paddingHorizontal: 20,
-    paddingBottom: 20,
+    paddingHorizontal: 15,
+    paddingBottom: 15,
   },
   sectionHeader: {
-    marginBottom: 16,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    marginHorizontal:20,
+    marginBottom:10
   },
   sectionTitle: {
     fontSize: 24,
