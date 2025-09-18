@@ -1,3 +1,4 @@
+import colors from '@/constants/Colors';
 import { useEffect } from 'react';
 import { Animated, Dimensions, Easing, StyleProp, StyleSheet, View, ViewStyle } from 'react-native';
 
@@ -138,10 +139,10 @@ const AnalyticsShimmer = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f7fa',
+    backgroundColor: colors['bg-light'],
   },
   placeholder: {
-    backgroundColor: '#e0e0e0',
+    backgroundColor: colors['bg-light'],
     borderRadius: 4,
     overflow: 'hidden',
   },
@@ -151,11 +152,11 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: 'rgba(255, 255, 255, 0.7)',
+    backgroundColor: colors['bg-light'],
     transform: [{ translateX: -100 }],
   },
   header: {
-    backgroundColor: '#2c3e50',
+    backgroundColor: colors['bg-dark'],
     paddingTop: 60,
     paddingBottom: 20,
     paddingHorizontal: 20,
@@ -200,7 +201,7 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   progressOverviewCard: {
-    backgroundColor: '#ffffff',
+    backgroundColor: colors['bg-light'],
     borderRadius: 16,
     padding: 20,
     marginBottom: 20,

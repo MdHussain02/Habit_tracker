@@ -443,7 +443,7 @@ const styles = StyleSheet.create({
   // Dropdown styles
   dropdownButton: {
     width: '100%',
-    backgroundColor: '#f8f9fa',
+    // backgroundColor: '#f8f9fa',
     borderRadius: 16,
     padding: 18,
     marginBottom: 10,
@@ -456,7 +456,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   dropdownButtonText: {
-    color: '#333',
+    // color: '#333',
     fontSize: 16,
     flex: 1,
   },

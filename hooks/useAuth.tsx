@@ -1,3 +1,4 @@
+import { navigate } from 'expo-router/build/global-state/routing';
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { getAccessToken, getUserData, removeTokens, removeUserData, saveTokens, saveUserData } from '../utils/storage';
 
@@ -64,6 +65,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       await removeTokens();
       setUser(null);
       setIsAuthenticated(false);
+      navigate('/onboarding');
     } catch (error) {
       console.error('Error during logout:', error);
       throw error;
@@ -72,6 +74,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     checkAuth();
+    navigate('/(tabs)');
   }, []);
 
   const value: AuthContextType = {

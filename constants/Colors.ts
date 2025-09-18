@@ -1,41 +1,33 @@
-/**
- * Below are the colors that are used in the app. The colors are defined in the light and dark mode.
- * There are many other ways to style your app. For example, [Nativewind](https://www.nativewind.dev/), [Tamagui](https://tamagui.dev/), [unistyles](https://reactnativeunistyles.vercel.app), etc.
- */
 
-const tintColorLight = '#ff9b00'; // Orange from the palette
-const tintColorDark = '#fff';
+// colors.ts
+const colors = {
+  // Primary theme colors
+  primary: "#96A78D",       // Dark green-gray (top color)
+  secondary: "#B6CEB4",     // Medium green-gray
+  accent: "#DBE9D3",        // Light pastel green
+  light: "#F0F0F0",       // Off white / background
+  
+  // Text colors
+  "text-primary": "#333333", // Dark text
+  "text-secondary": "#555555", // Medium text
+  "text-light": "#FFFFFF",  // White text
+  "text-dark": "#333333",   // Dark text
+  "text-danger" : "#ff6b6b",
 
-export const Colors = {
-  light: {
-    text: '#11181C',
-    background: '#fff',
-    tint: tintColorLight,
-    icon: '#687076',
-    tabIconDefault: '#687076',
-    tabIconSelected: tintColorLight,
-  },
-  dark: {
-    text: '#11181C', // Darker text for contrast on light background
-    background: '#f8f8f8', // Light background for dark mode
-    tint: tintColorLight,
-    icon: '#687076',
-    tabIconDefault: '#687076',
-    tabIconSelected: tintColorLight,
-  },
+  // Backgrounds
+  "bg-primary": "#96A78D",
+  "bg-secondary": "#B6CEB4",
+  "bg-accent": "#DBE9D3",
+  "bg-light": "#F0F0F0",
+  "bg-dark": "#2c3e50",
+
+  // Borders
+  "border-light": "#E0E0E0",
+  "border-dark": "#666666",
+
+  //Shadows
+
+  "shadow" : "#DBE9D3"
 };
 
-export const PookieColors = {
-  black: '#000000',
-  deepRed: '#CE114A',
-  hotPink: '#FF0B55',
-  palePink: '#FFDEDE',
-};
-
-// Color palette from ff9b00ffe100ffc900ebe389.png
-export const PaletteColors = {
-  orange: '#ff9b00',
-  yellow: '#ffe100',
-  gold: '#ffc900',
-  lightYellow: '#ebe389',
-};
+export default colors;

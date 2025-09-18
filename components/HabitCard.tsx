@@ -1,3 +1,4 @@
+import colors from '@/constants/Colors';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
@@ -24,9 +25,7 @@ interface HabitCardProps {
   habit: Habit;
 } 
 
-export default function HabitCard({ 
-  habit
-}: HabitCardProps) {
+export default function HabitCard({ habit }: HabitCardProps) {
   const router = useRouter();
   const habitId = habit._id || habit.id;
   
@@ -42,22 +41,29 @@ export default function HabitCard({
       activeOpacity={0.8}
     >
       <View style={styles.iconContainer}>
-        {renderIcon(habit.icon_id || 1, 24, "#4B5563")}
+        {renderIcon(habit.icon_id || 1, 24, colors['text-secondary'])}
       </View>
       <View style={styles.content}>
         <View style={styles.headerRow}>
           <Text style={styles.name}>{habit.name}</Text>
         </View>
         <View style={styles.streakContainer}>
-          <Ionicons name="flame" size={16} color="#FF6B6B" />
+          <Ionicons name="flame" size={16} color={colors['text-danger']} />
           <Text style={styles.streakText}>
             {habit.streak || 0} day{habit.streak !== 1 ? 's' : ''}
           </Text>
         </View>
         {habit.reminder?.time && (
           <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 4 }}>
-            <Ionicons name="time-outline" size={16} color="#FF6B6B" style={{ marginRight: 4 }} />
-            <Text style={{ color: '#ccc', fontSize: 13 }}>Scheduled: {habit.reminder.time}</Text>
+            <Ionicons 
+              name="time-outline" 
+              size={16} 
+              color={colors['text-danger']} 
+              style={{ marginRight: 4 }} 
+            />
+            <Text style={{ color: colors['text-secondary'], fontSize: 13 }}>
+              Scheduled: {habit.reminder.time}
+            </Text>
           </View>
         )}
       </View>
@@ -69,18 +75,18 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: "#ffffff",
+    backgroundColor: colors['bg-light'],
     borderRadius: 16,
     padding: 16,
     marginBottom: 12,
     minHeight: 100,
-    shadowColor: '#000',
+    shadowColor: colors['shadow'],
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.05,
     shadowRadius: 4,
     elevation: 2,
     borderWidth: 1,
-    borderColor: '#f0f0f0',
+    borderColor: colors['border-light'],
   },
   content: {
     flex: 1,
@@ -90,7 +96,7 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: '#F3F4F6',
+    backgroundColor: colors['bg-light'],
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -102,7 +108,7 @@ const styles = StyleSheet.create({
   name: {
     fontSize: 17,
     fontWeight: '600',
-    color: '#1F2937',
+    color: colors['text-dark'],
     flex: 1,
     paddingVertical: 4,
   },
@@ -113,7 +119,7 @@ const styles = StyleSheet.create({
   },
   streakText: {
     fontSize: 14,
-    color: '#687076', // Darker text for contrast
+    color: colors['text-secondary'],
     marginLeft: 6,
     fontWeight: '600',
   },

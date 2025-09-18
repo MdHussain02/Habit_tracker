@@ -3,8 +3,10 @@ import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native
 import * as Notifications from 'expo-notifications';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
+import { useState } from 'react';
 import { Easing } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import SplashScreen from '../components/SplashScreen'; // Adjust path as needed
 import { AuthProvider } from '../hooks/useAuth';
 import { useColorScheme } from '../hooks/useColorScheme';
 import { PushNotificationProvider } from '../hooks/usePushNotifications';
@@ -141,6 +143,15 @@ const fadeTransition = {
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
+  const [showSplash, setShowSplash] = useState(true);
+
+  const handleSplashFinish = () => {
+    setShowSplash(false);
+  };
+
+  if (showSplash) {
+    return <SplashScreen onAnimationFinish={handleSplashFinish} />;
+  }
 
   return (
     <AuthProvider>
@@ -201,5 +212,3 @@ export default function RootLayout() {
     </AuthProvider>
   );
 }
-
-

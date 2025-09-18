@@ -1,7 +1,6 @@
+import colors from '@/constants/Colors';
 import { useEffect } from 'react';
-import { Animated, Dimensions, Easing, StyleProp, StyleSheet, View, ViewStyle } from 'react-native';
-
-const { width } = Dimensions.get('window');
+import { Animated, Easing, StyleProp, StyleSheet, View, ViewStyle } from 'react-native';
 
 interface ShimmerPlaceholderProps {
   style: StyleProp<ViewStyle>;
@@ -52,9 +51,6 @@ const ShimmerPlaceholder = ({ style }: ShimmerPlaceholderProps) => {
 };
 
 const HabitCardShimmer = () => {
-  // Create an array of 10 items to map over
-  const shimmerItems = Array(10).fill(null);
-
   return (
     <View style={styles.container}>
       <View style={styles.card}>
@@ -77,7 +73,7 @@ const styles = StyleSheet.create({
     marginBottom: 25,
   },
   placeholder: {
-    backgroundColor: '#e0e0e0',
+    backgroundColor: colors['border-light'],
     borderRadius: 4,
     overflow: 'hidden',
   },
@@ -87,30 +83,29 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: 'rgba(255, 255, 255, 0.7)',
-    transform: [{ translateX: -100 }],
+    backgroundColor: colors.light,
+    opacity: 0.7,
   },
   card: {
-    backgroundColor: '#ffffff',
+    backgroundColor: colors['bg-light'],
     borderRadius: 16,
     padding: 10,
     flexDirection: 'row',
     alignItems: 'center',
     minHeight: 117,
-    shadowColor: '#000',
+    shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.05,
     shadowRadius: 4,
     elevation: 2,
     borderWidth: 1,
-    borderColor: '#f0f0f0',
+    borderColor: colors['border-light'],
   },
   iconPlaceholder: {
     width: 48,
     height: 48,
     borderRadius: 12,
     marginRight: 16,
-    overflow: 'hidden',
   },
   content: {
     flex: 1,
@@ -120,7 +115,7 @@ const styles = StyleSheet.create({
     height: 20,
     borderRadius: 4,
     marginBottom: 12,
-    backgroundColor: '#f0f0f0',
+    backgroundColor: colors['bg-accent'],
   },
   streakContainer: {
     flexDirection: 'row',
@@ -131,19 +126,13 @@ const styles = StyleSheet.create({
     height: 16,
     borderRadius: 4,
     marginRight: 12,
-    backgroundColor: '#f0f0f0',
+    backgroundColor: colors['bg-accent'],
   },
   timePlaceholder: {
     width: 80,
     height: 16,
     borderRadius: 4,
-    backgroundColor: '#f0f0f0',
-  },
-  checkboxPlaceholder: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    overflow: 'hidden',
+    backgroundColor: colors['bg-accent'],
   },
 });
 

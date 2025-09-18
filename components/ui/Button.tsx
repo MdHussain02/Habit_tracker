@@ -1,9 +1,11 @@
+import colors from '@/constants/Colors';
 import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
 import { ActivityIndicator, StyleSheet, Text, TextStyle, TouchableOpacity, ViewStyle } from 'react-native';
 
 export type ButtonType = 'primary' | 'secondary' | 'outline' | 'link';
 export type sizeType = 'small' | 'medium' | 'large';
+
 
 interface ButtonProps {
   onPress: () => void;
@@ -18,10 +20,10 @@ interface ButtonProps {
   testID?: string;
 }
 
-const MAIN_COLOR = '#4CAF50'; // Use orange from palette
-const PRESSED_COLOR = '#e08a00'; // Darker orange for pressed state
-const DISABLED_COLOR = '#bcbcbc';
-const TEXT_COLOR = '#FFFFFF'; // White text for better contrast
+const MAIN_COLOR = colors.primary; // Use orange from palette
+const PRESSED_COLOR = colors.primary; // Darker orange for pressed state
+const DISABLED_COLOR = colors['bg-light'];
+const TEXT_COLOR = colors['text-light']; // White text for better contrast
 
 const getButtonStyle = (type: ButtonType, disabled: boolean): ViewStyle => {
   switch (type) {

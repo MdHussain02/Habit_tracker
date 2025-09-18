@@ -1,3 +1,4 @@
+import colors from '@/constants/Colors';
 import { useRouter } from 'expo-router';
 import React, { useEffect } from 'react';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
@@ -32,7 +33,7 @@ export function ProtectedRoute({
   if (isLoading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#7066F6" />
+        <ActivityIndicator size="large" color={colors['text-dark']} />
       </View>
     );
   }
@@ -51,6 +52,6 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#18181b',
+    backgroundColor: colors['bg-light'],
   },
 }); 
