@@ -18,7 +18,6 @@ declare global {
     interface RootParamList extends RootStackParamList {}
   }
 }
-
 // --- Notification handler ---
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
