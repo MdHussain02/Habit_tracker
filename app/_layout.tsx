@@ -30,18 +30,20 @@ Notifications.setNotificationHandler({
   }),
 });
 
-// --- Transitions (unchanged) ---
+// --- Transitions ---
 const slideFromRight = { /* your slideFromRight code */ };
 const slideFromBottom = { /* your slideFromBottom code */ };
 const fadeTransition = { /* your fadeTransition code */ };
 
-// --- Wrapper to decide initial screen based on auth ---
-function AppNavigator() {
-  const { user, isLoading,isAuthenticated } = useAuth(); // assuming your hook returns this
+// Auth-aware Navigator Component
+function AuthAwareNavigator() {
+  const { isLoading, isAuthenticated } = useAuth();
   const colorScheme = useColorScheme();
 
+  console.log('🔐 Auth State - isLoading:', isLoading, 'isAuthenticated:', isAuthenticated);
+
+  // Show splash screen while checking authentication
   if (isLoading) {
-    // while checking auth, keep splash
     return <SplashScreen />;
   }
 
@@ -50,13 +52,16 @@ function AppNavigator() {
       <SafeAreaProvider style={{ flex: 1 }}>
         <StatusBar style={colorScheme === 'dark' ? 'light' : 'dark'} />
         <Stack
-          initialRouteName={isAuthenticated ? '(tabs)' : 'onboarding'}
+          // Set initial route based on auth state - NO navigation needed!
+          initialRouteName={'onboarding'}
           screenOptions={{
             headerShown: false,
             contentStyle: { backgroundColor: colors["bg-light"] },
-            ...slideFromRight, // default transition
+            ...slideFromRight,
           }}
         >
+          
+          <Stack.Protected guard ={isAuthenticated} >
           <Stack.Screen
             name="(tabs)"
             options={{
@@ -64,14 +69,8 @@ function AppNavigator() {
               gestureEnabled: false,
             }}
           />
-          <Stack.Screen
-            name="add-habit"
-            options={{
-              ...slideFromBottom,
-              gestureEnabled: true,
-              gestureDirection: 'vertical',
-            }}
-          />
+          </Stack.Protected>
+          <Stack.Protected  guard = {!isAuthenticated}>
           <Stack.Screen
             name="login"
             options={{
@@ -79,6 +78,8 @@ function AppNavigator() {
               gestureEnabled: false,
             }}
           />
+          </Stack.Protected>
+          <Stack.Protected guard ={!isAuthenticated} >
           <Stack.Screen
             name="register"
             options={{
@@ -86,6 +87,8 @@ function AppNavigator() {
               gestureEnabled: false,
             }}
           />
+          </Stack.Protected>
+          <Stack.Protected guard ={!isAuthenticated} >
           <Stack.Screen
             name="onboarding"
             options={{
@@ -93,28 +96,25 @@ function AppNavigator() {
               gestureEnabled: false,
             }}
           />
+          </Stack.Protected>
         </Stack>
       </SafeAreaProvider>
     </ThemeProvider>
   );
 }
-
 export default function RootLayout() {
   const [showSplash, setShowSplash] = useState(true);
-
   const handleSplashFinish = () => {
     setShowSplash(false);
   };
-
   if (showSplash) {
     return <SplashScreen onAnimationFinish={handleSplashFinish} />;
   }
-
   return (
     <AuthProvider>
       <ToastProvider>
         <PushNotificationProvider>
-          <AppNavigator />
+          <AuthAwareNavigator />
         </PushNotificationProvider>
       </ToastProvider>
     </AuthProvider>

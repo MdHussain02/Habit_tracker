@@ -33,6 +33,7 @@ export default function HomeScreen() {
   const { fetchGet } = useApi();
   const { showToast } = useToast();
   const API_BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL;
+  
 
   const { addHabitWithNotification, editHabitWithNotification, deleteHabitWithNotification } =
     useHabitNotifications(habits, setHabits);
