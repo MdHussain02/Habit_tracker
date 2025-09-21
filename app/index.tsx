@@ -1,23 +1,23 @@
 import { useRouter } from 'expo-router';
-import React, { useEffect } from 'react';
-import { View, ActivityIndicator, StyleSheet } from 'react-native';
+import React from 'react';
+import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import { useAuth } from '../hooks/useAuth';
 
 export default function Index() {
   const { isAuthenticated, isLoading } = useAuth();
   const router = useRouter();
 
-  useEffect(() => {
-    if (!isLoading) {
-      if (isAuthenticated) {
-        // User is logged in, redirect to main app
-        router.replace('/(tabs)');
-      } else {
-        // User is not logged in, redirect to onboarding
-        router.replace('/onboarding');
-      }
-    }
-  }, [isAuthenticated, isLoading, router]);
+  // useEffect(() => {
+  //   if (!isLoading) {
+  //     if (isAuthenticated) {
+  //       // User is logged in, redirect to main app
+  //       router.replace('/(tabs)');
+  //     } else {
+  //       // User is not logged in, redirect to onboarding
+  //       router.replace('/onboarding');
+  //     }
+  //   }
+  // }, [isAuthenticated, isLoading, router]);
 
   // Show loading spinner while checking authentication
   return (

@@ -1,6 +1,7 @@
 import { DropdownButton } from '@/components/DropDownButton';
 import { DropdownModal } from '@/components/DropdownSelect';
 import Button from '@/components/ui/Button';
+import colors from '@/constants/Colors';
 import { Ionicons } from '@expo/vector-icons';
 import { StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
@@ -286,7 +287,7 @@ export default function RegistrationScreen({ onRegister }: { onRegister: (user: 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#ffffff',
+    backgroundColor: colors['bg-light'],
   },
   backButton: {
     position: 'absolute',
@@ -295,31 +296,31 @@ const styles = StyleSheet.create({
     zIndex: 10,
     padding: 8,
     borderRadius: 20,
-    backgroundColor: '#f0f0f5',
+    backgroundColor: colors['bg-light'],
   },
   scrollContainer: {
     flexGrow: 1,
     padding: 24,
     paddingTop: 100,
-    backgroundColor: '#ffffff',
+    backgroundColor: colors['bg-light'],
   },
   progressContainer: {
     marginBottom: 32,
   },
   progressBar: {
     height: 8,
-    backgroundColor: '#e0e0e0',
+    backgroundColor: colors['bg-secondary'],
     borderRadius: 4,
     overflow: 'hidden',
     marginBottom: 8,
   },
   progressFill: {
     height: '100%',
-    backgroundColor: '#4CAF50',
+    backgroundColor: colors.primary,
     borderRadius: 4,
   },
   progressText: {
-    color: '#666',
+    color: colors['text-secondary'],
     fontSize: 14,
     textAlign: 'center',
   },
@@ -337,39 +338,39 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: '#f0f0f5',
+    backgroundColor :colors['bg-light'],
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 8,
     borderWidth: 1,
-    borderColor: '#e0e0e0',
+    borderColor: colors['border-light'],
   },
   stepCircleActive: {
-    backgroundColor: '#4CAF50',
-    borderColor: '#4CAF50',
+    backgroundColor: colors.primary,
+    borderColor: colors['border-light'],
   },
   stepNumber: {
-    color: '#999',
+    color: colors['text-secondary'],
     fontSize: 16,
     fontWeight: 'bold',
   },
   stepNumberActive: {
-    color: '#fff',
+    color: colors['text-light'],
   },
   stepLabel: {
-    color: '#999',
+    color:  colors['text-disabled'],
     fontSize: 12,
     textAlign: 'center',
     fontWeight: '500',
   },
   stepLabelActive: {
-    color: '#333',
+    color: colors['text-secondary'],
     fontWeight: '600',
   },
   title: {
     fontSize: 32,
     fontWeight: 'bold',
-    color: '#333',
+    color: colors['text-secondary'],
     marginBottom: 24,
     textAlign: 'center',
   },
@@ -379,20 +380,20 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#444',
+    color: colors['text-primary'],
     marginBottom: 16,
     textAlign: 'center',
   },
   input: {
     width: '100%',
-    backgroundColor: '#f8f9fa',
-    color: '#333',
+    backgroundColor: colors['bg-light'],
+    color: colors['text-primary'],
     borderRadius: 16,
     padding: 16,
     marginBottom: 16,
     fontSize: 16,
     borderWidth: 1,
-    borderColor: '#e0e0e0',
+    borderColor: colors['border-light'],
   },
   row: {
     flexDirection: 'row',
@@ -402,7 +403,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   errorText: {
-    color: '#ff4d4f',
+    color: colors['text-danger'],
     fontSize: 14,
     marginBottom: 16,
     textAlign: 'center',
@@ -414,13 +415,13 @@ const styles = StyleSheet.create({
     gap: 16,
   },
   button: {
-    backgroundColor: '#4CAF50',
+    backgroundColor: colors.primary,
     borderRadius: 20,
     paddingVertical: 16,
     paddingHorizontal: 40,
     alignItems: 'center',
     minWidth: 140,
-    shadowColor: '#4CAF50',
+    shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.2,
     shadowRadius: 8,
@@ -443,7 +444,6 @@ const styles = StyleSheet.create({
   // Dropdown styles
   dropdownButton: {
     width: '100%',
-    // backgroundColor: '#f8f9fa',
     borderRadius: 16,
     padding: 18,
     marginBottom: 10,

@@ -1,5 +1,5 @@
 import Button from '@/components/ui/Button';
-import { PookieColors } from '@/constants/Colors';
+import colors from '@/constants/Colors';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
@@ -195,11 +195,11 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   loginButton: {
-    backgroundColor: PookieColors.hotPink,
+    backgroundColor: colors.primary,
     borderRadius: 12,
     paddingVertical: 16,
     alignItems: 'center',
-    shadowColor: PookieColors.hotPink,
+    shadowColor: colors.primary,
     shadowOffset: {
       width: 0,
       height: 4,

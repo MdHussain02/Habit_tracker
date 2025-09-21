@@ -13,6 +13,7 @@ const colors = {
   "text-light": "#FFFFFF",  // White text
   "text-dark": "#333333",   // Dark text
   "text-danger" : "#ff6b6b",
+  "text-disabled" : "#9c9c9cff",
 
   // Backgrounds
   "bg-primary": "#96A78D",

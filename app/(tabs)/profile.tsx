@@ -195,7 +195,7 @@ export default function ProfileScreen() {
                 </TouchableOpacity>
               </View>
               <View style={styles.profileInfo}>
-                <Text style={styles.profileName}>{profile.name || 'Jane Doe'}</Text>
+                <Text style={styles.profileName}>{profile.name}</Text>
                 <Text style={styles.profileLevel}>
                   Level: {profile.level || 'Beginner'}
                 </Text>

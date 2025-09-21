@@ -1,4 +1,4 @@
-import { PookieColors } from '@/constants/Colors';
+import colors from '@/constants/Colors';
 import { useApi } from '@/hooks/useApi';
 import { useToast } from '@/hooks/useToast';
 import { AISuggestion } from '@/types/habit';
@@ -51,7 +51,7 @@ const CategorySuggestionsScreen = () => {
       case 'nutrition':
         return '#10b981';
       default:
-        return PookieColors.hotPink;
+        return colors.primary;
     }
   };
 

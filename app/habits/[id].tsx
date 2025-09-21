@@ -1,8 +1,8 @@
+import colors from '@/constants/Colors';
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { PookieColors } from '../../constants/Colors';
 import { useApi } from '../../hooks/useApi';
 
 const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
@@ -177,11 +177,11 @@ export default function HabitDetailsScreen() {
 
       <View style={styles.contentContainer}>
         <View style={styles.habitHeader}>
-          <View style={[styles.iconContainer, { backgroundColor: PookieColors.hotPink + '20' }]}>
+          <View style={[styles.iconContainer, { backgroundColor: colors.primary + '20' }]}>
             <Ionicons 
               name={iconName as any} 
               size={48} 
-              color={PookieColors.hotPink} 
+              color={colors.primary} 
             />
           </View>
           <Text style={styles.habitName}>{habit.name}</Text>
@@ -220,7 +220,7 @@ export default function HabitDetailsScreen() {
 
       <View style={styles.actionsContainer}>
         <TouchableOpacity 
-          style={[styles.actionButton, { backgroundColor: PookieColors.hotPink }]}
+          style={[styles.actionButton, { backgroundColor: colors.primary }]}
           onPress={() => console.log('Toggle completion')}
         >
           <Ionicons 
@@ -385,7 +385,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
   },
   retryButton: {
-    backgroundColor: PookieColors.hotPink,
+    backgroundColor: colors.primary,
     paddingHorizontal: 24,
     paddingVertical: 12,
     borderRadius: 8,

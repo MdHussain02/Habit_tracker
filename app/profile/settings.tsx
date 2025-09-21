@@ -1,4 +1,4 @@
-import { PookieColors } from "@/constants/Colors";
+import colors from "@/constants/Colors";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
@@ -211,7 +211,7 @@ export default function SettingsScreen() {
             <Text style={styles.settingDescription}>{item.description}</Text>
           </View>
           <View style={styles.settingIcon}>
-            <Ionicons name={item.icon} size={24} color={PookieColors.hotPink} />
+            <Ionicons name={item.icon} size={24} color={colors.primary} />
           </View>
         </View>
         <View style={styles.settingControl}>
@@ -226,7 +226,7 @@ export default function SettingsScreen() {
             <Switch
               value={item.value}
               onValueChange={item.onValueChange}
-              trackColor={{ false: "#e2e8f0", true: PookieColors.hotPink }}
+              trackColor={{ false: "#e2e8f0", true: colors.primary }}
               thumbColor="#fff"
             />
           )}
@@ -284,7 +284,7 @@ export default function SettingsScreen() {
                       <Ionicons
                         name={item.icon as any}
                         size={20}
-                        color={PookieColors.hotPink}
+                        color={colors.primary}
                       />
                     </View>
                   </View>
@@ -292,7 +292,7 @@ export default function SettingsScreen() {
                     <Switch
                       value={item.value}
                       onValueChange={item.onValueChange}
-                      trackColor={{ false: '#e2e8f0', true: PookieColors.hotPink }}
+                      trackColor={{ false: '#e2e8f0', true: colors.primary }}
                       thumbColor="#fff"
                     />
                   </View>
@@ -354,7 +354,6 @@ export default function SettingsScreen() {
                       text: "Logout", 
                       onPress: () => {
                         logout();
-                        router.replace('/login');
                       } 
                     }
                   ]
@@ -373,18 +372,18 @@ export default function SettingsScreen() {
   const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f8f9fa",
+    backgroundColor: colors["bg-light"],
   },
   content: {
     flex: 1,
   },
   statusText: {
     fontSize: 14,
-    color: '#64748b',
+    color: colors["text-primary"],
     fontWeight: '500',
   },
   header: {
-    backgroundColor: '#2c3e50',
+    backgroundColor: colors["bg-primary"],
     paddingTop: 60,
     paddingBottom: 20,
     paddingHorizontal: 20,
@@ -399,12 +398,12 @@ export default function SettingsScreen() {
   greeting: {
     fontSize: 24,
     fontWeight: '700',
-    color: '#ffffff',
+    color: colors["text-light"],
     marginBottom: 4,
   },
   headerDate: {
     fontSize: 14,
-    color: '#bdc3c7',
+    color: colors["text-light"],
     fontWeight: '500',
   },
   scrollView: {
@@ -417,7 +416,7 @@ export default function SettingsScreen() {
   },
   section: {
     marginBottom: 20,
-    backgroundColor: '#fff',
+    backgroundColor: colors["bg-accent"],
     borderRadius: 12,
     padding: 16,
     shadowColor: '#000',
@@ -429,23 +428,23 @@ export default function SettingsScreen() {
   sectionTitle: {
     fontSize: 18,
     fontWeight: '700',
-    color: '#1a1a1a',
+    color: colors["text-primary"],
     marginBottom: 12,
     letterSpacing: -0.3,
   },
   sectionDescription: {
     fontSize: 14,
-    color: '#64748b',
+    color: colors["text-primary"],
     marginBottom: 16,
     lineHeight: 20,
   },
   settingCard: {
-    backgroundColor: '#fff',
+    backgroundColor: colors["bg-secondary"],
     borderRadius: 12,
     padding: 16,
     marginBottom: 8,
     borderWidth: 1,
-    borderColor: '#f1f5f9',
+    borderColor: colors["border-light"],
   },
   settingHeader: {
     flexDirection: 'row',
@@ -460,23 +459,23 @@ export default function SettingsScreen() {
   settingTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#1e293b',
+    color: colors["text-primary"],
     marginBottom: 4,
   },
   settingDescription: {
     fontSize: 13.5,
-    color: '#64748b',
+    color: colors["text-primary"],
     lineHeight: 20,
   },
   settingIcon: {
     width: 40,
     height: 40,
     borderRadius: 12,
-    backgroundColor: '#f8fafc',
+    backgroundColor: colors["bg-light"],
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: '#e2e8f0',
+    borderColor: colors["border-light"],
   },
   settingControl: {
     flexDirection: 'row',
@@ -487,42 +486,42 @@ export default function SettingsScreen() {
   logoutButton: {
     marginTop: 8,
     marginBottom: 40,
-    backgroundColor: '#fff',
+    backgroundColor: colors["bg-light"],
     borderWidth: 1,
-    borderColor: '#fee2e2',
+    borderColor: colors["border-light"],
   } as const,
   logoutButtonText: {
-    color: '#dc2626',
+    color: colors["text-primary"],
     fontWeight: '600',
     fontSize: 15,
   },
   errorContainer: {
-    backgroundColor: '#fef2f2',
+    backgroundColor: colors["bg-secondary"],
     padding: 16,
     borderRadius: 12,
     marginBottom: 24,
     borderLeftWidth: 4,
-    borderLeftColor: '#ef4444',
+    borderLeftColor: colors["border-dark"],
   },
   errorText: {
-    color: '#b91c1c',
+    color: colors["text-danger"],
     fontSize: 14,
     lineHeight: 20,
   },
   testSection: {
-    backgroundColor: '#fff',
+    backgroundColor: colors["bg-light"],
     borderRadius: 16,
     padding: 20,
     marginBottom: 16,
   },
   testButton: {
-    backgroundColor: PookieColors.hotPink,
+    backgroundColor: colors.primary,
     marginTop: 8,
   } as const,
   testSectionTitle: {
     fontSize: 17,
     fontWeight: '700',
-    color: '#1a1a1a',
+    color: colors["text-primary"],
     marginBottom: 16,
   },
   logoutSection: {
