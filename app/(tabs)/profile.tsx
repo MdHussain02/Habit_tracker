@@ -379,7 +379,7 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   profileCard: {
-    backgroundColor: colors["text-light"],
+    backgroundColor: colors["bg-accent"],
     borderRadius: 16,
     padding: 24,
     marginBottom: 20,
@@ -400,7 +400,7 @@ const styles = StyleSheet.create({
     width: 100,
     height: 100,
     borderRadius: 50,
-    backgroundColor: colors["bg-light"],
+    backgroundColor: colors["bg-accent"],
   },
   editAvatarBtn: {
     position: 'absolute',
@@ -455,7 +455,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   metricsCard: {
-    backgroundColor: colors["text-light"],
+    backgroundColor: colors["bg-accent"],
     borderRadius: 16,
     padding: 20,
     marginBottom: 20,
@@ -501,7 +501,7 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   optionsCard: {
-    backgroundColor: colors["text-light"],
+    backgroundColor: colors["bg-accent"],
     borderRadius: 16,
     padding: 20,
     marginBottom: 20,

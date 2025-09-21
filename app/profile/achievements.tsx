@@ -1,3 +1,4 @@
+import colors from '@/constants/Colors';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React from 'react';
@@ -44,15 +45,12 @@ export default function AchievementsScreen() {
 }
 
 const styles = StyleSheet.create({
+
   container: {
-    flex: 1,
-    backgroundColor: '#f8f9fa',
-    alignItems: 'center',
-    paddingTop: 48,
-    paddingHorizontal: 16,
+    backgroundColor: colors['bg-light'],
   },
   header: {
-    backgroundColor: '#2c3e50',
+    backgroundColor: colors['bg-primary'],
     paddingTop: 60,
     paddingBottom: 20,
     paddingHorizontal: 20,
@@ -72,7 +70,7 @@ const styles = StyleSheet.create({
   },
   headerDate: {
     fontSize: 14,
-    color: '#bdc3c7',
+    color: colors['text-light'],
     fontWeight: '500',
   },
   backButton: {
@@ -89,6 +87,8 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingBottom: 40,
     width: '100%',
+    paddingTop:20,
+    padding:20,
   },
   achievementBadge: {
     backgroundColor: '#ffffff',

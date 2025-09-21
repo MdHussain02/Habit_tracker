@@ -47,9 +47,9 @@ const CategorySuggestionsScreen = () => {
   const getCategoryColor = (category: string) => {
     switch (category?.toLowerCase()) {
       case 'fitness':
-        return '#6366f1';
+        return colors.primary;
       case 'nutrition':
-        return '#10b981';
+        return colors.primary;
       default:
         return colors.primary;
     }
@@ -141,7 +141,7 @@ const CategorySuggestionsScreen = () => {
             disabled={isAdding}
           >
             {isAdding ? (
-              <Ionicons name="time-outline" size={18} color="#fff" />
+              <Ionicons name="time-outline" size={18} color ={colors['bg-light']} />
             ) : (
               <Ionicons name="add" size={18} color="#fff" />
             )}
@@ -248,10 +248,10 @@ const styles = StyleSheet.create({
   container: {
     // marginTop: 40,
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: colors['bg-light'],
   },
   header: {
-    backgroundColor: 'rgb(139, 92, 246)',
+    backgroundColor: colors['bg-primary'],
     paddingTop: 60,
     paddingBottom: 20,
     paddingHorizontal: 20,
@@ -291,7 +291,7 @@ const styles = StyleSheet.create({
     paddingVertical: 20,
   },
   suggestionCard: {
-    backgroundColor: '#dfe6f5',
+    backgroundColor: colors['bg-accent'],
     borderRadius: 12,
     padding: 0,
     marginBottom: 16,

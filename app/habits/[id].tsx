@@ -241,7 +241,7 @@ export default function HabitDetailsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#ffffff',
+    backgroundColor: colors['bg-light'],
   },
   contentContainer: {
     flex: 1,
@@ -291,7 +291,7 @@ const styles = StyleSheet.create({
   },
   // Habit details
   header: {
-    backgroundColor: 'rgb(236, 74, 153)',
+    backgroundColor: colors['bg-primary'],
     paddingTop: 60,
     paddingBottom: 20,
     paddingHorizontal: 20,

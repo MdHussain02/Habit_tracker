@@ -52,7 +52,7 @@ function AuthAwareNavigator() {
         <StatusBar style={colorScheme === 'dark' ? 'light' : 'dark'} />
         <Stack
           // Set initial route based on auth state - NO navigation needed!
-          initialRouteName={'onboarding'}
+          // initialRouteName={''}
           screenOptions={{
             headerShown: false,
             contentStyle: { backgroundColor: colors["bg-light"] },

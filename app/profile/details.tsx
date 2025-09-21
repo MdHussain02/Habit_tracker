@@ -1,3 +1,4 @@
+import colors from '@/constants/Colors';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
@@ -378,7 +379,7 @@ export default function PersonalDetailsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: colors['bg-light'],
   },
   scrollContainer: {
     flexGrow: 1,
@@ -387,7 +388,7 @@ const styles = StyleSheet.create({
     paddingBottom: 40,
   },
   header: {
-    backgroundColor: '#2c3e50',
+    backgroundColor: colors['bg-primary'],
     paddingTop: 60,
     paddingBottom: 20,
     paddingHorizontal: 20,
@@ -441,7 +442,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 17,
     fontWeight: '600',
-    color: '#4CAF50',
+    color: colors['text-primary'],
     marginBottom: 16,
     textAlign: 'left',
   },
@@ -480,7 +481,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 4,
   },
   saveButton: {
-    backgroundColor: '#4CAF50',
+    backgroundColor: colors.primary,
   },
   cancelButton: {
     backgroundColor: '#f3f4f6',
@@ -500,7 +501,7 @@ const styles = StyleSheet.create({
     color: '#4b5563',
   },
   editButtonText: {
-    color: '#4CAF50',
+    color: colors.primary,
   },
   sectionButtonRow: {
     flexDirection: 'row',

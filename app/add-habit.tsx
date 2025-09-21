@@ -1,4 +1,5 @@
 import Button from '@/components/ui/Button';
+import colors from '@/constants/Colors';
 import { useToast } from '@/hooks/useToast';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
@@ -133,7 +134,7 @@ export default function AddHabitPage() {
                 ]}
                 onPress={() => setSelectedIconId(icon.id)}
               >
-                <Ionicons name={icon.name as any} size={32} color={selectedIconId === icon.id ? '#4f46e5' : '#6b7280'} />
+                <Ionicons name={icon.name as any} size={32} color={selectedIconId === icon.id ? colors.primary : colors.accent} />
               </TouchableOpacity>
             ))}
           </View>
@@ -180,7 +181,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   header: {
-    backgroundColor: '#2c3e50',
+    backgroundColor: colors['bg-primary'],
     paddingTop: 60,
     paddingBottom: 20,
     paddingHorizontal: 20,

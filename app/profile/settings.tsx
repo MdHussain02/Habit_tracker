@@ -459,12 +459,12 @@ export default function SettingsScreen() {
   settingTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: colors["text-primary"],
+    color: colors["text-light"],
     marginBottom: 4,
   },
   settingDescription: {
     fontSize: 13.5,
-    color: colors["text-primary"],
+    color: colors["text-light"],
     lineHeight: 20,
   },
   settingIcon: {

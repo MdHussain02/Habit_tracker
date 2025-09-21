@@ -298,9 +298,6 @@ const styles = StyleSheet.create({
   sectionHeader: {
     marginBottom: 16,
   },
-
-
-
   errorContainer: {
     flex: 1,
     justifyContent: 'center',
@@ -445,7 +442,7 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   insightCard: {
-    backgroundColor: colors['bg-light'],
+    backgroundColor: colors['bg-accent'],
     borderRadius: 16,
     padding: 20,
     width: (width - 56) / 2,
@@ -480,7 +477,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   profileSummaryCard: {
-    backgroundColor: colors['bg-light'],
+    backgroundColor: colors['bg-accent'],
     borderRadius: 20,
     padding: 24,
     marginBottom: 20,
@@ -538,7 +535,7 @@ const styles = StyleSheet.create({
     textTransform: 'capitalize',
   },
   analysisCard: {
-    backgroundColor: colors['bg-light'],
+    backgroundColor: colors['bg-accent'],
     borderRadius: 20,
     padding: 24,
     marginBottom: 20,
