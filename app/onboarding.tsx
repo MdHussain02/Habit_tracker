@@ -1,4 +1,5 @@
 import Button from '@/components/ui/Button';
+import colors from '@/constants/Colors';
 import { useRouter } from 'expo-router';
 import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { ProtectedRoute } from '../components/ProtectedRoute';
@@ -49,7 +50,7 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     fontSize: 16,
-    color: '#4a4a4a',
+    color: colors['text-secondary'],
     textAlign: 'center',
     marginBottom: 32,
     lineHeight: 22,
