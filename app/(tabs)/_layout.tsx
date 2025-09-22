@@ -120,7 +120,7 @@ const CustomTabBar = ({ state, navigation }: { state: any, navigation: any }) =>
                   <Ionicons 
                     name={item.icon} 
                     size={22} 
-                    color={isFocused ? item.color : '#6B7280'} 
+                    color={isFocused ? item.color : colors['bg-primary']} 
                   />
                   {isFocused && (
                     <Text 
@@ -190,7 +190,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     width: '100%',
     height: '100%',
-    backgroundColor: '#F8FAFC',
+    backgroundColor: colors['bg-secondary'],
     borderRadius: 35,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 8 },

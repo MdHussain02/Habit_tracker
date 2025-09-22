@@ -5,7 +5,9 @@ import { AISuggestion } from '@/types/habit';
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Dimensions, FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+
+const { width } = Dimensions.get('window');
 
 const CategorySuggestionsScreen = () => {
   const { category, suggestions: suggestionsString } = useLocalSearchParams<{
@@ -55,9 +57,21 @@ const CategorySuggestionsScreen = () => {
     }
   };
 
+  const getDifficultyColor = (difficulty: string) => {
+    switch (difficulty.toLowerCase()) {
+      case 'easy':
+        return '#d1fae5'; // Soft green
+      case 'medium':
+        return '#fef3c7'; // Soft yellow
+      case 'hard':
+        return '#fee2e2'; // Soft red
+      default:
+        return '#f3f4f6'; // Gray
+    }
+  };
+
   const handleAddHabit = async (suggestion: AISuggestion) => {
     try {
-      // Use name as a unique identifier since id might not exist
       const suggestionKey = suggestion.name;
       setAddingHabit(prev => ({ ...prev, [suggestionKey]: true }));
       
@@ -73,7 +87,6 @@ const CategorySuggestionsScreen = () => {
       
       if (response.success) {
         showToast('Habit created successfully!', 'success');
-        // Navigate to home tab after a short delay
         setTimeout(() => {
           router.replace('/(tabs)');
         }, 1000);
@@ -106,46 +119,31 @@ const CategorySuggestionsScreen = () => {
     };
 
     const onTextLayout = (e: any) => {
-      const { lineHeight } = e.nativeEvent;
-      const maxLines = 3;
-      const maxHeight = lineHeight * maxLines;
-      const currentHeight = e.nativeEvent.lines.reduce((acc: number, line: any) => {
-        return acc + line.height;
-      }, 0);
-      
-      setShowReadMore(currentHeight > maxHeight);
+      const { lines } = e.nativeEvent;
+      setShowReadMore(lines.length > 3);
     };
 
     return (
-      <View key={`suggestion-${index}`} style={styles.suggestionCard}>
+      <View style={styles.suggestionCard}>
         <View style={styles.suggestionHeader}>
-          <View style={[styles.suggestionIcon, { backgroundColor: `${categoryColor}20` }]}>
-            <Ionicons name={iconName as any} size={20} color={categoryColor} />
+          <View style={[styles.suggestionIcon, { backgroundColor: `${categoryColor}10` }]}>
+            <Ionicons name={iconName as any} size={24} color={categoryColor} />
           </View>
           <View style={styles.suggestionTitleContainer}>
             <Text style={styles.suggestionTitle}>{suggestion.name}</Text>
             <View style={styles.suggestionMetaContainer}>
-              <View style={[styles.categoryBadge, { backgroundColor: `${categoryColor}20` }]}>
+              <View style={[styles.categoryBadge, { backgroundColor: `${categoryColor}10` }]}>
                 <Text style={[styles.categoryText, { color: categoryColor }]}>
                   {suggestion.category}
                 </Text>
               </View>
-              <Text style={styles.difficultyText}>
-                {suggestion.difficulty}
-              </Text>
+              <View style={[styles.difficultyTag, { backgroundColor: getDifficultyColor(suggestion.difficulty) }]}>
+                <Text style={styles.difficultyText}>
+                  {suggestion.difficulty}
+                </Text>
+              </View>
             </View>
           </View>
-          <TouchableOpacity 
-            style={[styles.addButton, { backgroundColor: isAdding ? '#666' : categoryColor }]}
-            onPress={() => !isAdding && handleAddHabit(suggestion)}
-            disabled={isAdding}
-          >
-            {isAdding ? (
-              <Ionicons name="time-outline" size={18} color ={colors['bg-light']} />
-            ) : (
-              <Ionicons name="add" size={18} color="#fff" />
-            )}
-          </TouchableOpacity>
         </View>
         
         <View style={styles.descriptionContainer}>
@@ -161,38 +159,48 @@ const CategorySuggestionsScreen = () => {
               <Text style={[styles.readMoreText, { color: categoryColor }]}>
                 {expanded ? 'Read Less' : 'Read More'}
               </Text>
+              <Ionicons name={expanded ? 'chevron-up' : 'chevron-down'} size={14} color={categoryColor} style={styles.readMoreIcon} />
             </TouchableOpacity>
           )}
         </View>
         
         <View style={styles.suggestionMeta}>
           <View style={styles.metaItem}>
-            <Ionicons name="time-outline" size={16} color="#888" />
+            <Ionicons name="time-outline" size={16} color={colors['text-secondary']} />
             <Text style={styles.metaText}>{formatTime(suggestion.target_time)}</Text>
           </View>
           <View style={styles.metaItem}>
-            <Ionicons name="repeat" size={16} color="#888" />
+            <Ionicons name="repeat" size={16} color={colors['text-secondary']} />
             <Text style={styles.metaText}>{formatRepeats(suggestion.repeats)}</Text>
           </View>
           <View style={styles.metaItem}>
-            <Ionicons name="timer-outline" size={16} color="#888" />
+            <Ionicons name="timer-outline" size={16} color={colors['text-secondary']} />
             <Text style={styles.metaText}>{suggestion.estimated_duration} min</Text>
           </View>
         </View>
         
         {suggestion.success_tips?.length > 0 && (
-          <View style={[styles.tipsContainer, { borderLeftColor: categoryColor }]}>
-            <Text style={styles.tipsTitle}>Success Tips</Text>
+          <View style={styles.tipsContainer}>
+            <Text style={[styles.tipsTitle, { color: categoryColor }]}>Success Tips</Text>
             {suggestion.success_tips.map((tip, i) => (
               <View key={`tip-${i}`} style={styles.tipItem}>
-                <View style={[styles.tipBulletContainer, { backgroundColor: `${categoryColor}20` }]}>
-                  <Text style={[styles.tipBullet, { color: categoryColor }]}>•</Text>
-                </View>
+                <Ionicons name="checkmark-circle" size={16} color={categoryColor} style={styles.tipBullet} />
                 <Text style={styles.tipText}>{tip}</Text>
               </View>
             ))}
           </View>
         )}
+        
+        <TouchableOpacity 
+          style={[styles.addButton, { backgroundColor: isAdding ? colors['text-secondary'] : categoryColor }]}
+          onPress={() => !isAdding && handleAddHabit(suggestion)}
+          disabled={isAdding}
+        >
+          <Text style={styles.addButtonText}>
+            {isAdding ? 'Adding...' : 'Add Habit'}
+          </Text>
+          {!isAdding && <Ionicons name="add" size={18} color="#fff" style={styles.addButtonIcon} />}
+        </TouchableOpacity>
       </View>
     );
   };
@@ -200,17 +208,23 @@ const CategorySuggestionsScreen = () => {
   if (!category) {
     return (
       <View style={styles.centered}>
+        <Ionicons name="alert-circle-outline" size={48} color={colors['text-danger']} />
         <Text style={styles.errorText}>No category selected</Text>
+        <TouchableOpacity
+          style={styles.backButtonError}
+          onPress={() => router.back()}
+        >
+          <Text style={styles.backButtonText}>Go Back</Text>
+        </TouchableOpacity>
       </View>
     );
   }
 
   return (
     <View style={styles.container}>
-      {/* Header */}
       <View style={styles.header}>
         <View style={styles.headerTop}>
-        <TouchableOpacity
+          <TouchableOpacity
             style={styles.backButton}
             onPress={() => router.back()}
           >
@@ -222,36 +236,42 @@ const CategorySuggestionsScreen = () => {
             </Text>
             <Text style={styles.headerDate}>AI-powered habit recommendations</Text>
           </View>
-         
         </View>
       </View>
 
-      <ScrollView style={styles.scrollView}>
-        {suggestions.length === 0 ? (
+      <FlatList
+        data={suggestions}
+        renderItem={({ item, index }) => <SuggestionCard suggestion={item} index={index} />}
+        keyExtractor={(item, index) => `suggestion-${index}`}
+        contentContainerStyle={styles.suggestionsContainer}
+        showsVerticalScrollIndicator={false}
+        ListEmptyComponent={() => (
           <View style={styles.emptyState}>
-            <Ionicons name="sad-outline" size={48} color="#666" />
-            <Text style={styles.emptyStateText}>No suggestions found</Text>
-          </View>
-        ) : (
-          <View style={styles.suggestionsContainer}>
-            {suggestions.map((suggestion, index) => (
-              <SuggestionCard key={`suggestion-${index}`} suggestion={suggestion} index={index} />
-            ))}
+            <Ionicons name="sad-outline" size={64} color={colors['text-secondary']} />
+            <Text style={styles.emptyStateText}>No Suggestions Found</Text>
+            <Text style={styles.emptyStateSubtext}>
+              Try refreshing the main page to get new recommendations
+            </Text>
+            <TouchableOpacity
+              style={styles.backButtonEmpty}
+              onPress={() => router.back()}
+            >
+              <Text style={styles.backButtonText}>Go Back</Text>
+            </TouchableOpacity>
           </View>
         )}
-      </ScrollView>
+      />
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    // marginTop: 40,
     flex: 1,
     backgroundColor: colors['bg-light'],
   },
   header: {
-    backgroundColor: colors['bg-primary'],
+    backgroundColor: colors.primary,
     paddingTop: 60,
     paddingBottom: 20,
     paddingHorizontal: 20,
@@ -260,20 +280,20 @@ const styles = StyleSheet.create({
   },
   headerTop: {
     flexDirection: 'row',
-    // justifyContent: 'space-between',
     alignItems: 'center',
     gap: 10,
   },
   greeting: {
     fontSize: 24,
     fontWeight: '700',
-    color: '#ffffff',
+    color: colors['text-light'],
     marginBottom: 4,
   },
   headerDate: {
     fontSize: 14,
-    color: '#bdc3c7',
+    color: colors['text-light'],
     fontWeight: '500',
+    opacity: 0.9,
   },
   backButton: {
     width: 44,
@@ -283,48 +303,45 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  scrollView: {
-    flex: 1,
-    paddingHorizontal: 20,
-  },
   suggestionsContainer: {
-    paddingVertical: 20,
+    paddingHorizontal: 24,
+    paddingVertical: 24,
+    paddingBottom: 100,
   },
   suggestionCard: {
     backgroundColor: colors['bg-accent'],
-    borderRadius: 12,
-    padding: 0,
+    borderRadius: 24,
+    padding: 20,
     marginBottom: 16,
-    overflow: 'hidden',
-    borderWidth: 1,
-    borderColor: '#ccc',
+    shadowColor: colors.shadow,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 12,
+    elevation: 5,
+    borderWidth: 0.5,
+    borderColor: colors['border-light'],
   },
   suggestionHeader: {
     flexDirection: 'row',
-    alignItems: 'center',
-    padding: 16,
-    paddingBottom: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: '#ccc',
+    alignItems: 'flex-start',
+    marginBottom: 16,
   },
   suggestionIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 48,
+    height: 48,
+    borderRadius: 24,
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 12,
+    marginRight: 16,
   },
   suggestionTitleContainer: {
     flex: 1,
   },
   suggestionTitle: {
-    color: '#000',
-    fontSize: 16,
+    color: colors['text-primary'],
+    fontSize: 18,
     fontWeight: '600',
-    marginBottom: 4,
-    flex: 1,
-    paddingRight: 8,
+    marginBottom: 8,
   },
   suggestionMetaContainer: {
     flexDirection: 'row',
@@ -332,114 +349,150 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   categoryBadge: {
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 6,
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 16,
   },
   categoryText: {
-    fontSize: 11,
+    fontSize: 12,
     fontWeight: '600',
-    textTransform: 'capitalize',
+    textTransform: 'uppercase',
+  },
+  difficultyTag: {
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 16,
   },
   difficultyText: {
-    color: '#888',
-    fontSize: 11,
+    fontSize: 12,
     fontWeight: '500',
-  },
-  addButton: {
-    width: 32,
-    height: 32,
-    borderRadius: 10,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginLeft: 'auto',
+    color: colors['text-primary'],
   },
   descriptionContainer: {
-    padding: 16,
+    marginBottom: 16,
   },
   suggestionDescription: {
-    color: '#000',
+    color: colors['text-secondary'],
     fontSize: 14,
-    lineHeight: 20,
-    marginBottom: 12,
+    lineHeight: 22,
   },
   readMoreButton: {
-    marginTop: 4,
-    alignSelf: 'flex-start',
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 8,
   },
   readMoreText: {
-    color: '#000',
     fontSize: 14,
-    fontWeight: '500',
+    fontWeight: '600',
+  },
+  readMoreIcon: {
+    marginLeft: 4,
   },
   suggestionMeta: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 12,
-    paddingHorizontal: 16,
+    justifyContent: 'space-around',
+    marginBottom: 20,
+    padding: 12,
+    backgroundColor: colors['bg-secondary'],
+    borderRadius: 16,
   },
   metaItem: {
     flexDirection: 'row',
     alignItems: 'center',
+    gap: 6,
   },
   metaText: {
-    color: '#888',
-    fontSize: 12,
-    marginLeft: 4,
+    color: colors['text-primary'],
+    fontSize: 13,
+    fontWeight: '500',
   },
   tipsContainer: {
-    backgroundColor: '#fff',
-    padding: 16,
-    borderLeftWidth: 3,
-    marginTop: 4,
-  },
-  tipBulletContainer: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 8,
-  },
-  tipBullet: {
-    fontSize: 16,
-    lineHeight: 16,
+    marginBottom: 20,
   },
   tipsTitle: {
-    color: '#fff',
     fontWeight: '600',
-    marginBottom: 8,
-    fontSize: 14,
+    marginBottom: 12,
+    fontSize: 16,
   },
   tipItem: {
     flexDirection: 'row',
-    marginBottom: 4,
+    marginBottom: 12,
+    alignItems: 'center',
+  },
+  tipBullet: {
+    marginRight: 12,
   },
   tipText: {
-    color: '#000',
-    fontSize: 13,
+    color: colors['text-secondary'],
+    fontSize: 14,
+    lineHeight: 20,
     flex: 1,
   },
+  addButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 16,
+    borderRadius: 16,
+  },
+  addButtonText: {
+    color: '#fff',
+    fontWeight: '600',
+    fontSize: 16,
+    marginRight: 8,
+  },
+  addButtonIcon: {},
   centered: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#fff',
+    backgroundColor: colors['bg-light'],
+    padding: 32,
+    gap: 16,
   },
   errorText: {
-    color: '#ff6b6b',
+    color: colors['text-danger'],
     fontSize: 16,
     textAlign: 'center',
+    lineHeight: 24,
+  },
+  backButtonError: {
+    backgroundColor: colors['bg-dark'],
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 24,
+    marginTop: 16,
+  },
+  backButtonEmpty: {
+    backgroundColor: colors['bg-dark'],
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 24,
+    marginTop: 16,
+  },
+  backButtonText: {
+    color: '#ffffff',
+    fontWeight: '600',
+    fontSize: 16,
   },
   emptyState: {
+    flex: 1,
+    justifyContent: 'center',
     alignItems: 'center',
-    padding: 40,
+    padding: 32,
+    gap: 16,
   },
   emptyStateText: {
-    color: '#000',
-    fontSize: 16,
-    marginTop: 16,
+    color: colors['text-primary'],
+    fontSize: 20,
+    fontWeight: '600',
     textAlign: 'center',
+  },
+  emptyStateSubtext: {
+    color: colors['text-secondary'],
+    fontSize: 14,
+    textAlign: 'center',
+    lineHeight: 20,
   },
 });
 

@@ -165,7 +165,7 @@ export default function HomeScreen() {
       <View style={styles.header}>
         <View style={styles.headerContent}>
           <View style={styles.headerText}>
-            <Text style={styles.greeting}>{getGreeting()}! 👋</Text>
+            <Text style={styles.greeting}>{getGreeting()}!</Text>
             <Text style={styles.headerSubtitle}>
               {habits.length > 0
                 ? `${habits.length} habit${habits.length === 1 ? '' : 's'} for today`

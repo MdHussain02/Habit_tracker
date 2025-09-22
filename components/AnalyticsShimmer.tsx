@@ -142,7 +142,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors['bg-light'],
   },
   placeholder: {
-    backgroundColor: colors['bg-light'],
+    backgroundColor: colors['bg-accent'],
     borderRadius: 4,
     overflow: 'hidden',
   },
@@ -152,11 +152,11 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: colors['bg-light'],
+    backgroundColor: colors['bg-secondary'],
     transform: [{ translateX: -100 }],
   },
   header: {
-    backgroundColor: colors['bg-dark'],
+    backgroundColor: colors['bg-primary'],
     paddingTop: 60,
     paddingBottom: 20,
     paddingHorizontal: 20,
@@ -201,7 +201,7 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   progressOverviewCard: {
-    backgroundColor: colors['bg-light'],
+    backgroundColor: colors['bg-accent'],
     borderRadius: 16,
     padding: 20,
     marginBottom: 20,

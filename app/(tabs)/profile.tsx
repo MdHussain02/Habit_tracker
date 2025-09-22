@@ -1,25 +1,95 @@
 import colors from '@/constants/Colors';
 import { useToast } from '@/hooks/useToast';
-import { AntDesign, MaterialCommunityIcons } from '@expo/vector-icons';
+import { AntDesign, Feather, MaterialCommunityIcons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import {
   Image,
-  Modal,
+  LayoutAnimation,
+  Platform,
   RefreshControl,
   ScrollView,
   StyleSheet,
   Text,
-  TextInput,
   TouchableOpacity,
+  UIManager,
   View
 } from 'react-native';
 import { useApi } from '../../hooks/useApi';
 import { useAuth } from '../../hooks/useAuth';
 
 const PROFILE_KEY = 'userProfile';
+
+// Enable LayoutAnimation on Android
+if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
+  UIManager.setLayoutAnimationEnabledExperimental(true);
+}
+
+interface AccordionItemProps {
+  title: string;
+  subtitle?: string;
+  icon: string;
+  iconFamily: 'AntDesign' | 'MaterialCommunityIcons' | 'Feather';
+  iconColor: string;
+  iconBgColor: string;
+  children: React.ReactNode;
+  isExpanded: boolean;
+  onToggle: () => void;
+}
+
+const AccordionItem: React.FC<AccordionItemProps> = ({
+  title,
+  subtitle,
+  icon,
+  iconFamily,
+  iconColor,
+  iconBgColor,
+  children,
+  isExpanded,
+  onToggle
+}) => {
+  const IconComponent = iconFamily === 'AntDesign' ? AntDesign :
+    iconFamily === 'MaterialCommunityIcons' ? MaterialCommunityIcons : Feather;
+
+  const toggleAccordion = () => {
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    onToggle();
+  };
+
+  return (
+    <View style={styles.accordionContainer}>
+      <TouchableOpacity
+        style={styles.accordionHeader}
+        onPress={toggleAccordion}
+        activeOpacity={0.7}
+      >
+        <View style={styles.accordionLeft}>
+          <View style={[styles.accordionIcon, { backgroundColor: iconBgColor }]}>
+            <IconComponent name={icon as any} size={20} color={iconColor} />
+          </View>
+          <View style={styles.accordionTextContainer}>
+            <Text style={styles.accordionTitle}>{title}</Text>
+            {subtitle && <Text style={styles.accordionSubtitle}>{subtitle}</Text>}
+          </View>
+        </View>
+        <AntDesign
+          name={isExpanded ? "up" : "down"}
+          size={16}
+          color={colors["text-secondary"]}
+          style={[styles.chevron, isExpanded && styles.chevronRotated]}
+        />
+      </TouchableOpacity>
+
+      {isExpanded && (
+        <View style={styles.accordionContent}>
+          {children}
+        </View>
+      )}
+    </View>
+  );
+};
 
 export default function ProfileScreen() {
   const [profile, setProfile] = useState({
@@ -35,11 +105,11 @@ export default function ProfileScreen() {
   });
 
   const [loading, setLoading] = useState(true);
-  const [editModalVisible, setEditModalVisible] = useState(false);
-  const [editProfile, setEditProfile] = useState({
-    name: '',
-    level: '',
-    quote: '',
+  const [expandedAccordions, setExpandedAccordions] = useState<{ [key: string]: boolean }>({
+    personal: false,
+    health: false,
+    fitness: false,
+    account: false,
   });
 
   const router = useRouter();
@@ -49,10 +119,17 @@ export default function ProfileScreen() {
 
   const API_BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL;
 
+  const toggleAccordion = (key: string) => {
+    setExpandedAccordions(prev => ({
+      ...prev,
+      [key]: !prev[key]
+    }));
+  };
+
   const getProfileDetails = async (forceRefresh = false) => {
     try {
       setLoading(true);
-      
+
       if (!forceRefresh) {
         const cachedProfile = await AsyncStorage.getItem(PROFILE_KEY);
         if (cachedProfile) {
@@ -61,7 +138,7 @@ export default function ProfileScreen() {
           return;
         }
       }
-      
+
       const data = await fetchGet(`${API_BASE_URL}/auth/me`);
       if (data.success && data.data) {
         const profileData = {
@@ -76,7 +153,7 @@ export default function ProfileScreen() {
           quote: data.data.motivationLevel || '',
           lastUpdated: new Date().toISOString(),
         };
-        
+
         setProfile(profileData);
         await AsyncStorage.setItem(PROFILE_KEY, JSON.stringify(profileData));
       } else {
@@ -91,18 +168,18 @@ export default function ProfileScreen() {
       setLoading(false);
     }
   };
-  
+
   const handleRefresh = () => {
     getProfileDetails(true);
   };
 
   useEffect(() => {
     getProfileDetails();
-    
+
     const interval = setInterval(() => {
       getProfileDetails(true);
     }, 30 * 60 * 1000);
-    
+
     return () => clearInterval(interval);
   }, []);
 
@@ -121,22 +198,6 @@ export default function ProfileScreen() {
     }
   };
 
-  const openEditModal = () => {
-    setEditProfile({
-      name: profile.name || '',
-      level: profile.level || 'Beginner',
-      quote: profile.quote || 'Consistency is key to lasting change.',
-    });
-    setEditModalVisible(true);
-  };
-
-  const saveEditProfile = async () => {
-    const newProfile = { ...profile, ...editProfile };
-    setProfile(newProfile);
-    await AsyncStorage.setItem(PROFILE_KEY, JSON.stringify(newProfile));
-    setEditModalVisible(false);
-  };
-
   const handleLogout = async () => {
     try {
       await logout();
@@ -149,23 +210,23 @@ export default function ProfileScreen() {
 
   return (
     <View style={styles.container}>
-        {/* Header */}
-        <View style={styles.header}>
-          <View style={styles.headerTop}>
-            <View>
-              <Text style={styles.greeting}>Profile</Text>
-              <Text style={styles.headerDate}>Manage your account & settings</Text>
-            </View>
-            <TouchableOpacity
-              style={styles.settingsButton}
-              onPress={() => router.push('/profile/settings')}
-            >
-              <AntDesign name="setting" size={24} color={colors["text-light"]} />
-            </TouchableOpacity>
+      {/* Header */}
+      <View style={styles.header}>
+        <View style={styles.headerTop}>
+          <View>
+            <Text style={styles.greeting}>Profile</Text>
+            <Text style={styles.headerDate}>Manage your account & settings</Text>
           </View>
+          {/* <TouchableOpacity
+            style={styles.settingsButton}
+            onPress={() => router.push('/profile/settings')}
+          >
+            <AntDesign name="setting" size={24} color={colors["text-light"]} />
+          </TouchableOpacity> */}
         </View>
+      </View>
 
-      <ScrollView 
+      <ScrollView
         style={styles.scrollView}
         showsVerticalScrollIndicator={false}
         refreshControl={
@@ -178,8 +239,8 @@ export default function ProfileScreen() {
         }
       >
         <View style={styles.content}>
-          {/* Profile Card */}
-          <View style={styles.profileCard}>
+          {/* Profile Summary Card */}
+          <View style={styles.profileSummaryCard}>
             <View style={styles.avatarSection}>
               <View style={styles.avatarContainer}>
                 <Image
@@ -191,144 +252,207 @@ export default function ProfileScreen() {
                   style={styles.avatarLarge}
                 />
                 <TouchableOpacity style={styles.editAvatarBtn} onPress={pickAvatar}>
-                  <AntDesign name="edit" size={14} color={colors["text-light"]} />
+                  <AntDesign name="camera" size={14} color={colors["text-light"]} />
                 </TouchableOpacity>
               </View>
-              <View style={styles.profileInfo}>
-                <Text style={styles.profileName}>{profile.name}</Text>
+              <View style={styles.profileSummaryInfo}>
+                <Text style={styles.profileName}>{profile.name || 'Your Name'}</Text>
                 <Text style={styles.profileLevel}>
-                  Level: {profile.level || 'Beginner'}
+                  {profile.level || 'Beginner'} • {profile.email}
                 </Text>
-                <Text style={styles.profileQuote}>
-                  <Text style={styles.quoteText}>
-                    "{profile.quote || 'Consistency is key to lasting change.'}"
-                  </Text>
-                </Text>
-                <TouchableOpacity style={styles.editButton} onPress={openEditModal}>
-                  <AntDesign name="edit" size={16} color={colors.primary} />
-                  <Text style={styles.editButtonText}>Edit Profile</Text>
-                </TouchableOpacity>
+              </View>
+            </View>
+
+            {/* Quick Stats */}
+            <View style={styles.quickStats}>
+              <View style={styles.statItem}>
+                <Text style={styles.statValue}>{profile.age || '--'}</Text>
+                <Text style={styles.statLabel}>Age</Text>
+              </View>
+              <View style={styles.statDivider} />
+              <View style={styles.statItem}>
+                <Text style={styles.statValue}>{profile.height || '--'}</Text>
+                <Text style={styles.statLabel}>Height</Text>
+              </View>
+              <View style={styles.statDivider} />
+              <View style={styles.statItem}>
+                <Text style={styles.statValue}>{profile.weight || '--'}</Text>
+                <Text style={styles.statLabel}>Weight</Text>
               </View>
             </View>
           </View>
 
-          {/* Health Metrics Card */}
-          <View style={styles.metricsCard}>
-            <Text style={styles.cardTitle}>Health Metrics</Text>
-            <View style={styles.metricsGrid}>
-              <View style={styles.metricItem}>
-                <View style={styles.metricIcon}>
-                  <MaterialCommunityIcons name="human-male-height" size={20} color={colors.primary} />
-                </View>
-                <Text style={styles.metricValue}>{profile.height || '--'}</Text>
-                <Text style={styles.metricLabel}>Height (cm)</Text>
+          {/* Personal Information Accordion */}
+          <AccordionItem
+            title="Personal Information"
+            subtitle="View and manage your personal details"
+            icon="user"
+            iconFamily="AntDesign"
+            iconColor={colors.primary}
+            iconBgColor={`${colors.primary}20`}
+            isExpanded={expandedAccordions.personal}
+            onToggle={() => toggleAccordion('personal')}
+          >
+            <View style={styles.detailsGrid}>
+              <View style={styles.detailItem}>
+                <Text style={styles.detailLabel}>Full Name</Text>
+                <Text style={styles.detailValue}>{profile.name || 'Not set'}</Text>
               </View>
-              <View style={styles.metricItem}>
-                <View style={styles.metricIcon}>
-                  <MaterialCommunityIcons name="weight-kilogram" size={20} color={colors.secondary} />
-                </View>
-                <Text style={styles.metricValue}>{profile.weight || '--'}</Text>
-                <Text style={styles.metricLabel}>Weight (kg)</Text>
+              <View style={styles.detailItem}>
+                <Text style={styles.detailLabel}>Email</Text>
+                <Text style={styles.detailValue}>{profile.email || 'Not set'}</Text>
               </View>
-              <View style={styles.metricItem}>
-                <View style={styles.metricIcon}>
-                  <MaterialCommunityIcons name="calendar" size={20} color={colors.accent} />
-                </View>
-                <Text style={styles.metricValue}>{profile.age || '--'}</Text>
-                <Text style={styles.metricLabel}>Age</Text>
+              <View style={styles.detailItem}>
+                <Text style={styles.detailLabel}>Gender</Text>
+                <Text style={styles.detailValue}>{profile.gender || 'Not specified'}</Text>
               </View>
             </View>
-          </View>
-
-          {/* Account Options */}
-          <View style={styles.optionsCard}>
-            <Text style={styles.cardTitle}>Account</Text>
             <TouchableOpacity
-              style={styles.optionItem}
+              style={styles.editButton}
               onPress={() => router.push('/profile/details')}
-              activeOpacity={0.7}
             >
-              <View style={styles.optionLeft}>
-                <View style={[styles.optionIcon, { backgroundColor: `${colors.primary}20` }]}>
-                  <MaterialCommunityIcons name="account-details" size={20} color={colors.primary} />
+              <AntDesign name="edit" size={16} color={colors.primary} />
+              <Text style={styles.editButtonText}>Edit Details</Text>
+            </TouchableOpacity>
+          </AccordionItem>
+
+          {/* Health Metrics Accordion */}
+          <AccordionItem
+            title="Health Metrics"
+            subtitle="Your physical measurements and stats"
+            icon="heart-pulse"
+            iconFamily="MaterialCommunityIcons"
+            iconColor={colors.secondary}
+            iconBgColor={`${colors.secondary}20`}
+            isExpanded={expandedAccordions.health}
+            onToggle={() => toggleAccordion('health')}
+          >
+            <View style={styles.metricsDetailGrid}>
+              <View style={styles.metricDetailItem}>
+                <View style={styles.metricDetailIcon}>
+                  <MaterialCommunityIcons name="human-male-height" size={24} color={colors.primary} />
                 </View>
-                <View>
-                  <Text style={styles.optionTitle}>Personal Details</Text>
-                  <Text style={styles.optionSubtitle}>{profile.email}</Text>
+                <View style={styles.metricDetailInfo}>
+                  <Text style={styles.metricDetailValue}>{profile.height || '--'} cm</Text>
+                  <Text style={styles.metricDetailLabel}>Height</Text>
                 </View>
               </View>
-              <AntDesign name="right" size={16} color={colors["text-secondary"]} />
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={styles.optionItem}
-              onPress={() => router.push('/profile/achievements')}
-              activeOpacity={0.7}
-            >
-              <View style={styles.optionLeft}>
-                <View style={[styles.optionIcon, { backgroundColor: `${colors.accent}20` }]}>
-                  <MaterialCommunityIcons name="trophy-award" size={20} color={colors.accent} />
+              <View style={styles.metricDetailItem}>
+                <View style={styles.metricDetailIcon}>
+                  <MaterialCommunityIcons name="weight-kilogram" size={24} color={colors.secondary} />
                 </View>
-                <View>
-                  <Text style={styles.optionTitle}>Achievements</Text>
-                  <Text style={styles.optionSubtitle}>View your badges & progress</Text>
+                <View style={styles.metricDetailInfo}>
+                  <Text style={styles.metricDetailValue}>{profile.weight || '--'} kg</Text>
+                  <Text style={styles.metricDetailLabel}>Weight</Text>
                 </View>
               </View>
-              <AntDesign name="right" size={16} color={colors["text-secondary"]} />
-            </TouchableOpacity>
-          </View>
-        </View>
-
-        {/* Edit Profile Modal */}
-        <Modal
-          visible={editModalVisible}
-          animationType="slide"
-          transparent
-          onRequestClose={() => setEditModalVisible(false)}
-        >
-          <View style={styles.modalOverlay}>
-            <View style={styles.modalContent}>
-              <Text style={styles.modalTitle}>Edit Profile</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="Name"
-                placeholderTextColor={colors["text-secondary"]}
-                value={editProfile.name}
-                onChangeText={(text) => setEditProfile({ ...editProfile, name: text })}
-              />
-              <TextInput
-                style={styles.input}
-                placeholder="Level"
-                placeholderTextColor={colors["text-secondary"]}
-                value={editProfile.level}
-                onChangeText={(text) => setEditProfile({ ...editProfile, level: text })}
-              />
-              <TextInput
-                style={styles.input}
-                placeholder="Motivational Quote"
-                placeholderTextColor={colors["text-secondary"]}
-                value={editProfile.quote}
-                onChangeText={(text) => setEditProfile({ ...editProfile, quote: text })}
-                multiline
-              />
-              <View style={styles.modalButtons}>
-                <TouchableOpacity 
-                  style={styles.modalCancelButton} 
-                  onPress={() => setEditModalVisible(false)}
-                >
-                  <Text style={styles.modalCancelText}>Cancel</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={styles.modalSaveButton}
-                  onPress={saveEditProfile}
-                >
-                  <Text style={styles.modalSaveText}>Save</Text>
-                </TouchableOpacity>
+              <View style={styles.metricDetailItem}>
+                <View style={styles.metricDetailIcon}>
+                  <MaterialCommunityIcons name="calendar" size={24} color={colors.accent} />
+                </View>
+                <View style={styles.metricDetailInfo}>
+                  <Text style={styles.metricDetailValue}>{profile.age || '--'} years</Text>
+                  <Text style={styles.metricDetailLabel}>Age</Text>
+                </View>
               </View>
             </View>
-          </View>
-        </Modal>
+          </AccordionItem>
+
+          {/* Fitness Profile Accordion */}
+          {/* <AccordionItem
+            title="Fitness Profile"
+            subtitle="Your fitness level and goals"
+            icon="trophy"
+            iconFamily="MaterialCommunityIcons"
+            iconColor={colors.primary}
+            iconBgColor={`${colors.primary}20`}
+            isExpanded={expandedAccordions.fitness}
+            onToggle={() => toggleAccordion('fitness')}
+          >
+            <View style={styles.fitnessDetails}>
+              <View style={styles.fitnessItem}>
+                <View>
+                  <Text style={styles.fitnessLabel}>Fitness Level</Text>
+                  <Text style={styles.fitnessValue}>{profile.level}</Text>
+                </View>
+              </View>
+              <View style={styles.motivationSection}>
+                <Text style={styles.motivationLabel}>Motivational Quote</Text>
+                <Text style={styles.fitnessValue}>
+                  {profile.quote}
+                </Text>
+              </View>
+            </View>
+          </AccordionItem> */}
+
+          {/* Account Options Accordion */}
+          <AccordionItem
+            title="Account & Settings"
+            subtitle="Manage your account preferences"
+            icon="settings"
+            iconFamily="Feather"
+            iconColor={colors.primary}
+            iconBgColor={`${colors.primary}20`}
+            isExpanded={expandedAccordions.account}
+            onToggle={() => toggleAccordion('account')}
+          >
+            <View style={styles.accountOptions}>
+              <TouchableOpacity
+                style={styles.accountOptionItem}
+                onPress={() => router.push('/profile/achievements')}
+                activeOpacity={0.7}
+              >
+                <View style={styles.accountOptionIcon}>
+                  <MaterialCommunityIcons name="trophy-award" size={20} color={colors.primary} />
+                </View>
+                <View style={styles.accountOptionText}>
+                  <Text style={styles.accountOptionTitle}>Achievements</Text>
+                  <Text style={styles.accountOptionSubtitle}>View badges & progress</Text>
+                </View>
+                <AntDesign name="right" size={16} color={colors["text-primary"]} />
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={styles.accountOptionItem}
+                onPress={() => router.push('/profile/settings')}
+                activeOpacity={0.7}
+              >
+                <View style={styles.accountOptionIcon}>
+                  <MaterialCommunityIcons name="cog" size={20} color={colors.primary} />
+                </View>
+                <View style={styles.accountOptionText}>
+                  <Text style={styles.accountOptionTitle}>Preferences</Text>
+                  <Text style={styles.accountOptionSubtitle}>App settings & notifications</Text>
+                </View>
+                <AntDesign name="right" size={16} color={colors["text-primary"]} />
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={styles.accountOptionItem}
+                onPress={() => router.push('/profile')}
+                activeOpacity={0.7}
+              >
+                <View style={styles.accountOptionIcon}>
+                  <MaterialCommunityIcons name="shield-check" size={20} color={colors.primary} />
+                </View>
+                <View style={styles.accountOptionText}>
+                  <Text style={styles.accountOptionTitle}>Privacy & Security</Text>
+                  <Text style={styles.accountOptionSubtitle}>Data & privacy settings</Text>
+                </View>
+                <AntDesign name="right" size={16} color={colors["text-primary"]} />
+              </TouchableOpacity>
+            </View>
+          </AccordionItem>
+
+          {/* Logout Button */}
+        <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+          <MaterialCommunityIcons name="logout" size={20} color={colors["text-light"]} />
+          <Text style={styles.logoutButtonText}>Sign Out</Text>
+        </TouchableOpacity>
+        </View>
       </ScrollView>
+      <View style={styles.footer}>
+      </View>
     </View>
   );
 }
@@ -337,6 +461,16 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.light,
+  },
+  footer: {
+    paddingHorizontal: 20,
+    backgroundColor: colors.light,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    position: 'absolute',
+    bottom: 100,
+    left: 0,
+    right: 0,
   },
   header: {
     backgroundColor: colors.primary,
@@ -378,7 +512,7 @@ const styles = StyleSheet.create({
   content: {
     padding: 20,
   },
-  profileCard: {
+  profileSummaryCard: {
     backgroundColor: colors["bg-accent"],
     borderRadius: 16,
     padding: 24,
@@ -390,141 +524,98 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   avatarSection: {
+    flexDirection: 'row',
     alignItems: 'center',
+    marginBottom: 20,
   },
   avatarContainer: {
     position: 'relative',
-    marginBottom: 16,
+    marginRight: 16,
   },
   avatarLarge: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    backgroundColor: colors["bg-accent"],
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: colors["bg-light"],
   },
   editAvatarBtn: {
     position: 'absolute',
-    bottom: 0,
-    right: 0,
+    bottom: -2,
+    right: -2,
     backgroundColor: colors.primary,
-    borderRadius: 16,
-    width: 32,
-    height: 32,
+    borderRadius: 14,
+    width: 28,
+    height: 28,
     justifyContent: 'center',
     alignItems: 'center',
-    borderWidth: 3,
+    borderWidth: 2,
     borderColor: colors["text-light"],
   },
-  profileInfo: {
-    alignItems: 'center',
+  profileSummaryInfo: {
+    flex: 1,
   },
   profileName: {
-    fontSize: 24,
+    fontSize: 22,
     fontWeight: '700',
     color: colors["text-dark"],
     marginBottom: 4,
   },
   profileLevel: {
-    fontSize: 16,
+    fontSize: 14,
     color: colors["text-secondary"],
     fontWeight: '500',
-    marginBottom: 8,
   },
-  profileQuote: {
-    marginBottom: 16,
-  },
-  quoteText: {
-    fontSize: 14,
-    color: colors["text-secondary"],
-    fontStyle: 'italic',
-    textAlign: 'center',
-    lineHeight: 20,
-  },
-  editButton: {
+  quickStats: {
     flexDirection: 'row',
+    justifyContent: 'space-around',
     alignItems: 'center',
-    backgroundColor: `${colors.primary}20`,
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 8,
-    gap: 6,
+    backgroundColor: colors["bg-secondary"],
+    borderRadius: 12,
+    paddingVertical: 16,
   },
-  editButtonText: {
-    color: colors.primary,
-    fontWeight: '600',
-    fontSize: 14,
+  statItem: {
+    alignItems: 'center',
+    flex: 1,
   },
-  metricsCard: {
-    backgroundColor: colors["bg-accent"],
-    borderRadius: 16,
-    padding: 20,
-    marginBottom: 20,
-    shadowColor: colors.shadow,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 4,
-  },
-  cardTitle: {
+  statValue: {
     fontSize: 18,
     fontWeight: '700',
-    color: colors["text-dark"],
-    marginBottom: 16,
+    color: colors["text-light"],
+    marginBottom: 2,
   },
-  metricsGrid: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  metricItem: {
-    alignItems: 'center',
-    flex: 1,
-  },
-  metricIcon: {
-    width: 44,
-    height: 44,
-    borderRadius: 12,
-    backgroundColor: `${colors.primary}20`,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  metricValue: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: colors["text-dark"],
-    marginBottom: 4,
-  },
-  metricLabel: {
+  statLabel: {
     fontSize: 12,
-    color: colors["text-secondary"],
-    textAlign: 'center',
+    color: colors["text-light"],
     fontWeight: '500',
   },
-  optionsCard: {
+  statDivider: {
+    width: 1,
+    height: 24,
+    backgroundColor: colors["border-light"],
+  },
+  // Accordion Styles
+  accordionContainer: {
     backgroundColor: colors["bg-accent"],
     borderRadius: 16,
-    padding: 20,
-    marginBottom: 20,
+    marginBottom: 16,
     shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 8,
     elevation: 4,
   },
-  optionItem: {
+  accordionHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: colors["border-light"],
+    padding: 20,
   },
-  optionLeft: {
+  accordionLeft: {
     flexDirection: 'row',
     alignItems: 'center',
     flex: 1,
   },
-  optionIcon: {
+  accordionIcon: {
     width: 40,
     height: 40,
     borderRadius: 10,
@@ -532,14 +623,185 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginRight: 12,
   },
-  optionTitle: {
+  accordionTextContainer: {
+    flex: 1,
+  },
+  accordionTitle: {
     fontSize: 16,
     fontWeight: '600',
     color: colors["text-dark"],
     marginBottom: 2,
   },
-  optionSubtitle: {
+  accordionSubtitle: {
     fontSize: 13,
+    color: colors["text-secondary"],
+  },
+  chevron: {
+    marginLeft: 8,
+  },
+  chevronRotated: {
+    transform: [{ rotate: '180deg' }],
+  },
+  accordionContent: {
+    paddingHorizontal: 20,
+    paddingBottom: 20,
+    borderTopWidth: 1,
+    borderTopColor: colors["border-light"],
+  },
+  // Content Styles
+  detailsGrid: {
+    marginBottom: 16,
+  },
+  detailItem: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: colors["border-light"],
+  },
+  detailLabel: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: colors["text-secondary"],
+  },
+  detailValue: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: colors["text-dark"],
+  },
+  editButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: `${colors.primary}15`,
+    paddingVertical: 12,
+    borderRadius: 8,
+    gap: 6,
+    marginTop: 8,
+  },
+  editButtonText: {
+    color: colors.primary,
+    fontWeight: '600',
+    fontSize: 14,
+  },
+  metricsDetailGrid: {
+    gap: 16,
+  },
+  metricDetailItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors["bg-light"],
+    padding: 16,
+    borderRadius: 12,
+  },
+  metricDetailIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: 12,
+    backgroundColor: colors["text-light"],
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 16,
+  },
+  metricDetailInfo: {
+    flex: 1,
+  },
+  metricDetailValue: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: colors["text-dark"],
+    marginBottom: 2,
+  },
+  metricDetailLabel: {
+    fontSize: 13,
+    color: colors["text-secondary"],
+    fontWeight: '500',
+  },
+  fitnessDetails: {
+    gap: 16,
+  },
+  fitnessItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors["bg-light"],
+    padding: 16,
+    borderRadius: 12,
+  },
+  fitnessIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 10,
+    backgroundColor: `${colors.accent}20`,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 12,
+  },
+  fitnessLabel: {
+    fontSize: 13,
+    color: colors["text-secondary"],
+    fontWeight: '500',
+    marginBottom: 2,
+  },
+  fitnessValue: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: colors["text-dark"],
+  },
+  motivationSection: {
+    backgroundColor: colors["bg-light"],
+    padding: 16,
+    borderRadius: 12,
+  },
+  motivationLabel: {
+    fontSize: 13,
+    color: colors["text-secondary"],
+    fontWeight: '500',
+    marginBottom: 8,
+  },
+  quoteContainer: {
+    backgroundColor: colors["text-light"],
+    padding: 12,
+    borderRadius: 8,
+    borderLeftWidth: 3,
+    borderLeftColor: colors.primary,
+  },
+  quoteText: {
+    fontSize: 14,
+    color: colors["text-dark"],
+    fontStyle: 'italic',
+    lineHeight: 20,
+  },
+  accountOptions: {
+    gap: 0,
+  },
+  accountOptionItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: colors["border-light"],
+  },
+  accountOptionIcon: {
+    width: 36,
+    height: 36,
+    borderRadius: 8,
+    backgroundColor: colors["bg-light"],
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 12,
+  },
+  accountOptionText: {
+    flex: 1,
+  },
+  accountOptionTitle: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: colors["text-dark"],
+    marginBottom: 2,
+  },
+  accountOptionSubtitle: {
+    fontSize: 12,
     color: colors["text-secondary"],
   },
   logoutButton: {
@@ -551,6 +813,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     gap: 8,
+    marginTop: 20,
     shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
@@ -558,73 +821,6 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   logoutButtonText: {
-    color: colors["text-light"],
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
-  },
-  modalContent: {
-    backgroundColor: colors["text-light"],
-    borderRadius: 16,
-    padding: 24,
-    width: '100%',
-    maxWidth: 400,
-    shadowColor: colors.shadow,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 8,
-  },
-  modalTitle: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: colors["text-dark"],
-    marginBottom: 20,
-    textAlign: 'center',
-  },
-  input: {
-    backgroundColor: colors["bg-light"],
-    color: colors["text-dark"],
-    borderRadius: 8,
-    padding: 12,
-    fontSize: 16,
-    marginBottom: 12,
-    borderWidth: 1,
-    borderColor: colors["border-light"],
-  },
-  modalButtons: {
-    flexDirection: 'row',
-    gap: 12,
-    marginTop: 8,
-  },
-  modalCancelButton: {
-    flex: 1,
-    backgroundColor: colors["bg-light"],
-    borderRadius: 8,
-    paddingVertical: 12,
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: colors["border-light"],
-  },
-  modalCancelText: {
-    color: colors["text-secondary"],
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  modalSaveButton: {
-    flex: 1,
-    backgroundColor: colors.primary,
-    borderRadius: 8,
-    paddingVertical: 12,
-    alignItems: 'center',
-  },
-  modalSaveText: {
     color: colors["text-light"],
     fontSize: 16,
     fontWeight: '600',

@@ -8,9 +8,9 @@ import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import {
   Dimensions,
+  FlatList,
   Platform,
   RefreshControl,
-  ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -179,9 +179,9 @@ export default function CoachScreen() {
     const getCategoryColor = (category: string) => {
       switch (category.toLowerCase()) {
         case 'fitness':
-          return   colors.primary;
+          return  colors.primary;
         case 'nutrition':
-          return colors.primary;
+          return  colors.primary;
         default:
           return colors.primary;
       }
@@ -192,28 +192,24 @@ export default function CoachScreen() {
     return (
       <View style={styles.suggestionCard}>
         <View style={styles.suggestionHeader}>
-          <View style={[styles.suggestionIcon, { backgroundColor: `${categoryColor}20` }]}>
-            <Ionicons name={iconName as any} size={20} color={categoryColor} />
+          <View style={[styles.suggestionIcon, { backgroundColor: `${categoryColor}10` }]}>
+            <Ionicons name={iconName as any} size={24} color={categoryColor} />
           </View>
           <View style={styles.suggestionTitleContainer}>
             <Text style={styles.suggestionTitle}>{suggestion.name}</Text>
             <View style={styles.suggestionMetaContainer}>
-              <View style={[styles.categoryTag, { backgroundColor: `${categoryColor}20` }]}>
+              <View style={[styles.categoryTag, { backgroundColor: `${categoryColor}10` }]}>
                 <Text style={[styles.categoryText, { color: categoryColor }]}>
                   {suggestion.category}
                 </Text>
               </View>
-              <Text style={styles.difficultyText}>
-                {suggestion.difficulty}
-              </Text>
+              <View style={[styles.difficultyTag, { backgroundColor: getDifficultyColor(suggestion.difficulty) }]}>
+                <Text style={styles.difficultyText}>
+                  {suggestion.difficulty}
+                </Text>
+              </View>
             </View>
           </View>
-          <TouchableOpacity 
-            style={[styles.addButton, { backgroundColor: categoryColor }]}
-            onPress={() => handleAddHabit(suggestion)}
-          >
-            <Ionicons name="add" size={18} color="#fff" />
-          </TouchableOpacity>
         </View>
         
         <View style={styles.descriptionContainer}>
@@ -229,44 +225,60 @@ export default function CoachScreen() {
               <Text style={[styles.readMoreText, { color: categoryColor }]}>
                 {expanded ? 'Read Less' : 'Read More'}
               </Text>
+              <Ionicons name={expanded ? 'chevron-up' : 'chevron-down'} size={14} color={categoryColor} style={styles.readMoreIcon} />
             </TouchableOpacity>
           )}
         </View>
         
         <View style={styles.suggestionMeta}>
           <View style={styles.metaItem}>
-            <Ionicons name="time-outline" size={16} color="#7f8c8d" />
+            <Ionicons name="time-outline" size={16} color={colors['text-secondary']} />
             <Text style={styles.metaText}>{formatTime(suggestion.target_time)}</Text>
           </View>
           <View style={styles.metaItem}>
-            <Ionicons name="repeat" size={16} color="#7f8c8d" />
+            <Ionicons name="repeat" size={16} color={colors['text-secondary']} />
             <Text style={styles.metaText}>{formatRepeats(suggestion.repeats)}</Text>
           </View>
           <View style={styles.metaItem}>
-            <Ionicons name="timer-outline" size={16} color="#7f8c8d" />
+            <Ionicons name="timer-outline" size={16} color={colors['text-secondary']} />
             <Text style={styles.metaText}>{suggestion.estimated_duration} min</Text>
           </View>
         </View>
         
         {suggestion.success_tips.length > 0 && (
-          <View style={[styles.tipsContainer, { borderLeftColor: categoryColor }]}>
-            <Text style={styles.tipsTitle}>Success Tips</Text>
+          <View style={styles.tipsContainer}>
+            <Text style={[styles.tipsTitle, { color: categoryColor }]}>Success Tips</Text>
             {suggestion.success_tips.map((tip, i) => (
               <View key={`tip-${i}`} style={styles.tipItem}>
-                <View style={[styles.tipBulletContainer, { backgroundColor: `${categoryColor}20` }]}>
-                  <Text style={[styles.tipBullet, { color: categoryColor }]}>•</Text>
-                </View>
+                <Ionicons name="checkmark-circle" size={16} color={categoryColor} style={styles.tipBullet} />
                 <Text style={styles.tipText}>{tip}</Text>
               </View>
             ))}
           </View>
         )}
+
+        <TouchableOpacity 
+          style={[styles.addButton, { backgroundColor: categoryColor }]}
+          onPress={() => handleAddHabit(suggestion)}
+        >
+          <Text style={styles.addButtonText}>Add Habit</Text>
+          <Ionicons name="add" size={18} color="#fff" style={styles.addButtonIcon} />
+        </TouchableOpacity>
       </View>
     );
   };
 
-  const renderSuggestionCard = (suggestion: AISuggestion, key: string) => {
-    return <SuggestionCard suggestion={suggestion} key={key} />;
+  const getDifficultyColor = (difficulty: string) => {
+    switch (difficulty.toLowerCase()) {
+      case 'easy':
+        return '#d1fae5'; // Soft green
+      case 'medium':
+        return '#fef3c7'; // Soft yellow
+      case 'hard':
+        return '#fee2e2'; // Soft red
+      default:
+        return '#f3f4f6'; // Gray
+    }
   };
 
   const navigateToAllSuggestions = (category: string, suggestions: AISuggestion[]) => {
@@ -299,36 +311,38 @@ export default function CoachScreen() {
     if (loading && suggestions.length === 0) return null;
     if (!loading && suggestions.length === 0) return null;
 
-    const mainSuggestion = suggestions[0];
-    const hasMore = suggestions.length > 1;
-
     return (
       <View style={styles.section}>
         <View style={styles.sectionHeader}>
           <View style={styles.sectionTitleContainer}>
-            <View style={[styles.sectionIcon, { backgroundColor: `${color}20` }]}>
-              <Ionicons name={icon} size={20} color={color} />
+            <View style={[styles.sectionIcon, { backgroundColor: `${color}10` }]}>
+              <Ionicons name={icon} size={24} color={color} />
             </View>
             <View>
               <Text style={[styles.sectionTitle, { color }]}>{title}</Text>
               <Text style={styles.sectionSubtitle}>{subtitle}</Text>
             </View>
           </View>
-        </View>
-        
-        <View style={styles.suggestionsContainer}>
-          {renderSuggestionCard(mainSuggestion, `${categoryKey}-0`)}
-          
-          {hasMore && (
+          {suggestions.length > 0 && (
             <TouchableOpacity 
-              style={[styles.viewAllButton, { borderColor: color, backgroundColor: `${color}10` }]}
+              style={[styles.viewAllButton, { borderColor: color }]} 
               onPress={() => navigateToAllSuggestions(categoryKey, suggestions)}
             >
-              <Text style={[styles.viewAllText, { color }]}>View All {suggestions.length} Suggestions</Text>
+              <Text style={[styles.viewAllText, { color }]}>View All</Text>
               <Ionicons name="chevron-forward" size={16} color={color} />
             </TouchableOpacity>
           )}
         </View>
+        
+        <FlatList
+          data={suggestions.slice(0, 3)} // Show up to 3 suggestions per section for better UX
+          renderItem={({ item }) => <SuggestionCard suggestion={item} />}
+          keyExtractor={(item, index) => `${categoryKey}-${index}`}
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.horizontalList}
+          ItemSeparatorComponent={() => <View style={{ width: 16 }} />}
+        />
       </View>
     );
   };
@@ -337,12 +351,13 @@ export default function CoachScreen() {
     if (error) {
       return (
         <View style={styles.errorContainer}>
-          <Ionicons name="warning-outline" size={48} color="#f87171" />
+          <Ionicons name="alert-circle-outline" size={48} color={colors['text-danger']} />
           <Text style={styles.errorText}>{error}</Text>
           <TouchableOpacity 
             style={styles.retryButton}
             onPress={() => loadGeneralSuggestions()}
           >
+            <Ionicons name="refresh" size={18} color="#fff" style={styles.retryIcon} />
             <Text style={styles.retryButtonText}>Retry</Text>
           </TouchableOpacity>
         </View>
@@ -356,10 +371,10 @@ export default function CoachScreen() {
     if (!hasGeneralSuggestions && !hasFitnessSuggestions && !hasNutritionSuggestions) {
       return (
         <View style={styles.emptyState}>
-          <Ionicons name="bulb-outline" size={48} color="#7f8c8d" />
-          <Text style={styles.emptyStateText}>No suggestions available</Text>
+          <Ionicons name="bulb-outline" size={64} color={colors['text-secondary']} />
+          <Text style={styles.emptyStateText}>No Suggestions Yet</Text>
           <Text style={styles.emptyStateSubtext}>
-            Check back later for personalized habit suggestions
+            Our AI is cooking up some personalized habits for you. Check back soon!
           </Text>
         </View>
       );
@@ -368,33 +383,33 @@ export default function CoachScreen() {
     return (
       <View style={styles.content}>
         {renderCategorySection({
-          title: 'Fitness Suggestions',
+          title: 'Fitness',
           icon: 'fitness',
-          color: colors.primary,
+          color:  colors.primary,
           suggestions: fitnessSuggestions,
           loading: loadingFitness,
           categoryKey: 'fitness',
-          subtitle: 'Personalized workout and fitness recommendations'
+          subtitle: 'Build strength and stay active'
         })}
 
         {renderCategorySection({
-          title: 'Nutrition Suggestions',
+          title: 'Nutrition',
           icon: 'nutrition',
-          color: colors.primary,
+          color:  colors.primary,
           suggestions: nutritionSuggestions,
           loading: loadingNutrition,
           categoryKey: 'nutrition',
-          subtitle: 'Healthy eating habits and meal planning'
+          subtitle: 'Fuel your body right'
         })}
 
         {renderCategorySection({
-          title: 'General Suggestions',
+          title: 'General',
           icon: 'bulb-outline',
-          color: colors.primary,
+          color:  colors.primary,
           suggestions: generalSuggestions,
           loading: loading,
           categoryKey: 'general',
-          subtitle: 'Habits to improve your daily routine'
+          subtitle: 'Everyday wellness habits'
         })}
       </View>
     );
@@ -404,14 +419,12 @@ export default function CoachScreen() {
     return (
       <View style={styles.container}>
         <View style={styles.header}>
-          <View style={styles.headerTop}>
-            <View>
-              <Text style={styles.greeting}>Smart Coach</Text>
-              <Text style={styles.headerDate}>Your Personalized Habit Coach</Text>
-            </View>
-          </View>
+          <Text style={styles.greeting}>Smart Coach</Text>
+          <Text style={styles.headerDate}>Your AI-Powered Habit Guide</Text>
         </View>
         <View style={styles.loadingContainer}>
+          <SuggestionShimmer />
+          <SuggestionShimmer />
           <SuggestionShimmer />
         </View>
       </View>
@@ -421,28 +434,25 @@ export default function CoachScreen() {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <View style={styles.headerTop}>
-          <View>
-            <Text style={styles.greeting}>Smart Coach</Text>
-            <Text style={styles.headerDate}>Your Personalized Habit Coach</Text>
-          </View>
-        </View>
+        <Text style={styles.greeting}>Smart Coach</Text>
+        <Text style={styles.headerDate}>Your AI-Powered Habit Guide</Text>
       </View>
 
-      <ScrollView 
+      <FlatList 
+        data={[]} // Using FlatList for better performance and refresh
+        renderItem={() => null}
+        ListHeaderComponent={renderContent}
         style={styles.scrollView} 
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
             onRefresh={onRefresh}
-            colors={[colors['text-danger']]}
-            tintColor={colors['text-danger']}
+            colors={[colors.primary]}
+            tintColor={colors.primary}
           />
         }
-      >
-        {renderContent()}
-      </ScrollView>
+      />
     </View>
   );
 }
@@ -450,105 +460,40 @@ export default function CoachScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors["bg-light"],
-  },
-  loadingContainer: {
-    flex: 1,
-    padding: 16,
-  },
-  errorContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
     backgroundColor: colors['bg-light'],
-  },
-  errorText: {
-    color: colors['text-danger'],
-    fontSize: 16,
-    textAlign: 'center',
-    marginVertical: 16,
-    lineHeight: 22,
-  },
-  retryButton: {
-    backgroundColor: colors['bg-dark'],
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderRadius: 12,
-    marginTop: 12,
-  },
-  retryButtonText: {
-    color: '#ffffff',
-    fontWeight: '600',
-    fontSize: 15,
-  },
-  emptyState: {
-    alignItems: 'center',
-    padding: 40,
-    backgroundColor: colors['bg-light'],
-    borderRadius: 16,
-    margin: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 4,
-  },
-  emptyStateText: {
-    color: colors['text-dark'],
-    fontSize: 18,
-    fontWeight: '600',
-    marginTop: 16,
-    textAlign: 'center',
-  },
-  emptyStateSubtext: {
-    color: colors['text-light'],
-    fontSize: 14,
-    marginTop: 8,
-    textAlign: 'center',
   },
   header: {
-    backgroundColor: colors['bg-primary'],
+    backgroundColor: colors.primary,
     paddingTop: 60,
     paddingHorizontal: 20,
     paddingBottom: 20,
     borderBottomLeftRadius: 20,
     borderBottomRightRadius: 20,
   },
-  headerTop: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
   greeting: {
     fontSize: 24,
     fontWeight: '700',
     color: colors['text-light'],
-    marginBottom: 4,
   },
   headerDate: {
-    fontSize: 14,
+    fontSize: 16,
     color: colors['text-light'],
-    fontWeight: '500',
+    opacity: 0.9,
   },
   scrollView: {
     flex: 1,
   },
   content: {
-    padding: 20,
+    padding: 24,
+    paddingBottom: 100,
   },
   section: {
-    marginBottom: 24,
-    backgroundColor: colors['bg-light'],
-    borderRadius: 16,
-    padding: 20,
-    shadowColor: colors['shadow'],
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 4,
+    marginBottom: 32,
   },
   sectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     marginBottom: 16,
   },
   sectionTitleContainer: {
@@ -557,55 +502,71 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   sectionIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 12,
+    width: 48,
+    height: 48,
+    borderRadius: 24,
     justifyContent: 'center',
     alignItems: 'center',
   },
   sectionTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#2c3e50',
-    marginBottom: 2,
+    fontSize: 22,
+    fontWeight: 'bold',
   },
   sectionSubtitle: {
-    fontSize: 12,
-    color: '#7f8c8d',
-    fontWeight: '500',
+    fontSize: 14,
+    color: colors['text-secondary'],
+    opacity: 0.8,
   },
-  suggestionsContainer: {
-    gap: 12,
+  viewAllButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 16,
+    borderWidth: 1,
+  },
+  viewAllText: {
+    fontSize: 14,
+    fontWeight: '600',
+    marginRight: 4,
+  },
+  horizontalList: {
+    paddingRight: 24,
   },
   suggestionCard: {
-    backgroundColor: colors['bg-light'],
-    borderRadius: 12,
-    overflow: 'hidden',
-    borderWidth: 1,
-    borderColor: colors['border-dark'],
+    backgroundColor: colors['bg-accent'],
+    borderRadius: 24,
+    padding: 20,
+    width: width * 0.85,
+    shadowColor: colors.shadow,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 12,
+    elevation: 5,
+    borderWidth: 0.5,
+    borderColor: colors['border-light'],
   },
   suggestionHeader: {
     flexDirection: 'row',
-    alignItems: 'center',
-    padding: 16,
-    paddingBottom: 12,
+    alignItems: 'flex-start',
+    marginBottom: 16,
   },
   suggestionIcon: {
-    width: 36,
-    height: 36,
-    borderRadius: 10,
+    width: 48,
+    height: 48,
+    borderRadius: 24,
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 12,
+    marginRight: 16,
   },
   suggestionTitleContainer: {
     flex: 1,
   },
   suggestionTitle: {
     color: colors['text-primary'],
-    fontSize: 15,
+    fontSize: 18,
     fontWeight: '600',
-    marginBottom: 4,
+    marginBottom: 8,
   },
   suggestionMetaContainer: {
     flexDirection: 'row',
@@ -613,115 +574,149 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   categoryTag: {
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 6,
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 16,
   },
   categoryText: {
-    fontSize: 11,
+    fontSize: 12,
     fontWeight: '600',
     textTransform: 'uppercase',
   },
-  difficultyText: {
-    color: colors['text-primary'],
-    fontSize: 11,
-    fontWeight: '500',
-    textTransform: 'capitalize',
+  difficultyTag: {
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 16,
   },
-  addButton: {
-    width: 32,
-    height: 32,
-    borderRadius: 8,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginLeft: 'auto',
+  difficultyText: {
+    fontSize: 12,
+    fontWeight: '500',
+    color: colors['text-primary'],
   },
   descriptionContainer: {
-    paddingHorizontal: 16,
-    paddingTop: 8,
-    paddingBottom: 12,
+    marginBottom: 16,
   },
   suggestionDescription: {
     color: colors['text-secondary'],
     fontSize: 14,
-    lineHeight: 20,
+    lineHeight: 22,
   },
   readMoreButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
     marginTop: 8,
-    alignSelf: 'flex-start',
   },
   readMoreText: {
-    fontSize: 13,
+    fontSize: 14,
     fontWeight: '600',
+  },
+  readMoreIcon: {
+    marginLeft: 4,
   },
   suggestionMeta: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderTopWidth: 1,
-    borderTopColor: '#eaeaea',
-    backgroundColor: colors['bg-light'],
+    justifyContent: 'space-around',
+    marginBottom: 20,
+    padding: 12,
+    backgroundColor: colors['bg-secondary'],
+    borderRadius: 16,
   },
   metaItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    flex: 1,
-    justifyContent: 'center',
+    gap: 6,
   },
   metaText: {
     color: colors['text-primary'],
-    fontSize: 12,
-    marginLeft: 4,
+    fontSize: 13,
     fontWeight: '500',
   },
-  viewAllButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 12,
-    borderRadius: 8,
-    borderWidth: 1,
-    marginTop: 12,
-  },
-  viewAllText: {
-    fontSize: 14,
-    fontWeight: '600',
-    marginRight: 4,
-  },
   tipsContainer: {
-    backgroundColor: colors['bg-accent'],
-    padding: 16,
-    borderLeftWidth: 3,
+    marginBottom: 20,
   },
   tipsTitle: {
-    color: colors['text-primary'],
     fontWeight: '600',
     marginBottom: 12,
-    fontSize: 14,
+    fontSize: 16,
   },
   tipItem: {
     flexDirection: 'row',
-    marginBottom: 8,
-    alignItems: 'flex-start',
-  },
-  tipBulletContainer: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    justifyContent: 'center',
+    marginBottom: 12,
     alignItems: 'center',
-    marginRight: 8,
-    marginTop: 1,
   },
   tipBullet: {
-    fontSize: 12,
-    fontWeight: '600',
+    marginRight: 12,
   },
   tipText: {
     color: colors['text-secondary'],
-    fontSize: 13,
-    lineHeight: 18,
+    fontSize: 14,
+    lineHeight: 20,
     flex: 1,
+  },
+  addButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 16,
+    borderRadius: 16,
+  },
+  addButtonText: {
+    color: '#fff',
+    fontWeight: '600',
+    fontSize: 16,
+    marginRight: 8,
+  },
+  addButtonIcon: {},
+  loadingContainer: {
+    flex: 1,
+    padding: 24,
+    gap: 16,
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 32,
+    gap: 16,
+  },
+  errorText: {
+    color: colors['text-danger'],
+    fontSize: 16,
+    textAlign: 'center',
+    lineHeight: 24,
+  },
+  retryButton: {
+    flexDirection: 'row',
+    backgroundColor: colors['bg-dark'],
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 24,
+    alignItems: 'center',
+    gap: 8,
+  },
+  retryIcon: {},
+  retryButtonText: {
+    color: '#ffffff',
+    fontWeight: '600',
+    fontSize: 16,
+  },
+  emptyState: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 32,
+    gap: 16,
+  },
+  emptyStateText: {
+    color: colors['text-primary'],
+    fontSize: 20,
+    fontWeight: '600',
+    textAlign: 'center',
+  },
+  emptyStateSubtext: {
+    color: colors['text-secondary'],
+    fontSize: 14,
+    textAlign: 'center',
+    lineHeight: 20,
   },
 });

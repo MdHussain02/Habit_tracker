@@ -1,376 +1,438 @@
 import colors from '@/constants/Colors';
-import { Ionicons } from '@expo/vector-icons';
+import { AntDesign, Feather, Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
-import { Alert, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import TimePicker from '../../components/TimePicker';
+import {
+  Alert,
+  KeyboardAvoidingView,
+  LayoutAnimation,
+  Modal,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  UIManager,
+  View
+} from 'react-native';
 import { getUserData, saveUserData } from '../../utils/storage';
 
+// Enable LayoutAnimation on Android
+if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
+  UIManager.setLayoutAnimationEnabledExperimental(true);
+}
+
 const genderOptions = ['Male', 'Female', 'Non-binary', 'Prefer not to say'];
-const fitnessLevelOptions = ['Beginner', 'Intermediate', 'Advanced'];
-const primaryGoalOptions = ['Weight Loss', 'Muscle Gain', 'General Fitness', 'Endurance', 'Flexibility'];
-const workoutTimeOptions = ['Early Morning (5-7 AM)', 'Morning (7-9 AM)', 'Late Morning (9-11 AM)', 'Afternoon (12-3 PM)', 'Late Afternoon (3-5 PM)', 'Evening (5-7 PM)', 'Night (7-9 PM)'];
-const motivationLevelOptions = ['1 - Very Low', '2', '3', '4', '5 - Moderate', '6', '7', '8', '9', '10 - Very High'];
+
+interface AccordionSection {
+  id: string;
+  title: string;
+  icon: string;
+  iconFamily: 'AntDesign' | 'MaterialCommunityIcons' | 'Feather' | 'Ionicons';
+  iconColor: string;
+  iconBgColor: string;
+  fields: {
+    key: string;
+    label: string;
+    type: 'text' | 'email' | 'password' | 'dropdown' | 'number';
+    placeholder?: string;
+    options?: string[];
+  }[];
+}
+
+const accordionSections: AccordionSection[] = [
+  {
+    id: 'basic',
+    title: 'Basic Information',
+    icon: 'user',
+    iconFamily: 'Feather',
+    iconColor: colors.primary,
+    iconBgColor: `${colors.primary}15`,
+    fields: [
+      {
+        key: 'name',
+        label: 'Full Name',
+        type: 'text',
+        placeholder: 'Enter your full name'
+      },
+      {
+        key: 'email',
+        label: 'Email Address',
+        type: 'email',
+        placeholder: 'Enter your email address'
+      },
+      {
+        key: 'phone',
+        label: 'Phone Number',
+        type: 'text',
+        placeholder: 'Enter your phone number'
+      }
+    ]
+  },
+];
+
+interface ModernDropdownProps {
+  value: string;
+  placeholder: string;
+  options: string[];
+  onSelect: (value: string) => void;
+  title: string;
+  disabled?: boolean;
+}
+
+const ModernDropdown: React.FC<ModernDropdownProps> = ({ 
+  value, 
+  placeholder, 
+  options, 
+  onSelect, 
+  title,
+  disabled = false 
+}) => {
+  const [modalVisible, setModalVisible] = useState(false);
+
+  return (
+    <>
+      <TouchableOpacity
+        style={[styles.modernDropdown, disabled && styles.disabledField]}
+        onPress={() => !disabled && setModalVisible(true)}
+        disabled={disabled}
+      >
+        <Text style={[styles.modernDropdownText, !value && styles.placeholderText]}>
+          {value || placeholder}
+        </Text>
+        <AntDesign 
+          name="down" 
+          size={14} 
+          color={disabled ? colors["text-secondary"] : colors["text-dark"]} 
+        />
+      </TouchableOpacity>
+
+      <Modal
+        visible={modalVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <View style={styles.modernModalOverlay}>
+          <View style={styles.modernModalContent}>
+            <View style={styles.modernModalHeader}>
+              <Text style={styles.modernModalTitle}>{title}</Text>
+              <TouchableOpacity
+                style={styles.modernModalClose}
+                onPress={() => setModalVisible(false)}
+              >
+                <AntDesign name="close" size={20} color={colors["text-secondary"]} />
+              </TouchableOpacity>
+            </View>
+            
+            <ScrollView style={styles.modernOptionsList} showsVerticalScrollIndicator={false}>
+              {options.map((option, index) => (
+                <TouchableOpacity
+                  key={option}
+                  style={[
+                    styles.modernOptionItem,
+                    index === options.length - 1 && styles.lastOptionItem,
+                    value === option && styles.selectedOptionItem
+                  ]}
+                  onPress={() => {
+                    onSelect(option);
+                    setModalVisible(false);
+                  }}
+                >
+                  <Text style={[
+                    styles.modernOptionText,
+                    value === option && styles.selectedOptionText
+                  ]}>
+                    {option}
+                  </Text>
+                  {value === option && (
+                    <AntDesign name="check" size={16} color={colors.primary} />
+                  )}
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
+    </>
+  );
+};
+
+interface AccordionItemProps {
+  section: AccordionSection;
+  isExpanded: boolean;
+  onToggle: () => void;
+  form: any;
+  onChange: (key: string, value: string) => void;
+  isEditing: boolean;
+}
+
+const AccordionItem: React.FC<AccordionItemProps> = ({
+  section,
+  isExpanded,
+  onToggle,
+  form,
+  onChange,
+  isEditing
+}) => {
+  const IconComponent = section.iconFamily === 'AntDesign' ? AntDesign :
+                      section.iconFamily === 'MaterialCommunityIcons' ? MaterialCommunityIcons :
+                      section.iconFamily === 'Feather' ? Feather : Ionicons;
+
+  const renderField = (field: any) => {
+    const commonStyle = [styles.modernInput, !isEditing && styles.disabledField];
+    
+    switch (field.type) {
+      case 'text':
+      case 'email':
+      case 'number':
+        return (
+          <View key={field.key} style={styles.inputGroup}>
+            <Text style={styles.inputLabel}>{field.label}</Text>
+            <TextInput
+              style={commonStyle}
+              placeholder={field.placeholder}
+              placeholderTextColor={colors["text-secondary"]}
+              value={form[field.key] || ''}
+              onChangeText={v => onChange(field.key, v)}
+              editable={isEditing}
+              keyboardType={field.type === 'email' ? 'email-address' : field.type === 'number' ? 'numeric' : 'default'}
+              autoCapitalize={field.type === 'email' ? 'none' : 'words'}
+            />
+          </View>
+        );
+      
+      case 'password':
+        return (
+          <View key={field.key} style={styles.inputGroup}>
+            <Text style={styles.inputLabel}>{field.label}</Text>
+            <TextInput
+              style={commonStyle}
+              placeholder={field.placeholder}
+              placeholderTextColor={colors["text-secondary"]}
+              value={form[field.key] || ''}
+              onChangeText={v => onChange(field.key, v)}
+              secureTextEntry
+              editable={isEditing}
+            />
+          </View>
+        );
+      
+      case 'dropdown':
+        return (
+          <View key={field.key} style={styles.inputGroup}>
+            <Text style={styles.inputLabel}>{field.label}</Text>
+            <ModernDropdown
+              value={form[field.key] || ''}
+              placeholder={field.placeholder || 'Select an option'}
+              options={field.options || []}
+              onSelect={value => onChange(field.key, value)}
+              title={field.label}
+              disabled={!isEditing}
+            />
+          </View>
+        );
+      
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <View style={styles.accordionItem}>
+      <TouchableOpacity
+        style={styles.accordionHeader}
+        onPress={onToggle}
+        activeOpacity={0.7}
+      >
+        <View style={styles.accordionHeaderContent}>
+          <View style={[styles.sectionIcon, { backgroundColor: section.iconBgColor }]}>
+            <IconComponent name={section.icon as any} size={20} color={section.iconColor} />
+          </View>
+          <Text style={styles.accordionTitle}>{section.title}</Text>
+        </View>
+        
+        <View style={styles.accordionChevron}>
+          <AntDesign 
+            name={isExpanded ? 'up' : 'down'} 
+            size={16} 
+            color={colors["text-secondary"]} 
+          />
+        </View>
+      </TouchableOpacity>
+
+      {isExpanded && (
+        <View style={styles.accordionContent}>
+          <View style={styles.fieldsContainer}>
+            {section.fields.map(renderField)}
+          </View>
+        </View>
+      )}
+    </View>
+  );
+};
 
 export default function PersonalDetailsScreen() {
   const [form, setForm] = useState({
     name: '',
     email: '',
-    password: '',
+    phone: '',
+    username: '',
+    currentPassword: '',
+    newPassword: '',
     confirmPassword: '',
-    height: '',
-    weight: '',
-    age: '',
     gender: '',
-    fitnessLevel: '',
-    primaryGoal: '',
-    wakeUpTime: '',
-    sleepTime: '',
-    preferredWorkoutTime: '',
-    notifications: true,
-    weeklyGoal: '',
-    motivationLevel: '',
+    birthDate: '',
+    location: '',
+    occupation: '',
+    language: '',
+    theme: '',
+    notifications: ''
   });
+  
   const [originalForm, setOriginalForm] = useState(form);
   const [loading, setLoading] = useState(true);
-  const [editingSection, setEditingSection] = useState<string | null>(null);
-  const [showGenderDropdown, setShowGenderDropdown] = useState(false);
-  const [showFitnessDropdown, setShowFitnessDropdown] = useState(false);
-  const [showGoalDropdown, setShowGoalDropdown] = useState(false);
-  const [showWorkoutTimeDropdown, setShowWorkoutTimeDropdown] = useState(false);
-  const [showMotivationDropdown, setShowMotivationDropdown] = useState(false);
+  const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set(['basic']));
+  const [isEditing, setIsEditing] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
     (async () => {
       const user = await getUserData();
       if (user) {
-        setForm({ ...form, ...user, confirmPassword: user.password || '' });
-        setOriginalForm({ ...form, ...user, confirmPassword: user.password || '' });
+        const updatedForm = { ...form, ...user };
+        setForm(updatedForm);
+        setOriginalForm(updatedForm);
       }
       setLoading(false);
     })();
   }, []);
 
-  const handleChange = (key: string, value: string | boolean) => {
+  const handleChange = (key: string, value: string) => {
     setForm({ ...form, [key]: value });
   };
 
-  const handleSave = async (section: string) => {
+  const toggleSection = (sectionId: string) => {
+    const newExpanded = new Set(expandedSections);
+    if (newExpanded.has(sectionId)) {
+      newExpanded.delete(sectionId);
+    } else {
+      newExpanded.add(sectionId);
+    }
+    setExpandedSections(newExpanded);
+  };
+
+  const handleSave = async () => {
     try {
+      // Validate passwords if changing
+      if (form.newPassword && form.newPassword !== form.confirmPassword) {
+        Alert.alert('Error', 'New passwords do not match');
+        return;
+      }
+
       await saveUserData(form);
       setOriginalForm(form);
-      setEditingSection(null);
-      Alert.alert('Success', 'Personal details updated!');
+      setIsEditing(false);
+      
+      LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+      Alert.alert('Success', 'Your details have been updated successfully!');
     } catch (e) {
-      Alert.alert('Error', 'Could not save details');
+      Alert.alert('Error', 'Could not save your details. Please try again.');
     }
   };
 
-  const handleCancel = (section: string) => {
+  const handleCancel = () => {
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
     setForm(originalForm);
-    setEditingSection(null);
+    setIsEditing(false);
   };
 
-  const DropdownButton = ({ 
-    value, 
-    placeholder, 
-    onPress, 
-    style, 
-    editable = true
-  }: { 
-    value: string; 
-    placeholder: string; 
-    onPress: () => void; 
-    style?: any;
-    editable?: boolean;
-  }) => (
-    <TouchableOpacity style={[styles.dropdownButton, style, !editable && styles.disabledField]} onPress={editable ? onPress : undefined} disabled={!editable}>
-      <Text style={[styles.dropdownButtonText, !value && styles.placeholderText]}>
-        {value || placeholder}
-      </Text>
-      <Text style={styles.dropdownArrow}>▼</Text>
-    </TouchableOpacity>
-  );
+  const hasChanges = () => {
+    return JSON.stringify(form) !== JSON.stringify(originalForm);
+  };
 
-  const DropdownModal = ({ 
-    visible, 
-    onClose, 
-    options, 
-    onSelect, 
-    title 
-  }: { 
-    visible: boolean; 
-    onClose: () => void; 
-    options: string[]; 
-    onSelect: (value: string) => void; 
-    title: string;
-  }) => (
-    <View>
-      {visible && (
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>{title}</Text>
-            <ScrollView style={styles.dropdownList}>
-              {options.map((item) => (
-                <TouchableOpacity
-                  key={item}
-                  style={styles.dropdownItem}
-                  onPress={() => {
-                    onSelect(item);
-                    onClose();
-                  }}
-                >
-                  <Text style={styles.dropdownItemText}>{item}</Text>
-                </TouchableOpacity>
-              ))}
-            </ScrollView>
-            <TouchableOpacity style={styles.modalCloseButton} onPress={onClose}>
-              <Text style={styles.modalCloseButtonText}>Close</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      )}
-    </View>
-  );
-
-  if (loading) return null;
+  if (loading) {
+    return (
+      <View style={[styles.container, styles.centered]}>
+        <Text style={styles.loadingText}>Loading your details...</Text>
+      </View>
+    );
+  }
 
   return (
-    <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+    <KeyboardAvoidingView 
+      style={styles.container} 
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+    >
       {/* Header */}
       <View style={styles.header}>
-        <View style={styles.headerTop}>
-          <View>
-            <Text style={styles.greeting}>Personal Details</Text>
-            <Text style={styles.headerDate}>Manage your profile information</Text>
-          </View>
+        <View style={styles.headerContent}>
           <TouchableOpacity
             style={styles.backButton}
             onPress={() => router.back()}
           >
-            <Ionicons name="arrow-back" size={24} color="#ffffff" />
+            <Ionicons name="arrow-back" size={24} color={colors["text-light"]} />
           </TouchableOpacity>
+          
+          <View style={styles.headerTextContainer}>
+            <Text style={styles.headerTitle}>Personal Details</Text>
+            <Text style={styles.headerSubtitle}>Manage your profile information</Text>
+          </View>
+
+          {hasChanges() && !isEditing && (
+            <View style={styles.changeIndicator}>
+              <MaterialCommunityIcons name="circle" size={8} color={colors.primary} />
+            </View>
+          )}
         </View>
       </View>
 
-      <ScrollView contentContainerStyle={styles.scrollContainer} showsVerticalScrollIndicator={false}>
-        <Text style={styles.title}>Personal Details</Text>
+      <ScrollView 
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Accordion Sections */}
+        {accordionSections.map((section) => (
+          <AccordionItem
+            key={section.id}
+            section={section}
+            isExpanded={expandedSections.has(section.id)}
+            onToggle={() => toggleSection(section.id)}
+            form={form}
+            onChange={handleChange}
+            isEditing={isEditing}
+          />
+        ))}
 
-        {/* Personal Info Section */}
-        <View style={styles.sectionCard}>
-          <Text style={styles.sectionTitle}>Personal Info</Text>
-          <TextInput
-            style={[styles.input, editingSection !== 'personal' && styles.disabledField]}
-            placeholder="Full Name"
-            placeholderTextColor="#9ca3af"
-            value={form.name}
-            onChangeText={v => handleChange('name', v)}
-            editable={editingSection === 'personal'}
-          />
-          <TextInput
-            style={[styles.input, editingSection !== 'personal' && styles.disabledField]}
-            placeholder="Email Address"
-            placeholderTextColor="#9ca3af"
-            value={form.email}
-            onChangeText={v => handleChange('email', v)}
-            keyboardType="email-address"
-            autoCapitalize="none"
-            editable={editingSection === 'personal'}
-          />
-          <TextInput
-            style={[styles.input, editingSection !== 'personal' && styles.disabledField]}
-            placeholder="Password"
-            placeholderTextColor="#9ca3af"
-            value={form.password}
-            onChangeText={v => handleChange('password', v)}
-            secureTextEntry
-            editable={editingSection === 'personal'}
-          />
-          <TextInput
-            style={[styles.input, editingSection !== 'personal' && styles.disabledField]}
-            placeholder="Confirm Password"
-            placeholderTextColor="#9ca3af"
-            value={form.confirmPassword}
-            onChangeText={v => handleChange('confirmPassword', v)}
-            secureTextEntry
-            editable={editingSection === 'personal'}
-          />
-          {form.password && form.confirmPassword && form.password !== form.confirmPassword && (
-            <Text style={styles.errorText}>Passwords don't match</Text>
-          )}
-          {editingSection === 'personal' ? (
-            <View style={styles.sectionButtonRow}>
-              <TouchableOpacity style={[styles.button, styles.saveButton]} onPress={() => handleSave('personal')}>
-                <Text style={[styles.buttonText, styles.saveButtonText]}>Save</Text>
+        {/* Global Action Buttons */}
+        <View style={styles.globalActions}>
+          {isEditing ? (
+            <View style={styles.editingActions}>
+              <TouchableOpacity 
+                style={[styles.actionButton, styles.cancelButton]} 
+                onPress={handleCancel}
+              >
+                <Text style={styles.cancelButtonText}>Cancel</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={[styles.button, styles.cancelButton]} onPress={() => handleCancel('personal')}>
-                <Text style={[styles.buttonText, styles.cancelButtonText]}>Cancel</Text>
+              <TouchableOpacity 
+                style={[styles.actionButton, styles.saveButton]} 
+                onPress={handleSave}
+              >
+                <Text style={styles.saveButtonText}>Save All Changes</Text>
               </TouchableOpacity>
             </View>
           ) : (
-            <TouchableOpacity style={[styles.button, styles.editButton]} onPress={() => setEditingSection('personal')}>
-              <Text style={[styles.buttonText, styles.editButtonText]}>Edit</Text>
+            <TouchableOpacity 
+              style={[styles.actionButton, styles.editButton]} 
+              onPress={() => setIsEditing(true)}
+            >
+              <Feather name="edit-2" size={16} color={colors.primary} />
+              <Text style={styles.editButtonText}>Edit Details</Text>
             </TouchableOpacity>
           )}
         </View>
-
-        {/* Health & Goals Section */}
-        <View style={styles.sectionCard}>
-          <Text style={styles.sectionTitle}>Health & Goals</Text>
-          <View style={styles.row}>
-            <TextInput
-              style={[styles.input, styles.halfInput, editingSection !== 'health' && styles.disabledField]}
-              placeholder="Height (cm)"
-              placeholderTextColor="#9ca3af"
-              value={form.height}
-              onChangeText={v => handleChange('height', v)}
-              keyboardType="numeric"
-              editable={editingSection === 'health'}
-            />
-            <TextInput
-              style={[styles.input, styles.halfInput, editingSection !== 'health' && styles.disabledField]}
-              placeholder="Weight (kg)"
-              placeholderTextColor="#9ca3af"
-              value={form.weight}
-              onChangeText={v => handleChange('weight', v)}
-              keyboardType="numeric"
-              editable={editingSection === 'health'}
-            />
-          </View>
-          <View style={styles.row}>
-            <TextInput
-              style={[styles.input, styles.halfInput, editingSection !== 'health' && styles.disabledField]}
-              placeholder="Age"
-              placeholderTextColor="#9ca3af"
-              value={form.age}
-              onChangeText={v => handleChange('age', v)}
-              keyboardType="numeric"
-              editable={editingSection === 'health'}
-            />
-            <DropdownButton
-              value={form.gender}
-              placeholder="Select Gender"
-              onPress={() => setShowGenderDropdown(true)}
-              style={styles.halfInput}
-              editable={editingSection === 'health'}
-            />
-          </View>
-          <DropdownButton
-            value={form.fitnessLevel}
-            placeholder="Select Fitness Level"
-            onPress={() => setShowFitnessDropdown(true)}
-            editable={editingSection === 'health'}
-          />
-          <DropdownButton
-            value={form.primaryGoal}
-            placeholder="Select Primary Goal"
-            onPress={() => setShowGoalDropdown(true)}
-            editable={editingSection === 'health'}
-          />
-          <TextInput
-            style={[styles.input, editingSection !== 'health' && styles.disabledField]}
-            placeholder="Weekly Goal (e.g., 3 workouts per week)"
-            placeholderTextColor="#9ca3af"
-            value={form.weeklyGoal}
-            onChangeText={v => handleChange('weeklyGoal', v)}
-            editable={editingSection === 'health'}
-          />
-          {editingSection === 'health' ? (
-            <View style={styles.sectionButtonRow}>
-              <TouchableOpacity style={[styles.button, styles.saveButton]} onPress={() => handleSave('health')}>
-                <Text style={[styles.buttonText, styles.saveButtonText]}>Save</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={[styles.button, styles.cancelButton]} onPress={() => handleCancel('health')}>
-                <Text style={[styles.buttonText, styles.cancelButtonText]}>Cancel</Text>
-              </TouchableOpacity>
-            </View>
-          ) : (
-            <TouchableOpacity style={[styles.button, styles.editButton]} onPress={() => setEditingSection('health')}>
-              <Text style={[styles.buttonText, styles.editButtonText]}>Edit</Text>
-            </TouchableOpacity>
-          )}
-        </View>
-
-        {/* Preferences Section */}
-        <View style={styles.sectionCard}>
-          <Text style={styles.sectionTitle}>Preferences</Text>
-          <TimePicker
-            title="Wake Up Time"
-            value={form.wakeUpTime}
-            onTimeChange={time => editingSection === 'prefs' && handleChange('wakeUpTime', time)}
-            enabled={editingSection === 'prefs'}
-          />
-          <TimePicker
-            title="Sleep Time"
-            value={form.sleepTime}
-            onTimeChange={time => editingSection === 'prefs' && handleChange('sleepTime', time)}
-            enabled={editingSection === 'prefs'}
-          />
-          <DropdownButton
-            value={form.preferredWorkoutTime}
-            placeholder="Select Preferred Workout Time"
-            onPress={() => setShowWorkoutTimeDropdown(true)}
-            editable={editingSection === 'prefs'}
-          />
-          <DropdownButton
-            value={form.motivationLevel}
-            placeholder="Select Motivation Level"
-            onPress={() => setShowMotivationDropdown(true)}
-            editable={editingSection === 'prefs'}
-          />
-          {editingSection === 'prefs' ? (
-            <View style={styles.sectionButtonRow}>
-              <TouchableOpacity style={[styles.button, styles.saveButton]} onPress={() => handleSave('prefs')}>
-                <Text style={[styles.buttonText, styles.saveButtonText]}>Save</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={[styles.button, styles.cancelButton]} onPress={() => handleCancel('prefs')}>
-                <Text style={[styles.buttonText, styles.cancelButtonText]}>Cancel</Text>
-              </TouchableOpacity>
-            </View>
-          ) : (
-            <TouchableOpacity style={[styles.button, styles.editButton]} onPress={() => setEditingSection('prefs')}>
-              <Text style={[styles.buttonText, styles.editButtonText]}>Edit</Text>
-            </TouchableOpacity>
-          )}
-        </View>
-
-        {/* Dropdown Modals */}
-        <DropdownModal
-          visible={showGenderDropdown}
-          onClose={() => setShowGenderDropdown(false)}
-          options={genderOptions}
-          onSelect={value => handleChange('gender', value)}
-          title="Select Gender"
-        />
-        <DropdownModal
-          visible={showFitnessDropdown}
-          onClose={() => setShowFitnessDropdown(false)}
-          options={fitnessLevelOptions}
-          onSelect={value => handleChange('fitnessLevel', value)}
-          title="Select Fitness Level"
-        />
-        <DropdownModal
-          visible={showGoalDropdown}
-          onClose={() => setShowGoalDropdown(false)}
-          options={primaryGoalOptions}
-          onSelect={value => handleChange('primaryGoal', value)}
-          title="Select Primary Goal"
-        />
-        <DropdownModal
-          visible={showWorkoutTimeDropdown}
-          onClose={() => setShowWorkoutTimeDropdown(false)}
-          options={workoutTimeOptions}
-          onSelect={value => handleChange('preferredWorkoutTime', value)}
-          title="Select Preferred Workout Time"
-        />
-        <DropdownModal
-          visible={showMotivationDropdown}
-          onClose={() => setShowMotivationDropdown(false)}
-          options={motivationLevelOptions}
-          onSelect={value => handleChange('motivationLevel', value)}
-          title="Select Motivation Level"
-        />
       </ScrollView>
     </KeyboardAvoidingView>
   );
@@ -379,220 +441,273 @@ export default function PersonalDetailsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors['bg-light'],
+    backgroundColor: colors.light,
   },
-  scrollContainer: {
-    flexGrow: 1,
-    padding: 16,
-    paddingTop: 20,
-    paddingBottom: 40,
+  centered: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingText: {
+    fontSize: 16,
+    color: colors["text-secondary"],
+    fontWeight: '500',
   },
   header: {
-    backgroundColor: colors['bg-primary'],
+    backgroundColor: colors.primary,
     paddingTop: 60,
     paddingBottom: 20,
     paddingHorizontal: 20,
     borderBottomLeftRadius: 20,
     borderBottomRightRadius: 20,
   },
-  headerTop: {
+  headerContent: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-  },
-  greeting: {
-    fontSize: 24,
-    fontWeight: '700',
-    color: '#ffffff',
-    marginBottom: 4,
-  },
-  headerDate: {
-    fontSize: 14,
-    color: '#bdc3c7',
-    fontWeight: '500',
+    position: 'relative',
   },
   backButton: {
     width: 44,
     height: 44,
     borderRadius: 12,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    backgroundColor: `${colors["text-light"]}20`,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 16,
+  },
+  headerTextContainer: {
+    flex: 1,
+  },
+  headerTitle: {
+    fontSize: 24,
+    fontWeight: '700',
+    color: colors["text-light"],
+    marginBottom: 4,
+  },
+  headerSubtitle: {
+    fontSize: 14,
+    color: colors["text-light"],
+    fontWeight: '500',
+    opacity: 0.9,
+  },
+  changeIndicator: {
+    position: 'absolute',
+    right: 0,
+    top: 10,
+  },
+  scrollView: {
+    flex: 1,
+  },
+  scrollContent: {
+    padding: 20,
+    paddingBottom: 40,
+  },
+  // Accordion Styles
+  accordionItem: {
+    backgroundColor: colors["bg-accent"],
+    borderRadius: 16,
+    marginBottom: 12,
+    shadowColor: colors.shadow,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 4,
+    overflow: 'hidden',
+  },
+  accordionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 20,
+    paddingVertical: 16,
+  },
+  accordionHeaderContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+  },
+  sectionIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 12,
+  },
+  accordionTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: colors["text-dark"],
+  },
+  accordionChevron: {
+    width: 24,
+    height: 24,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#1a1a1a',
-    marginBottom: 20,
-    textAlign: 'center',
-  },
-  sectionCard: {
-    backgroundColor: '#ffffff',
-    borderRadius: 16,
+  accordionContent: {
     padding: 20,
-    marginBottom: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 1,
-    borderWidth: 1,
-    borderColor: '#e5e7eb',
+    paddingTop: 0,
+    borderTopWidth: 1,
+    borderTopColor: colors["border-light"],
   },
-  sectionTitle: {
-    fontSize: 17,
-    fontWeight: '600',
-    color: colors['text-primary'],
-    marginBottom: 16,
-    textAlign: 'left',
+  fieldsContainer: {
+    gap: 16,
   },
-  input: {
-    width: '100%',
-    backgroundColor: '#ffffff',
-    color: '#1a1a1a',
-    borderRadius: 12,
-    padding: 14,
-    marginBottom: 14,
-    fontSize: 15,
-    borderWidth: 1,
-    borderColor: '#e5e7eb',
+  // Input Styles
+  inputGroup: {
+    marginBottom: 0,
   },
-  halfInput: {
-    flex: 1,
-    marginRight: 12,
-  },
-  row: {
-    flexDirection: 'row',
-    gap: 12,
-    marginBottom: 14,
-  },
-  errorText: {
-    color: '#ef4444',
+  inputLabel: {
     fontSize: 14,
-    marginBottom: 14,
-    textAlign: 'center',
-  },
-  button: {
-    borderRadius: 12,
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    alignItems: 'center',
-    minWidth: 100,
-    marginHorizontal: 4,
-  },
-  saveButton: {
-    backgroundColor: colors.primary,
-  },
-  cancelButton: {
-    backgroundColor: '#f3f4f6',
-  },
-  editButton: {
-    backgroundColor: '#f3f4f6',
-  },
-  buttonText: {
     fontWeight: '600',
-    fontSize: 15,
-    textAlign: 'center',
+    color: colors["text-dark"],
+    marginBottom: 8,
   },
-  saveButtonText: {
-    color: '#ffffff',
-  },
-  cancelButtonText: {
-    color: '#4b5563',
-  },
-  editButtonText: {
-    color: colors.primary,
-  },
-  sectionButtonRow: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    marginTop: 8,
-    gap: 10,
-  },
-  // Dropdown styles
-  dropdownButton: {
-    width: '100%',
-    backgroundColor: '#ffffff',
+  modernInput: {
+    backgroundColor: colors["bg-light"],
     borderRadius: 12,
-    padding: 14,
-    marginBottom: 14,
+    padding: 16,
+    fontSize: 15,
+    color: colors["text-dark"],
     borderWidth: 1,
-    borderColor: '#e5e7eb',
+    borderColor: colors["border-light"],
+  },
+  disabledField: {
+    backgroundColor: colors["bg-light"],
+    opacity: 0.6,
+  },
+  // Modern Dropdown Styles
+  modernDropdown: {
+    backgroundColor: colors["bg-light"],
+    borderRadius: 12,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: colors["border-light"],
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
   },
-  dropdownButtonText: {
-    color: '#1a1a1a',
+  modernDropdownText: {
     fontSize: 15,
+    color: colors["text-dark"],
     flex: 1,
   },
   placeholderText: {
-    color: '#9ca3af',
+    color: colors["text-secondary"],
   },
-  dropdownArrow: {
-    color: '#9ca3af',
-    fontSize: 14,
-  },
-  disabledField: {
-    backgroundColor: '#f9fafb',
-    opacity: 0.7,
-  },
-  modalOverlay: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: 'rgba(0, 0, 0, 0.4)',
+  modernModalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
     justifyContent: 'center',
     alignItems: 'center',
-    zIndex: 100,
+    padding: 20,
   },
-  modalContent: {
-    backgroundColor: '#ffffff',
+  modernModalContent: {
+    backgroundColor: colors["text-light"],
     borderRadius: 20,
-    padding: 24,
-    width: '90%',
-    maxHeight: '70%',
-    borderWidth: 1,
-    borderColor: '#e5e7eb',
-    alignItems: 'center',
+    width: '100%',
+    maxWidth: 400,
+    maxHeight: '80%',
+    shadowColor: colors.shadow,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
   },
-  modalTitle: {
-    color: '#1a1a1a',
+  modernModalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 20,
+    paddingBottom: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: colors["border-light"],
+  },
+  modernModalTitle: {
     fontSize: 18,
     fontWeight: '600',
-    marginBottom: 16,
-    textAlign: 'center',
+    color: colors["text-dark"],
   },
-  dropdownList: {
-    maxHeight: 300,
-    width: '100%',
-    marginBottom: 12,
-  },
-  dropdownItem: {
-    paddingVertical: 14,
-    paddingHorizontal: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f3f4f6',
-  },
-  dropdownItemText: {
-    color: '#1a1a1a',
-    fontSize: 15,
-  },
-  modalCloseButton: {
-    backgroundColor: '#4CAF50',
-    borderRadius: 12,
-    paddingVertical: 12,
-    paddingHorizontal: 32,
+  modernModalClose: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: colors["bg-light"],
+    justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 12,
-    width: '100%',
   },
-  modalCloseButtonText: {
-    color: '#ffffff',
+  modernOptionsList: {
+    maxHeight: 300,
+  },
+  modernOptionItem: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 16,
+    paddingHorizontal: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: colors["border-light"],
+  },
+  lastOptionItem: {
+    borderBottomWidth: 0,
+  },
+  selectedOptionItem: {
+    backgroundColor: `${colors.primary}10`,
+  },
+  modernOptionText: {
+    fontSize: 15,
+    color: colors["text-dark"],
+    flex: 1,
+  },
+  selectedOptionText: {
+    color: colors.primary,
     fontWeight: '600',
-    fontSize: 16,
+  },
+  // Global Action Styles
+  globalActions: {
+    marginTop: 20,
+    padding: 20,
+    backgroundColor: colors["bg-accent"],
+    borderRadius: 16,
+  },
+  editingActions: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  actionButton: {
+    flex: 1,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 10,
+    gap: 6,
+  },
+  editButton: {
+    backgroundColor: `${colors.primary}15`,
+  },
+  editButtonText: {
+    color: colors.primary,
+    fontWeight: '600',
+    fontSize: 14,
+  },
+  saveButton: {
+    backgroundColor: colors.primary,
+  },
+  saveButtonText: {
+    color: colors["text-light"],
+    fontWeight: '600',
+    fontSize: 14,
+  },
+  cancelButton: {
+    backgroundColor: colors["bg-light"],
+    borderWidth: 1,
+    borderColor: colors["border-light"],
+  },
+  cancelButtonText: {
+    color: colors["text-secondary"],
+    fontWeight: '600',
+    fontSize: 14,
   },
 });
