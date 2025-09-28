@@ -452,9 +452,9 @@ const styles = StyleSheet.create({
     color: colors["text-secondary"],
     fontWeight: '500',
   },
-  header: {
+   header: {
     backgroundColor: colors.primary,
-    paddingTop: 60,
+    paddingTop: 40,
     paddingBottom: 20,
     paddingHorizontal: 20,
     borderBottomLeftRadius: 20,

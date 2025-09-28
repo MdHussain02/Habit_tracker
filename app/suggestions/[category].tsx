@@ -270,9 +270,9 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors['bg-light'],
   },
-  header: {
+   header: {
     backgroundColor: colors.primary,
-    paddingTop: 60,
+    paddingTop: 40,
     paddingBottom: 20,
     paddingHorizontal: 20,
     borderBottomLeftRadius: 20,

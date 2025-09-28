@@ -282,6 +282,8 @@ export default function ProfileScreen() {
             </View>
           </View>
 
+
+
           {/* Personal Information Accordion */}
           <AccordionItem
             title="Personal Information"
@@ -460,11 +462,11 @@ export default function ProfileScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.light,
+    backgroundColor: colors["bg-light"],
   },
   footer: {
     paddingHorizontal: 20,
-    backgroundColor: colors.light,
+    backgroundColor: colors["bg-light"],
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     position: 'absolute',
@@ -474,11 +476,10 @@ const styles = StyleSheet.create({
   },
   header: {
     backgroundColor: colors.primary,
-    paddingTop: 60,
+    paddingTop: 40,
     paddingBottom: 20,
     paddingHorizontal: 20,
-    borderBottomLeftRadius: 20,
-    borderBottomRightRadius: 20,
+
   },
   headerTop: {
     flexDirection: 'row',
@@ -507,7 +508,7 @@ const styles = StyleSheet.create({
   scrollView: {
     flex: 1,
     marginBottom: 95,
-    backgroundColor: colors.light,
+    backgroundColor: colors["bg-light"],
   },
   content: {
     padding: 20,

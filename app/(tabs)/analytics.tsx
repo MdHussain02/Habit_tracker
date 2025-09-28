@@ -349,11 +349,11 @@ const styles = StyleSheet.create({
   },
   header: {
     backgroundColor: colors.primary,
-    paddingTop: 60,
+    paddingTop: 40,
     paddingBottom: 20,
     paddingHorizontal: 24,
-    borderBottomLeftRadius: 20,
-    borderBottomRightRadius: 20,
+    // borderBottomLeftRadius: 20,
+    // borderBottomRightRadius: 20,
   },
   headerTop: {
     flexDirection: 'row',

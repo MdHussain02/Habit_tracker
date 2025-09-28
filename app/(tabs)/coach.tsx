@@ -462,13 +462,12 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors['bg-light'],
   },
-  header: {
+   header: {
     backgroundColor: colors.primary,
-    paddingTop: 60,
-    paddingHorizontal: 20,
+    paddingTop: 40,
     paddingBottom: 20,
-    borderBottomLeftRadius: 20,
-    borderBottomRightRadius: 20,
+    paddingHorizontal: 20,
+
   },
   greeting: {
     fontSize: 24,

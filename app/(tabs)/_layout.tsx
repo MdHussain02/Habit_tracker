@@ -190,7 +190,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     width: '100%',
     height: '100%',
-    backgroundColor: colors['bg-secondary'],
+    backgroundColor: colors['bg-light'],
     borderRadius: 35,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 8 },
