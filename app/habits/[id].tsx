@@ -1,4 +1,5 @@
 import colors from '@/constants/Colors';
+import { useToast } from '@/hooks/useToast';
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
@@ -24,8 +25,10 @@ export default function HabitDetailsScreen() {
   const [habit, setHabit] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { fetchGet } = useApi();
+  const { fetchGet, fetchPost } = useApi();
   const router = useRouter();
+  const [marking, setMarking] = useState(false);
+  const { showToast } = useToast();
 
   useEffect(() => {
     const loadHabit = async () => {
@@ -46,10 +49,12 @@ export default function HabitDetailsScreen() {
           setError(null);
         } else {
           setError(response.error || 'Failed to load habit details');
+          showToast('Failed to load habit', 'error');
         }
       } catch (err) {
         console.error('Error loading habit:', err);
         setError('An error occurred while loading the habit');
+        showToast('Failed to load habit', 'error');
       } finally {
         setLoading(false);
       }
@@ -67,12 +72,58 @@ export default function HabitDetailsScreen() {
     return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
   };
 
-  const formatRepeats = (days: number[]) => {
+  // Backend uses Mon=0..Sun=6. UI labels use DAY_NAMES with Sun..Sat.
+  // Map backend index to UI label index: ui = (backend + 1) % 7
+  const toUILabelIndex = (backendIndex: number) => (backendIndex + 1) % 7;
+
+  const formatRepeats = (backendDays: number[]) => {
+    if (!backendDays || backendDays.length === 0) return 'No specific schedule';
+    const days = [...new Set(backendDays)].sort((a, b) => a - b);
     if (days.length === 7) return 'Every day';
-    if (days.length === 5 && !days.includes(5) && !days.includes(6)) return 'Weekdays';
-    if (days.length === 2 && days.includes(5) && days.includes(6)) return 'Weekends';
-    
-    return days.map(day => DAY_NAMES[day]).join(', ');
+    // Weekdays in backend indexing: Mon(0)..Fri(4)
+    const isWeekdays = days.length === 5 && days.every((d, i) => d === i && d <= 4);
+    if (isWeekdays) return 'Weekdays';
+    // Weekends in backend indexing: Sat(5), Sun(6)
+    const isWeekends = days.length === 2 && days.includes(5) && days.includes(6);
+    if (isWeekends) return 'Weekends';
+
+    return days.map((d) => DAY_NAMES[toUILabelIndex(d)]).join(', ');
+  };
+
+  const getScheduleLabel = (habitData: any) => {
+    if (!habitData) return 'No specific schedule';
+    if (Array.isArray(habitData.repeats) && habitData.repeats.length) {
+      return formatRepeats(habitData.repeats);
+    }
+    if (typeof habitData.day === 'number') {
+      return formatRepeats([habitData.day]);
+    }
+    return 'No specific schedule';
+  };
+
+  const handleMarkComplete = async () => {
+    if (!id || marking || habit?.completed) return;
+    try {
+      setMarking(true);
+      const timestamp = new Date().toISOString();
+      const response = await fetchPost(`/habits/${id}/mark`, { timestamp });
+      if (response?.success) {
+        setHabit((prev: any) => ({
+          ...prev,
+          completed: true,
+          last_completion: response?.data?.completion?.timestamp ?? timestamp,
+          streak: response?.data?.streak ?? prev?.streak ?? 0,
+        }));
+        showToast(`Marked habit as complete. Streak: ${response?.data?.streak ?? 0} days`, 'success');
+      } else if (response?.error) {
+        console.error('Failed to mark complete:', response.error);
+      }
+    } catch (e) {
+      console.error('Error marking complete:', e);
+      showToast('Failed to mark habit as complete', 'error');
+    } finally {
+      setMarking(false);
+    }
   };
 
   if (loading) {
@@ -197,11 +248,7 @@ export default function HabitDetailsScreen() {
           </View>
           <View style={styles.detailTextContainer}>
             <Text style={styles.detailLabel}>Schedule</Text>
-            <Text style={styles.detailValue}>
-              {habit.repeats?.length ? 
-                `Every ${habit.repeats.join(', ')}` : 
-                'No specific schedule'}
-            </Text>
+            <Text style={styles.detailValue}>{getScheduleLabel(habit)}</Text>
           </View>
         </View>
 
@@ -216,20 +263,36 @@ export default function HabitDetailsScreen() {
             </Text>
           </View>
         </View>
+
+        <View style={styles.detailItem}>
+          <View style={styles.detailIcon}>
+            <Ionicons name="flame" size={20} color="#e11d48" />
+          </View>
+          <View style={styles.detailTextContainer}>
+            <Text style={styles.detailLabel}>Streak</Text>
+            <Text style={styles.detailValue}>
+              {(habit.streak || 0)} day{(habit.streak || 0) === 1 ? '' : 's'}
+            </Text>
+          </View>
+        </View>
       </View>
 
       <View style={styles.actionsContainer}>
         <TouchableOpacity 
-          style={[styles.actionButton, { backgroundColor: colors.primary }]}
-          onPress={() => console.log('Toggle completion')}
+          style={[
+            styles.actionButton,
+            { backgroundColor: colors.primary, opacity: marking || habit.completed ? 0.7 : 1 },
+          ]}
+          onPress={handleMarkComplete}
+          disabled={marking || habit.completed}
         >
           <Ionicons 
-            name={habit.completed ? 'close-circle-outline' : 'checkmark-circle-outline'} 
+            name={habit.completed ? 'checkmark-done-circle-outline' : 'checkmark-circle-outline'} 
             size={20} 
             color="#fff" 
           />
           <Text style={styles.actionButtonText}>
-            {habit.completed ? 'Mark as Incomplete' : 'Mark as Complete'}
+            {habit.completed ? 'Completed' : marking ? 'Marking...' : 'Mark as Complete'}
           </Text>
         </TouchableOpacity>
       </View>

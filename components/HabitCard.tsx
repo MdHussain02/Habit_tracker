@@ -28,6 +28,26 @@ interface HabitCardProps {
 export default function HabitCard({ habit }: HabitCardProps) {
   const router = useRouter();
   const habitId = habit._id || habit.id;
+
+  const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  // Backend Mon=0..Sun=6 -> UI index Sun..Sat
+  const toUILabelIndex = (backendIndex: number) => (backendIndex + 1) % 7;
+  const formatRepeats = (backendDays: number[]) => {
+    if (!backendDays || backendDays.length === 0) return '';
+    const days = [...new Set(backendDays)].sort((a, b) => a - b);
+    if (days.length === 7) return 'Every day';
+    const isWeekdays = days.length === 5 && days.every((d, i) => d === i && d <= 4);
+    if (isWeekdays) return 'Weekdays';
+    const isWeekends = days.length === 2 && days.includes(5) && days.includes(6);
+    if (isWeekends) return 'Weekends';
+    return days.map((d) => DAY_NAMES[toUILabelIndex(d)]).join(', ');
+  };
+  const getRepeatLabel = () => {
+    if (Array.isArray(habit.repeats) && habit.repeats.length) return formatRepeats(habit.repeats);
+    // @ts-ignore: allow backend single-day field if present
+    if (typeof (habit as any).day === 'number') return formatRepeats([(habit as any).day]);
+    return '';
+  };
   
   if (!habitId) {
     console.error('No habit ID found');
@@ -63,6 +83,19 @@ export default function HabitCard({ habit }: HabitCardProps) {
             />
             <Text style={{ color: colors['text-secondary'], fontSize: 13 }}>
               Scheduled: {habit.reminder.time}
+            </Text>
+          </View>
+        )}
+        {getRepeatLabel() !== '' && (
+          <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 4 }}>
+            <Ionicons 
+              name="calendar-outline" 
+              size={16} 
+              color={colors['text-secondary']} 
+              style={{ marginRight: 4 }} 
+            />
+            <Text style={{ color: colors['text-secondary'], fontSize: 13 }}>
+              Repeats: {getRepeatLabel()}
             </Text>
           </View>
         )}

@@ -38,6 +38,21 @@ export default function HomeScreen() {
   const { addHabitWithNotification, editHabitWithNotification, deleteHabitWithNotification } =
     useHabitNotifications(habits, setHabits);
 
+  // Format a Date to YYYY-MM-DD in UTC for backend query
+  const formatUTCDate = (d: Date) => {
+    const year = d.getUTCFullYear();
+    const month = String(d.getUTCMonth() + 1).padStart(2, '0');
+    const day = String(d.getUTCDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
+  // Convert a YYYY-MM-DD (UTC) to backend day index Mon=0..Sun=6
+  const getBackendDayIndex = (yyyyMmDdUTC: string) => {
+    const date = new Date(`${yyyyMmDdUTC}T00:00:00.000Z`);
+    const uiDay = date.getUTCDay(); // Sun=0..Sat=6
+    return (uiDay + 6) % 7; // Mon=0..Sun=6
+  };
+
   /** ---------------- Cache Helpers ---------------- */
   const loadCachedHabits = async (): Promise<Habit[] | null> => {
     try {
@@ -84,17 +99,28 @@ export default function HomeScreen() {
         }
       }
 
-      // Fetch fresh data
-      const response = await fetchGet(`${API_BASE_URL}/habits`);
+      // Fetch fresh data for today in UTC
+      const todayUTC = formatUTCDate(new Date());
+      const response = await fetchGet(`${API_BASE_URL}/habits?date=${todayUTC}`);
       if (response?.success && response.data) {
-        const mappedHabits: Habit[] = response.data.map((item: any) => ({
+        // Filter by day in case backend returns all habits
+        const backendDay = getBackendDayIndex(todayUTC);
+        const filtered = (response.data as any[]).filter((item: any) => {
+          if (typeof item.day === 'number') return item.day === backendDay;
+          if (Array.isArray(item.repeats)) return item.repeats.includes(backendDay);
+          return false;
+        });
+
+        const mappedHabits: Habit[] = filtered.map((item: any) => ({
+          _id: item._id,
           id: item._id,
           name: item.name,
           icon_id: item.icon_id || 1,
           icon: { set: 'Ionicons', name: 'star' },
           createdAt: new Date(item.created_time).getTime(),
-          streak: 0,
+          streak: typeof item.streak === 'number' ? item.streak : 0,
           completedDates: [],
+          repeats: Array.isArray(item.repeats) ? item.repeats : undefined,
           reminder: {
             enabled: true,
             time: item.target_time

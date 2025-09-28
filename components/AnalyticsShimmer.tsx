@@ -1,50 +1,108 @@
 import colors from '@/constants/Colors';
-import { useEffect } from 'react';
-import { Animated, Dimensions, Easing, StyleProp, StyleSheet, View, ViewStyle } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient'; // If you don't have expo-linear-gradient, see alternative below
+import { useEffect, useRef } from 'react';
+import { Animated, Dimensions, StyleProp, StyleSheet, View, ViewStyle } from 'react-native';
 
 const { width } = Dimensions.get('window');
 
 interface ShimmerPlaceholderProps {
   style: StyleProp<ViewStyle>;
+  width?: number;
+  height?: number;
 }
 
-const ShimmerPlaceholder = ({ style }: ShimmerPlaceholderProps) => {
-  const shimmerAnim = new Animated.Value(0);
+const ShimmerPlaceholder = ({ style, width: customWidth, height: customHeight }: ShimmerPlaceholderProps) => {
+  const shimmerAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     const shimmerAnimation = Animated.loop(
-      Animated.sequence([
-        Animated.timing(shimmerAnim, {
-          toValue: 1,
-          duration: 1000,
-          easing: Easing.linear,
-          useNativeDriver: true,
-        }),
-        Animated.timing(shimmerAnim, {
-          toValue: 0,
-          duration: 1000,
-          easing: Easing.linear,
-          useNativeDriver: true,
-        }),
-      ])
+      Animated.timing(shimmerAnim, {
+        toValue: 1,
+        duration: 1500, // Slower, more elegant
+        useNativeDriver: true,
+      })
     );
 
     shimmerAnimation.start();
     return () => shimmerAnimation.stop();
-  }, []);
+  }, [shimmerAnim]);
 
   const translateX = shimmerAnim.interpolate({
     inputRange: [0, 1],
-    outputRange: [-100, 100],
+    outputRange: [-300, 300], // Wider sweep for better effect
   });
 
   return (
-    <View style={[styles.placeholder, style]}>
+    <View
+      style={[
+        styles.placeholder,
+        style,
+        customWidth != null ? { width: customWidth } : undefined,
+        customHeight != null ? { height: customHeight } : undefined,
+      ]}
+    >
       <Animated.View
         style={[
           styles.shimmerOverlay,
           {
             transform: [{ translateX }],
+          },
+        ]}
+      >
+        {/* Using LinearGradient for smooth shimmer effect */}
+        <LinearGradient
+          colors={['transparent', 'rgba(255, 255, 255, 0.4)', 'transparent']}
+          start={{ x: 0, y: 0.5 }}
+          end={{ x: 1, y: 0.5 }}
+          style={styles.gradient}
+        />
+      </Animated.View>
+    </View>
+  );
+};
+
+// Alternative ShimmerPlaceholder without LinearGradient (if you don't have expo-linear-gradient)
+const ShimmerPlaceholderAlternative = ({ style, width: customWidth, height: customHeight }: ShimmerPlaceholderProps) => {
+  const shimmerAnim = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    const shimmerAnimation = Animated.loop(
+      Animated.timing(shimmerAnim, {
+        toValue: 1,
+        duration: 1500,
+        useNativeDriver: true,
+      })
+    );
+
+    shimmerAnimation.start();
+    return () => shimmerAnimation.stop();
+  }, [shimmerAnim]);
+
+  const translateX = shimmerAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: [-300, 300],
+  });
+
+  const opacity = shimmerAnim.interpolate({
+    inputRange: [0, 0.5, 1],
+    outputRange: [0, 1, 0],
+  });
+
+  return (
+    <View
+      style={[
+        styles.placeholder,
+        style,
+        customWidth != null ? { width: customWidth } : undefined,
+        customHeight != null ? { height: customHeight } : undefined,
+      ]}
+    >
+      <Animated.View
+        style={[
+          styles.shimmerOverlayAlternative,
+          {
+            transform: [{ translateX }],
+            opacity,
           },
         ]}
       />
@@ -63,6 +121,10 @@ const AnalyticsShimmer = () => {
             <ShimmerPlaceholder style={styles.headerDatePlaceholder} />
           </View>
           <View style={styles.headerStats}>
+            <View style={styles.headerStatItem}>
+              <ShimmerPlaceholder style={styles.headerStatValuePlaceholder} />
+              <ShimmerPlaceholder style={styles.headerStatLabelPlaceholder} />
+            </View>
             <View style={styles.headerStatItem}>
               <ShimmerPlaceholder style={styles.headerStatValuePlaceholder} />
               <ShimmerPlaceholder style={styles.headerStatLabelPlaceholder} />
@@ -109,10 +171,21 @@ const AnalyticsShimmer = () => {
             </View>
             <ShimmerPlaceholder style={styles.motivationBadgePlaceholder} />
           </View>
+          
+          <View style={styles.profileDetails}>
+            <View style={styles.profileDetailRow}>
+              <ShimmerPlaceholder style={styles.profileDetailLabelPlaceholder} />
+              <ShimmerPlaceholder style={styles.profileDetailValuePlaceholder} />
+            </View>
+            <View style={styles.profileDetailRow}>
+              <ShimmerPlaceholder style={styles.profileDetailLabelPlaceholder} />
+              <ShimmerPlaceholder style={styles.profileDetailValuePlaceholder} />
+            </View>
+          </View>
         </View>
 
         {/* Analysis Cards Shimmer */}
-        {[1, 2, 3].map((item) => (
+        {[1, 2].map((item) => (
           <View key={item} style={styles.analysisCard}>
             <View style={styles.analysisCardHeader}>
               <ShimmerPlaceholder style={styles.analysisIconContainerPlaceholder} />
@@ -139,12 +212,13 @@ const AnalyticsShimmer = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors['bg-light'],
+    backgroundColor: colors['bg-light'] || '#f8f9fa',
   },
   placeholder: {
-    backgroundColor: colors['bg-accent'],
-    borderRadius: 4,
+    backgroundColor: '#e2e8f0', // Light gray background
+    borderRadius: 6,
     overflow: 'hidden',
+    position: 'relative',
   },
   shimmerOverlay: {
     position: 'absolute',
@@ -152,11 +226,23 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: colors['bg-secondary'],
-    transform: [{ translateX: -100 }],
+    width: 100,
+  },
+  shimmerOverlayAlternative: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(255, 255, 255, 0.6)',
+    width: 100,
+  },
+  gradient: {
+    flex: 1,
+    width: '100%',
   },
   header: {
-    backgroundColor: colors['bg-primary'],
+    backgroundColor: colors['bg-primary'] || '#4ade80',
     paddingTop: 60,
     paddingBottom: 20,
     paddingHorizontal: 20,
@@ -166,64 +252,58 @@ const styles = StyleSheet.create({
   headerTop: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
+    alignItems: 'flex-start',
   },
   greetingPlaceholder: {
     width: 120,
     height: 24,
-    borderRadius: 4,
-    marginBottom: 4,
+    marginBottom: 6,
   },
   headerDatePlaceholder: {
     width: 180,
-    height: 14,
-    borderRadius: 4,
+    height: 16,
   },
   headerStats: {
     flexDirection: 'row',
-    gap: 15,
+    gap: 20,
   },
   headerStatItem: {
     alignItems: 'center',
   },
   headerStatValuePlaceholder: {
-    width: 40,
-    height: 20,
-    borderRadius: 4,
+    width: 45,
+    height: 22,
     marginBottom: 4,
   },
   headerStatLabelPlaceholder: {
-    width: 60,
-    height: 12,
-    borderRadius: 4,
+    width: 65,
+    height: 14,
   },
   content: {
     padding: 20,
   },
   progressOverviewCard: {
-    backgroundColor: colors['bg-accent'],
+    backgroundColor: '#ffffff',
     borderRadius: 16,
     padding: 20,
     marginBottom: 20,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
+    shadowOpacity: 0.08,
     shadowRadius: 8,
-    elevation: 4,
+    elevation: 3,
   },
   progressHeader: {
-    marginBottom: 16,
+    marginBottom: 20,
   },
   progressTitlePlaceholder: {
-    width: 150,
+    width: 160,
     height: 20,
-    borderRadius: 4,
-    marginBottom: 4,
+    marginBottom: 6,
   },
   progressSubtitlePlaceholder: {
     width: 200,
-    height: 14,
-    borderRadius: 4,
+    height: 16,
   },
   progressStats: {
     flexDirection: 'row',
@@ -237,12 +317,11 @@ const styles = StyleSheet.create({
     width: 80,
     height: 80,
     borderRadius: 40,
-    marginBottom: 8,
+    marginBottom: 10,
   },
   progressLabelPlaceholder: {
-    width: 60,
-    height: 13,
-    borderRadius: 4,
+    width: 70,
+    height: 14,
   },
   insightsGrid: {
     flexDirection: 'row',
@@ -258,11 +337,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
+    shadowOpacity: 0.06,
     shadowRadius: 8,
-    elevation: 3,
-    borderWidth: 1,
-    borderColor: 'rgba(0, 0, 0, 0.05)',
+    elevation: 2,
   },
   insightIconPlaceholder: {
     width: 48,
@@ -271,15 +348,13 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   insightValuePlaceholder: {
-    width: 40,
+    width: 45,
     height: 24,
-    borderRadius: 4,
-    marginBottom: 4,
+    marginBottom: 6,
   },
   insightLabelPlaceholder: {
-    width: 50,
-    height: 13,
-    borderRadius: 4,
+    width: 60,
+    height: 14,
   },
   profileSummaryCard: {
     backgroundColor: '#ffffff',
@@ -287,22 +362,21 @@ const styles = StyleSheet.create({
     padding: 24,
     marginBottom: 20,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.08,
     shadowRadius: 12,
-    elevation: 6,
-    borderWidth: 1,
-    borderColor: 'rgba(0, 0, 0, 0.05)',
+    elevation: 4,
   },
   profileSummaryHeader: {
     flexDirection: 'row',
     alignItems: 'center',
+    marginBottom: 20,
   },
   profileAvatarPlaceholder: {
     width: 60,
     height: 60,
     borderRadius: 30,
-    marginRight: 15,
+    marginRight: 16,
   },
   profileInfo: {
     flex: 1,
@@ -310,31 +384,43 @@ const styles = StyleSheet.create({
   profileLevelPlaceholder: {
     width: 100,
     height: 18,
-    borderRadius: 4,
-    marginBottom: 4,
+    marginBottom: 6,
   },
   profileGoalPlaceholder: {
-    width: 120,
+    width: 130,
     height: 14,
-    borderRadius: 4,
   },
   motivationBadgePlaceholder: {
     width: 80,
     height: 32,
     borderRadius: 16,
   },
+  profileDetails: {
+    gap: 12,
+  },
+  profileDetailRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  profileDetailLabelPlaceholder: {
+    width: 100,
+    height: 16,
+  },
+  profileDetailValuePlaceholder: {
+    width: 80,
+    height: 16,
+  },
   analysisCard: {
     backgroundColor: '#ffffff',
     borderRadius: 20,
     padding: 24,
-    marginBottom: 20,
+    marginBottom: 16,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.08,
     shadowRadius: 12,
-    elevation: 6,
-    borderWidth: 1,
-    borderColor: 'rgba(0, 0, 0, 0.05)',
+    elevation: 4,
   },
   analysisCardHeader: {
     flexDirection: 'row',
@@ -353,34 +439,30 @@ const styles = StyleSheet.create({
   analysisTitlePlaceholder: {
     width: 140,
     height: 20,
-    borderRadius: 4,
-    marginBottom: 4,
+    marginBottom: 6,
   },
   analysisSubtitlePlaceholder: {
-    width: 120,
+    width: 160,
     height: 14,
-    borderRadius: 4,
   },
   analysisContent: {
-    gap: 16,
+    gap: 14,
   },
   analysisItem: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    paddingVertical: 8,
   },
   analysisItemDotPlaceholder: {
     width: 8,
     height: 8,
     borderRadius: 4,
-    marginTop: 8,
-    marginRight: 16,
+    marginTop: 6,
+    marginRight: 12,
     flexShrink: 0,
   },
   analysisItemTextPlaceholder: {
-    height: 15,
+    height: 16,
     flex: 1,
-    borderRadius: 4,
   },
 });
 

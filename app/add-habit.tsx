@@ -59,13 +59,22 @@ export default function AddHabitPage() {
       const targetDateTime = new Date(now);
       targetDateTime.setHours(hours, minutes, 0, 0);
 
-      const payload = {
+      // Map UI indices (Sun=0..Sat=6) to backend indices (Mon=0..Sun=6)
+      const toBackendIndex = (uiIndex: number) => (uiIndex + 6) % 7;
+      const mappedDays = selectedDays.map(toBackendIndex);
+
+      // Construct payload: if one day selected -> use `day`, else `repeats`
+      const basePayload = {
         name: habitName.trim(),
         created_time: now.toISOString(),
         target_time: targetDateTime.toISOString(),
         icon_id: selectedIconId,
-        repeats: selectedDays,
-      };
+      } as any;
+
+      const payload =
+        mappedDays.length === 1
+          ? { ...basePayload, day: mappedDays[0] }
+          : { ...basePayload, repeats: mappedDays };
 
       // Call the API to create the habit
       const response = await fetchPost(`${API_BASE_URL}/habits`, payload);
@@ -292,15 +301,15 @@ const styles = StyleSheet.create({
     elevation: 1,
   },
   selectedDayButton: {
-    backgroundColor: '#f3f4f6',
+    backgroundColor: colors['bg-secondary'],
     borderColor: '#d1d5db',
   },
   dayText: {
-    color: '#4b5563',
+    color: colors['text-dark'],
     fontWeight: '500',
   },
   selectedDayText: {
-    color: '#111827',
+    color: colors['text-light'],
     fontWeight: '600',
   },
   saveButton: {

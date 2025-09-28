@@ -25,29 +25,29 @@ const TAB_ITEMS = [
     name: 'coach',
     title: 'Coach',
     icon: 'bulb' as const,
-    color: colors.primary, // Purple
-    bg: colors['bg-accent'],
+    color: colors['text-light'], // 
+    bg: colors['bg-secondary'],
   },
   {
     name: 'index',
     title: 'Habits',
     icon: 'infinite' as const,
-    color: colors.primary, // Pink
-    bg: colors['bg-accent'],
+    color: colors['text-light'], // 
+    bg: colors['bg-secondary'],
   },
   {
     name: 'analytics',
     title: 'Stats',
     icon: 'analytics' as const,
-    color: colors.primary, // Orange/Yellow
-    bg: colors['bg-accent'],
+    color: colors['text-light'], // 
+    bg: colors['bg-secondary'],
   },
   {
     name: 'profile',
     title: 'Profile',
     icon: 'person' as const,
-    color: colors.primary, // Cyan
-    bg: colors['bg-accent'],
+    color: colors['text-light'], // Cyan
+    bg: colors['bg-secondary'],
   },
 ];
 
@@ -192,11 +192,11 @@ const styles = StyleSheet.create({
     height: '100%',
     backgroundColor: colors['bg-light'],
     borderRadius: 35,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 8 },
+    shadowColor: colors['bg-secondary'],
+    shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.1,
-    shadowRadius: 24,
-    elevation: 8,
+    shadowRadius: 12,
+    elevation: 2,
     borderWidth: 1,
     borderColor: colors['border-light'],
   },
