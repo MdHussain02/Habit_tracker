@@ -1,11 +1,12 @@
-import SuggestionShimmer from '@/components/SuggestionShimmer';
-import colors from '@/constants/Colors';
-import { useApi } from '@/hooks/useApi';
-import { useToast } from '@/hooks/useToast';
-import { AISuggestion, AISuggestionsResponse } from '@/types/habit';
-import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
-import { useEffect, useState } from 'react';
+import SuggestionShimmer from "@/components/SuggestionShimmer";
+import colors from "@/constants/Colors";
+import useSwrApi from "@/hooks/useSwrApi";
+import { useSwrMutationApi } from "@/hooks/useSwrMutation";
+import { useToast } from "@/hooks/useToast";
+import { AISuggestion } from "@/types/habit";
+import { Ionicons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
+import { useState } from "react";
 import {
   Dimensions,
   FlatList,
@@ -15,127 +16,78 @@ import {
   Text,
   TouchableOpacity,
   UIManager,
-  View
-} from 'react-native';
+  View,
+} from "react-native";
+import { mutate } from "swr";
 
-const { width } = Dimensions.get('window');
+const { width } = Dimensions.get("window");
 
 // Enable LayoutAnimation for Android
-if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
+if (
+  Platform.OS === "android" &&
+  UIManager.setLayoutAnimationEnabledExperimental
+) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
 
-// Map day numbers to day names
-const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+const DAY_NAMES = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
-// Map icon IDs to Ionicons names
 const ICON_MAP: Record<number, string> = {
-  1: 'water',
-  2: 'book',
-  3: 'fitness',
-  4: 'cafe',
-  5: 'moon',
-  6: 'walk',
-  7: 'barbell',
-  8: 'star',
+  1: "water",
+  2: "book",
+  3: "fitness",
+  4: "cafe",
+  5: "moon",
+  6: "walk",
+  7: "barbell",
+  8: "star",
 };
 
 export default function CoachScreen() {
-  const [generalSuggestions, setGeneralSuggestions] = useState<AISuggestion[]>([]);
-  const [fitnessSuggestions, setFitnessSuggestions] = useState<AISuggestion[]>([]);
-  const [nutritionSuggestions, setNutritionSuggestions] = useState<AISuggestion[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [loadingFitness, setLoadingFitness] = useState(true);
-  const [loadingNutrition, setLoadingNutrition] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const { fetchGet, fetchPost } = useApi();
-  const router = useRouter();
   const { showToast } = useToast();
+  const router = useRouter();
 
-  const loadGeneralSuggestions = async (isRefreshing = false) => {
-    try {
-      if (!isRefreshing) {
-        setLoading(true);
-      }
-      
-      const response = await fetchGet('/suggestions') as AISuggestionsResponse;
-      
-      if (response.success && response.data) {
-        setGeneralSuggestions(Array.isArray(response.data) ? response.data : response.data.suggestions);
-        setError(null);
-      } else {
-        setError('Failed to load suggestions. Please try again.');
-      }
-    } catch (err) {
-      console.error('Error loading suggestions:', err);
-      setError('An error occurred while loading suggestions.');
-    } finally {
-      setLoading(false);
-      if (isRefreshing) {
-        setRefreshing(false);
-      }
-    }
-  };
+  const {
+    data: generalSuggestionsData,
+    isLoading: loadingGeneral,
+    mutate: mutateGeneral,
+    error: generalError,
+  } = useSwrApi("/suggestions");
 
-  const loadFitnessSuggestions = async () => {
-    try {
-      setLoadingFitness(true);
-      const response = await fetchGet('/suggestions/category/fitness') as AISuggestionsResponse;
-      
-      if (response.success && response.data) {
-        setFitnessSuggestions(Array.isArray(response.data) ? response.data : response.data.suggestions);
-      } else {
-        console.warn('Failed to load fitness suggestions');
-      }
-    } catch (err) {
-      console.error('Error loading fitness suggestions:', err);
-    } finally {
-      setLoadingFitness(false);
-    }
-  };
+  const {
+    data: fitnessSuggestionsData,
+    isLoading: loadingFitness,
+    mutate: mutateFitness,
+  } = useSwrApi("/suggestions/category/fitness");
 
-  const loadNutritionSuggestions = async () => {
-    try {
-      setLoadingNutrition(true);
-      const response = await fetchGet('/suggestions/category/nutrition') as AISuggestionsResponse;
-      
-      if (response.success && response.data) {
-        setNutritionSuggestions(Array.isArray(response.data) ? response.data : response.data.suggestions);
-      } else {
-        console.warn('Failed to load nutrition suggestions');
-      }
-    } catch (err) {
-      console.error('Error loading nutrition suggestions:', err);
-    } finally {
-      setLoadingNutrition(false);
-    }
-  };
-
-  useEffect(() => {
-    loadGeneralSuggestions();
-    loadFitnessSuggestions();
-    loadNutritionSuggestions();
-  }, []);
+  const {
+    data: nutritionSuggestionsData,
+    isLoading: loadingNutrition,
+    mutate: mutateNutrition,
+  } = useSwrApi("/suggestions/category/nutrition");
+ const { trigger: createHabit } = useSwrMutationApi("/suggestions/create");
 
   const onRefresh = () => {
     setRefreshing(true);
-    loadGeneralSuggestions(true);
-    loadFitnessSuggestions();
-    loadNutritionSuggestions();
+    mutateGeneral();
+    mutateFitness();
+    mutateNutrition();
+    setRefreshing(false);
   };
 
   const formatTime = (dateString: string) => {
     const date = new Date(dateString);
-    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
   };
 
   const formatRepeats = (days: number[]) => {
-    if (days.length === 7) return 'Daily';
-    if (days.length === 5 && !days.includes(5) && !days.includes(6)) return 'Weekdays';
-    if (days.length === 2 && days.includes(5) && days.includes(6)) return 'Weekends';
-    
-    return days.map(day => DAY_NAMES[day]).join(', ');
+    if (days.length === 7) return "Daily";
+    if (days.length === 5 && !days.includes(5) && !days.includes(6))
+      return "Weekdays";
+    if (days.length === 2 && days.includes(5) && days.includes(6))
+      return "Weekends";
+    return days.map((day) => DAY_NAMES[day]).join(", ");
   };
 
   const handleAddHabit = async (suggestion: AISuggestion) => {
@@ -145,43 +97,40 @@ export default function CoachScreen() {
         target_time: suggestion.target_time,
         icon_id: suggestion.icon_id,
         repeats: suggestion.repeats,
-        description: 'Created from AI suggestion'
+        description: "Created from AI suggestion",
       };
 
-      const response = await fetchPost('/suggestions/create', habitData);
-      
+      const response: any = await createHabit(habitData);
+
       if (response.success) {
-        showToast('Habit created successfully!', 'success');
-        router.replace('/(tabs)');
+        showToast("Habit created successfully!", "success");
+        const todayUTC = new Date().toISOString().split("T")[0];
+        mutate(`/habits?date=${todayUTC}`);
+        router.replace("/(tabs)");
       } else {
-        showToast(response.error || 'Failed to create habit', 'error');
+        showToast(response.error || "Failed to create habit", "error");
       }
     } catch (error) {
-      console.error('Error creating habit:', error);
-      showToast('An error occurred while creating the habit', 'error');
+      console.error("Error creating habit:", error);
+      showToast("An error occurred while creating the habit", "error");
     }
   };
+
 
   const SuggestionCard = ({ suggestion }: { suggestion: AISuggestion }) => {
     const [expanded, setExpanded] = useState(false);
     const [showReadMore, setShowReadMore] = useState(false);
-    const iconName = ICON_MAP[suggestion.icon_id] || 'help-circle';
-    
-    const toggleExpand = () => {
-      setExpanded(!expanded);
-    };
+    const iconName = ICON_MAP[suggestion.icon_id] || "help-circle";
 
-    const onTextLayout = (e: any) => {
-      const { lines } = e.nativeEvent;
-      setShowReadMore(lines.length > 3);
-    };
+    const toggleExpand = () => setExpanded(!expanded);
+    const onTextLayout = (e: any) =>
+      setShowReadMore(e.nativeEvent.lines.length > 3);
 
     const getCategoryColor = (category: string) => {
       switch (category.toLowerCase()) {
-        case 'fitness':
-          return  colors.primary;
-        case 'nutrition':
-          return  colors.primary;
+        case "fitness":
+        case "nutrition":
+          return colors.primary;
         default:
           return colors.primary;
       }
@@ -192,18 +141,35 @@ export default function CoachScreen() {
     return (
       <View style={styles.suggestionCard}>
         <View style={styles.suggestionHeader}>
-          <View style={[styles.suggestionIcon, { backgroundColor: `${categoryColor}10` }]}>
+          <View
+            style={[
+              styles.suggestionIcon,
+              { backgroundColor: `${categoryColor}10` },
+            ]}
+          >
             <Ionicons name={iconName as any} size={24} color={categoryColor} />
           </View>
           <View style={styles.suggestionTitleContainer}>
             <Text style={styles.suggestionTitle}>{suggestion.name}</Text>
             <View style={styles.suggestionMetaContainer}>
-              <View style={[styles.categoryTag, { backgroundColor: `${categoryColor}10` }]}>
+              <View
+                style={[
+                  styles.categoryTag,
+                  { backgroundColor: `${categoryColor}10` },
+                ]}
+              >
                 <Text style={[styles.categoryText, { color: categoryColor }]}>
                   {suggestion.category}
                 </Text>
               </View>
-              <View style={[styles.difficultyTag, { backgroundColor: getDifficultyColor(suggestion.difficulty) }]}>
+              <View
+                style={[
+                  styles.difficultyTag,
+                  {
+                    backgroundColor: getDifficultyColor(suggestion.difficulty),
+                  },
+                ]}
+              >
                 <Text style={styles.difficultyText}>
                   {suggestion.difficulty}
                 </Text>
@@ -211,58 +177,92 @@ export default function CoachScreen() {
             </View>
           </View>
         </View>
-        
+
         <View style={styles.descriptionContainer}>
-          <Text 
-            style={styles.suggestionDescription} 
+          <Text
+            style={styles.suggestionDescription}
             numberOfLines={expanded ? undefined : 3}
             onTextLayout={onTextLayout}
           >
             {suggestion.description}
           </Text>
           {showReadMore && (
-            <TouchableOpacity onPress={toggleExpand} style={styles.readMoreButton}>
+            <TouchableOpacity
+              onPress={toggleExpand}
+              style={styles.readMoreButton}
+            >
               <Text style={[styles.readMoreText, { color: categoryColor }]}>
-                {expanded ? 'Read Less' : 'Read More'}
+                {expanded ? "Read Less" : "Read More"}
               </Text>
-              <Ionicons name={expanded ? 'chevron-up' : 'chevron-down'} size={14} color={categoryColor} style={styles.readMoreIcon} />
+              <Ionicons
+                name={expanded ? "chevron-up" : "chevron-down"}
+                size={14}
+                color={categoryColor}
+                style={styles.readMoreIcon}
+              />
             </TouchableOpacity>
           )}
         </View>
-        
+
         <View style={styles.suggestionMeta}>
           <View style={styles.metaItem}>
-            <Ionicons name="time-outline" size={16} color={colors['text-secondary']} />
-            <Text style={styles.metaText}>{formatTime(suggestion.target_time)}</Text>
+            <Ionicons
+              name="time-outline"
+              size={16}
+              color={colors["text-light"]}
+            />
+            <Text style={styles.metaText}>
+              {formatTime(suggestion.target_time)}
+            </Text>
           </View>
           <View style={styles.metaItem}>
-            <Ionicons name="repeat" size={16} color={colors['text-secondary']} />
-            <Text style={styles.metaText}>{formatRepeats(suggestion.repeats)}</Text>
+            <Ionicons name="repeat" size={16} color={colors["text-light"]} />
+            <Text style={styles.metaText}>
+              {formatRepeats(suggestion.repeats)}
+            </Text>
           </View>
           <View style={styles.metaItem}>
-            <Ionicons name="timer-outline" size={16} color={colors['text-secondary']} />
-            <Text style={styles.metaText}>{suggestion.estimated_duration} min</Text>
+            <Ionicons
+              name="timer-outline"
+              size={16}
+              color={colors["text-light"]}
+            />
+            <Text style={styles.metaText}>
+              {suggestion.estimated_duration} min
+            </Text>
           </View>
         </View>
-        
+
         {suggestion.success_tips.length > 0 && (
           <View style={styles.tipsContainer}>
-            <Text style={[styles.tipsTitle, { color: categoryColor }]}>Success Tips</Text>
+            <Text style={[styles.tipsTitle, { color: categoryColor }]}>
+              Success Tips
+            </Text>
             {suggestion.success_tips.map((tip, i) => (
               <View key={`tip-${i}`} style={styles.tipItem}>
-                <Ionicons name="checkmark-circle" size={16} color={categoryColor} style={styles.tipBullet} />
+                <Ionicons
+                  name="checkmark-circle"
+                  size={16}
+                  color={categoryColor}
+                  style={styles.tipBullet}
+                />
                 <Text style={styles.tipText}>{tip}</Text>
               </View>
             ))}
           </View>
         )}
 
-        <TouchableOpacity 
+        <TouchableOpacity
           style={[styles.addButton, { backgroundColor: categoryColor }]}
           onPress={() => handleAddHabit(suggestion)}
         >
           <Text style={styles.addButtonText}>Add Habit</Text>
-          <Ionicons name="add" size={18} color="#fff" style={styles.addButtonIcon} />
+          <Ionicons
+            name="add"
+            size={18}
+            color="#fff"
+            style={styles.addButtonIcon}
+          />
         </TouchableOpacity>
       </View>
     );
@@ -270,24 +270,24 @@ export default function CoachScreen() {
 
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty.toLowerCase()) {
-      case 'easy':
-        return '#d1fae5'; // Soft green
-      case 'medium':
-        return '#fef3c7'; // Soft yellow
-      case 'hard':
-        return '#fee2e2'; // Soft red
+      case "easy":
+        return "#d1fae5";
+      case "medium":
+        return "#fef3c7";
+      case "hard":
+        return "#fee2e2";
       default:
-        return '#f3f4f6'; // Gray
+        return "#f3f4f6";
     }
   };
 
-  const navigateToAllSuggestions = (category: string, suggestions: AISuggestion[]) => {
+  const navigateToAllSuggestions = (
+    category: string,
+    suggestions: AISuggestion[]
+  ) => {
     router.push({
-      pathname: '/suggestions/[category]',
-      params: { 
-        category,
-        suggestions: JSON.stringify(suggestions)
-      }
+      pathname: "/suggestions/[category]",
+      params: { category, suggestions: JSON.stringify(suggestions) },
     } as any);
   };
 
@@ -298,7 +298,7 @@ export default function CoachScreen() {
     suggestions,
     loading,
     categoryKey,
-    subtitle
+    subtitle,
   }: {
     title: string;
     icon: keyof typeof Ionicons.glyphMap;
@@ -308,14 +308,16 @@ export default function CoachScreen() {
     categoryKey: string;
     subtitle: string;
   }) => {
-    if (loading && suggestions.length === 0) return null;
-    if (!loading && suggestions.length === 0) return null;
+    if (loading) return null;
+    if (!loading && (!suggestions || suggestions.length === 0)) return null;
 
     return (
       <View style={styles.section}>
         <View style={styles.sectionHeader}>
           <View style={styles.sectionTitleContainer}>
-            <View style={[styles.sectionIcon, { backgroundColor: `${color}10` }]}>
+            <View
+              style={[styles.sectionIcon, { backgroundColor: `${color}10` }]}
+            >
               <Ionicons name={icon} size={24} color={color} />
             </View>
             <View>
@@ -324,8 +326,8 @@ export default function CoachScreen() {
             </View>
           </View>
           {suggestions.length > 0 && (
-            <TouchableOpacity 
-              style={[styles.viewAllButton, { borderColor: color }]} 
+            <TouchableOpacity
+              style={[styles.viewAllButton, { borderColor: color }]}
               onPress={() => navigateToAllSuggestions(categoryKey, suggestions)}
             >
               <Text style={[styles.viewAllText, { color }]}>View All</Text>
@@ -333,9 +335,9 @@ export default function CoachScreen() {
             </TouchableOpacity>
           )}
         </View>
-        
+
         <FlatList
-          data={suggestions.slice(0, 3)} // Show up to 3 suggestions per section for better UX
+          data={suggestions.slice(0, 3)}
           renderItem={({ item }) => <SuggestionCard suggestion={item} />}
           keyExtractor={(item, index) => `${categoryKey}-${index}`}
           horizontal
@@ -348,33 +350,45 @@ export default function CoachScreen() {
   };
 
   const renderContent = () => {
-    if (error) {
+    if (generalError) {
       return (
         <View style={styles.errorContainer}>
-          <Ionicons name="alert-circle-outline" size={48} color={colors['text-danger']} />
-          <Text style={styles.errorText}>{error}</Text>
-          <TouchableOpacity 
-            style={styles.retryButton}
-            onPress={() => loadGeneralSuggestions()}
-          >
-            <Ionicons name="refresh" size={18} color="#fff" style={styles.retryIcon} />
+          <Ionicons
+            name="alert-circle-outline"
+            size={48}
+            color={colors["text-danger"]}
+          />
+          <Text style={styles.errorText}>{generalError}</Text>
+          <TouchableOpacity style={styles.retryButton} onPress={onRefresh}>
+            <Ionicons
+              name="refresh"
+              size={18}
+              color="#fff"
+              style={styles.retryIcon}
+            />
             <Text style={styles.retryButtonText}>Retry</Text>
           </TouchableOpacity>
         </View>
       );
     }
 
-    const hasGeneralSuggestions = generalSuggestions.length > 0;
-    const hasFitnessSuggestions = fitnessSuggestions.length > 0;
-    const hasNutritionSuggestions = nutritionSuggestions.length > 0;
+    const hasGeneral = generalSuggestionsData?.data?.suggestions?.length > 0;
+    const hasFitness = fitnessSuggestionsData?.data?.suggestions?.length > 0;
+    const hasNutrition =
+      nutritionSuggestionsData?.data?.suggestions?.length > 0;
 
-    if (!hasGeneralSuggestions && !hasFitnessSuggestions && !hasNutritionSuggestions) {
+    if (!hasGeneral && !hasFitness && !hasNutrition) {
       return (
         <View style={styles.emptyState}>
-          <Ionicons name="bulb-outline" size={64} color={colors['text-secondary']} />
+          <Ionicons
+            name="bulb-outline"
+            size={64}
+            color={colors["text-secondary"]}
+          />
           <Text style={styles.emptyStateText}>No Suggestions Yet</Text>
           <Text style={styles.emptyStateSubtext}>
-            Our AI is cooking up some personalized habits for you. Check back soon!
+            Our AI is cooking up some personalized habits for you. Check back
+            soon!
           </Text>
         </View>
       );
@@ -383,39 +397,39 @@ export default function CoachScreen() {
     return (
       <View style={styles.content}>
         {renderCategorySection({
-          title: 'Fitness',
-          icon: 'fitness',
-          color:  colors.primary,
-          suggestions: fitnessSuggestions,
+          title: "Fitness",
+          icon: "fitness",
+          color: colors.primary,
+          suggestions: fitnessSuggestionsData?.data?.suggestions || [],
           loading: loadingFitness,
-          categoryKey: 'fitness',
-          subtitle: 'Build strength and stay active'
+          categoryKey: "fitness",
+          subtitle: "Build strength and stay active",
         })}
 
         {renderCategorySection({
-          title: 'Nutrition',
-          icon: 'nutrition',
-          color:  colors.primary,
-          suggestions: nutritionSuggestions,
+          title: "Nutrition",
+          icon: "nutrition",
+          color: colors.primary,
+          suggestions: nutritionSuggestionsData?.data?.suggestions || [],
           loading: loadingNutrition,
-          categoryKey: 'nutrition',
-          subtitle: 'Fuel your body right'
+          categoryKey: "nutrition",
+          subtitle: "Fuel your body right",
         })}
 
         {renderCategorySection({
-          title: 'General',
-          icon: 'bulb-outline',
-          color:  colors.primary,
-          suggestions: generalSuggestions,
-          loading: loading,
-          categoryKey: 'general',
-          subtitle: 'Everyday wellness habits'
+          title: "General",
+          icon: "bulb-outline",
+          color: colors.primary,
+          suggestions: generalSuggestionsData?.data?.suggestions || [],
+          loading: loadingGeneral,
+          categoryKey: "general",
+          subtitle: "Everyday wellness habits",
         })}
       </View>
     );
   };
 
-  if (loading && !refreshing) {
+  if (loadingGeneral && loadingFitness && loadingNutrition && !refreshing) {
     return (
       <View style={styles.container}>
         <View style={styles.header}>
@@ -438,11 +452,11 @@ export default function CoachScreen() {
         <Text style={styles.headerDate}>Your AI-Powered Habit Guide</Text>
       </View>
 
-      <FlatList 
-        data={[]} // Using FlatList for better performance and refresh
+      <FlatList
+        data={[]}
         renderItem={() => null}
         ListHeaderComponent={renderContent}
-        style={styles.scrollView} 
+        style={styles.scrollView}
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl
@@ -457,83 +471,56 @@ export default function CoachScreen() {
   );
 }
 
+// Keep all styles the same
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors['bg-light'],
-  },
-   header: {
+  container: { flex: 1, backgroundColor: colors["bg-light"] },
+  header: {
     backgroundColor: colors.primary,
     paddingTop: 40,
     paddingBottom: 20,
     paddingHorizontal: 20,
-
   },
-  greeting: {
-    fontSize: 24,
-    fontWeight: '700',
-    color: colors['text-light'],
-  },
-  headerDate: {
-    fontSize: 16,
-    color: colors['text-light'],
-    opacity: 0.9,
-  },
-  scrollView: {
-    flex: 1,
-  },
-  content: {
-    padding: 24,
-    paddingBottom: 100,
-  },
-  section: {
-    marginBottom: 32,
-  },
+  greeting: { fontSize: 24, fontWeight: "700", color: colors["text-light"] },
+  headerDate: { fontSize: 16, color: colors["text-light"], opacity: 0.9 },
+  scrollView: { flex: 1 },
+  content: { padding: 24, paddingBottom: 100 },
+  section: { marginBottom: 32 },
   sectionHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     marginBottom: 16,
   },
   sectionTitleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 12,
   },
   sectionIcon: {
     width: 48,
     height: 48,
     borderRadius: 24,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
-  sectionTitle: {
-    fontSize: 22,
-    fontWeight: 'bold',
-  },
+  sectionTitle: { fontSize: 22, fontWeight: "bold" },
   sectionSubtitle: {
     fontSize: 14,
-    color: colors['text-secondary'],
+    color: colors["text-secondary"],
     opacity: 0.8,
   },
   viewAllButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     paddingVertical: 8,
     paddingHorizontal: 16,
     borderRadius: 16,
     borderWidth: 1,
   },
-  viewAllText: {
-    fontSize: 14,
-    fontWeight: '600',
-    marginRight: 4,
-  },
-  horizontalList: {
-    paddingRight: 24,
-  },
+  viewAllText: { fontSize: 14, fontWeight: "600", marginRight: 4 },
+  horizontalList: { paddingRight: 24 },
   suggestionCard: {
-    backgroundColor: colors['bg-accent'],
+    backgroundColor: colors["bg-accent"],
     borderRadius: 24,
     padding: 20,
     width: width * 0.85,
@@ -543,45 +530,35 @@ const styles = StyleSheet.create({
     shadowRadius: 12,
     elevation: 5,
     borderWidth: 0.5,
-    borderColor: colors['border-light'],
+    borderColor: colors["border-light"],
   },
   suggestionHeader: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
+    flexDirection: "row",
+    alignItems: "flex-start",
     marginBottom: 16,
   },
   suggestionIcon: {
     width: 48,
     height: 48,
     borderRadius: 24,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     marginRight: 16,
   },
-  suggestionTitleContainer: {
-    flex: 1,
-  },
+  suggestionTitleContainer: { flex: 1 },
   suggestionTitle: {
-    color: colors['text-primary'],
+    color: colors["text-primary"],
     fontSize: 18,
-    fontWeight: '600',
+    fontWeight: "600",
     marginBottom: 8,
   },
   suggestionMetaContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 8,
   },
-  categoryTag: {
-    paddingHorizontal: 12,
-    paddingVertical: 4,
-    borderRadius: 16,
-  },
-  categoryText: {
-    fontSize: 12,
-    fontWeight: '600',
-    textTransform: 'uppercase',
-  },
+  categoryTag: { paddingHorizontal: 12, paddingVertical: 4, borderRadius: 16 },
+  categoryText: { fontSize: 12, fontWeight: "600", textTransform: "uppercase" },
   difficultyTag: {
     paddingHorizontal: 12,
     paddingVertical: 4,
@@ -589,133 +566,94 @@ const styles = StyleSheet.create({
   },
   difficultyText: {
     fontSize: 12,
-    fontWeight: '500',
-    color: colors['text-primary'],
+    fontWeight: "500",
+    color: colors["text-primary"],
   },
-  descriptionContainer: {
-    marginBottom: 16,
-  },
+  descriptionContainer: { marginBottom: 16 },
   suggestionDescription: {
-    color: colors['text-secondary'],
+    color: colors["text-secondary"],
     fontSize: 14,
     lineHeight: 22,
   },
-  readMoreButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 8,
-  },
-  readMoreText: {
-    fontSize: 14,
-    fontWeight: '600',
-  },
-  readMoreIcon: {
-    marginLeft: 4,
-  },
+  readMoreButton: { flexDirection: "row", alignItems: "center", marginTop: 8 },
+  readMoreText: { fontSize: 14, fontWeight: "600" },
+  readMoreIcon: { marginLeft: 4 },
   suggestionMeta: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
+    flexDirection: "row",
+    justifyContent: "space-around",
     marginBottom: 20,
     padding: 12,
-    backgroundColor: colors['bg-secondary'],
+    backgroundColor: colors["bg-secondary"],
     borderRadius: 16,
   },
-  metaItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-  },
-  metaText: {
-    color: colors['text-primary'],
-    fontSize: 13,
-    fontWeight: '500',
-  },
-  tipsContainer: {
-    marginBottom: 20,
-  },
-  tipsTitle: {
-    fontWeight: '600',
-    marginBottom: 12,
-    fontSize: 16,
-  },
-  tipItem: {
-    flexDirection: 'row',
-    marginBottom: 12,
-    alignItems: 'center',
-  },
-  tipBullet: {
-    marginRight: 12,
-  },
+  metaItem: { flexDirection: "row", alignItems: "center", gap: 6 },
+  metaText: { color: colors["text-light"], fontSize: 13, fontWeight: "500" },
+  tipsContainer: { marginBottom: 20 },
+  tipsTitle: { fontWeight: "600", marginBottom: 12, fontSize: 16 },
+  tipItem: { flexDirection: "row", marginBottom: 12, alignItems: "center" },
+  tipBullet: { marginRight: 12 },
   tipText: {
-    color: colors['text-secondary'],
+    color: colors["text-secondary"],
     fontSize: 14,
     lineHeight: 20,
     flex: 1,
   },
   addButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
     paddingVertical: 16,
     borderRadius: 16,
   },
   addButtonText: {
-    color: '#fff',
-    fontWeight: '600',
+    color: "#fff",
+    fontWeight: "600",
     fontSize: 16,
     marginRight: 8,
   },
   addButtonIcon: {},
-  loadingContainer: {
-    flex: 1,
-    padding: 24,
-    gap: 16,
-  },
+  loadingContainer: { flex: 1, padding: 24, gap: 16 },
   errorContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     padding: 32,
     gap: 16,
   },
   errorText: {
-    color: colors['text-danger'],
+    color: colors["text-danger"],
     fontSize: 16,
-    textAlign: 'center',
+    textAlign: "center",
     lineHeight: 24,
   },
   retryButton: {
-    flexDirection: 'row',
-    backgroundColor: colors['bg-dark'],
+    flexDirection: "row",
+    backgroundColor: colors["bg-dark"],
     paddingHorizontal: 24,
     paddingVertical: 12,
     borderRadius: 24,
-    alignItems: 'center',
+    alignItems: "center",
     gap: 8,
   },
   retryIcon: {},
-  retryButtonText: {
-    color: '#ffffff',
-    fontWeight: '600',
-    fontSize: 16,
-  },
+  retryButtonText: { color: "#ffffff", fontWeight: "600", fontSize: 16 },
   emptyState: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     padding: 32,
     gap: 16,
   },
   emptyStateText: {
-    color: colors['text-primary'],
+    color: colors["text-primary"],
     fontSize: 20,
-    fontWeight: '600',
-    textAlign: 'center',
+    fontWeight: "600",
+    textAlign: "center",
   },
   emptyStateSubtext: {
-    color: colors['text-secondary'],
+    color: colors["text-secondary"],
     fontSize: 14,
-    textAlign: 'center',
+    textAlign: "center",
     lineHeight: 20,
   },
 });

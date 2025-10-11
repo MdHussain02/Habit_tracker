@@ -5,8 +5,9 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import { ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { mutate } from 'swr';
 import { ProtectedRoute } from '../components/ProtectedRoute';
-import TimePicker from '../components/TimePicker';
+import CustomDateTimePicker from '../components/TimePicker';
 import { useApi } from '../hooks/useApi';
 
 // Icon options with their corresponding icon_id
@@ -81,6 +82,8 @@ export default function AddHabitPage() {
 
       if (response.success) {
         showToast('Habit created successfully', 'success', 'top');
+        const todayUTC = new Date().toISOString().split('T')[0]; 
+        await mutate(`/habits?date=${todayUTC}`);
         router.back();
       } else {
         showToast(response.error || 'Failed to create habit', 'error', 'top');
@@ -149,11 +152,12 @@ export default function AddHabitPage() {
           </View>
 
           <Text style={styles.label}>Habit Time</Text>
-          <TimePicker
+          <CustomDateTimePicker
             value={targetTime}
-            onTimeChange={setTargetTime}
+            onValueChange={setTargetTime}
+            mode="time"
+            title="Select Habit Time"
             enabled={true}
-            onToggle={() => {}}
           />
 
           <Text style={styles.label}>Repeat on Days</Text>

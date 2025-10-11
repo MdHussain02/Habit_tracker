@@ -161,18 +161,18 @@ const AnalyticsShimmer = () => {
           ))}
         </View>
 
-        {/* Profile Summary Card Shimmer */}
+        {/* {/* Profile Summary Card Shimmer */}
         <View style={styles.profileSummaryCard}>
-          <View style={styles.profileSummaryHeader}>
+          {/* <View style={styles.profileSummaryHeader}>
             <ShimmerPlaceholder style={styles.profileAvatarPlaceholder} />
             <View style={styles.profileInfo}>
               <ShimmerPlaceholder style={styles.profileLevelPlaceholder} />
               <ShimmerPlaceholder style={styles.profileGoalPlaceholder} />
             </View>
             <ShimmerPlaceholder style={styles.motivationBadgePlaceholder} />
-          </View>
+          </View> */}
           
-          <View style={styles.profileDetails}>
+          {/* <View style={styles.profileDetails}>
             <View style={styles.profileDetailRow}>
               <ShimmerPlaceholder style={styles.profileDetailLabelPlaceholder} />
               <ShimmerPlaceholder style={styles.profileDetailValuePlaceholder} />
@@ -181,11 +181,11 @@ const AnalyticsShimmer = () => {
               <ShimmerPlaceholder style={styles.profileDetailLabelPlaceholder} />
               <ShimmerPlaceholder style={styles.profileDetailValuePlaceholder} />
             </View>
-          </View>
-        </View>
+          </View> */}
+        </View> 
 
         {/* Analysis Cards Shimmer */}
-        {[1, 2].map((item) => (
+        {/* {[1, 2].map((item) => (
           <View key={item} style={styles.analysisCard}>
             <View style={styles.analysisCardHeader}>
               <ShimmerPlaceholder style={styles.analysisIconContainerPlaceholder} />
@@ -203,7 +203,7 @@ const AnalyticsShimmer = () => {
               ))}
             </View>
           </View>
-        ))}
+        ))}  */}
       </View>
     </View>
   );
@@ -325,15 +325,16 @@ const styles = StyleSheet.create({
   },
   insightsGrid: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
+    flexWrap: 'nowrap',
     marginBottom: 20,
     gap: 12,
+    padding: 12,
   },
   insightCard: {
     backgroundColor: '#ffffff',
     borderRadius: 16,
     padding: 20,
-    width: (width - 56) / 2,
+    // width: (width - 56) / 2,
     alignItems: 'center',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },

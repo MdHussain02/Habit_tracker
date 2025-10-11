@@ -1,4 +1,5 @@
 import colors from '@/constants/Colors';
+import useSwrApi from '@/hooks/useSwrApi';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect, useRouter } from 'expo-router';
@@ -14,7 +15,6 @@ import {
 import HabitCard from '../../components/HabitCard';
 import HabitCardShimmer from '../../components/HabitCardShimmer';
 import { PageTransition } from '../../components/PageTransition';
-import { useApi } from '../../hooks/useApi';
 import { useHabitNotifications } from '../../hooks/useHabitNotifications';
 import { useToast } from '../../hooks/useToast';
 import { Habit } from '../../types/habit';
@@ -30,28 +30,12 @@ export default function HomeScreen() {
   const [needsRefresh, setNeedsRefresh] = useState(false);
 
   const router = useRouter();
-  const { fetchGet } = useApi();
   const { showToast } = useToast();
-  const API_BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL;
-  
-
   const { addHabitWithNotification, editHabitWithNotification, deleteHabitWithNotification } =
     useHabitNotifications(habits, setHabits);
 
-  // Format a Date to YYYY-MM-DD in UTC for backend query
-  const formatUTCDate = (d: Date) => {
-    const year = d.getUTCFullYear();
-    const month = String(d.getUTCMonth() + 1).padStart(2, '0');
-    const day = String(d.getUTCDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
-  };
-
-  // Convert a YYYY-MM-DD (UTC) to backend day index Mon=0..Sun=6
-  const getBackendDayIndex = (yyyyMmDdUTC: string) => {
-    const date = new Date(`${yyyyMmDdUTC}T00:00:00.000Z`);
-    const uiDay = date.getUTCDay(); // Sun=0..Sat=6
-    return (uiDay + 6) % 7; // Mon=0..Sun=6
-  };
+  const todayUTC = new Date().toISOString().split('T')[0];
+  const { data, error, isLoading, mutate } = useSwrApi(`/habits?date=${todayUTC}`);
 
   /** ---------------- Cache Helpers ---------------- */
   const loadCachedHabits = async (): Promise<Habit[] | null> => {
@@ -84,97 +68,92 @@ export default function HomeScreen() {
     }
   };
 
-  /** ---------------- API Fetch ---------------- */
-  const loadHabits = async (forceRefresh = false) => {
-    try {
-      if (!refreshing) setLoading(true);
+  /** ---------------- Data Handling ---------------- */
+  useEffect(() => {
+    const loadHabits = async () => {
+      try {
+        if (isLoading) return;
+        setLoading(true);
 
-      // Use cache if valid
-      if (!forceRefresh && (await isCacheValid())) {
+        if (data?.success && Array.isArray(data.data)) {
+          const todayDate = new Date(`${todayUTC}T00:00:00.000Z`);
+          const uiDay = todayDate.getUTCDay(); // Sun=0..Sat=6
+          const backendDay = (uiDay + 6) % 7; // Mon=0..Sun=6
+
+          const filtered = data.data.filter((item: any) => {
+            if (typeof item.day === 'number') return item.day === backendDay;
+            if (Array.isArray(item.repeats)) return item.repeats.includes(backendDay);
+            return false;
+          });
+
+          const mappedHabits: Habit[] = filtered.map((item: any) => ({
+            _id: item._id,
+            id: item._id,
+            name: item.name,
+            icon_id: item.icon_id || 1,
+            icon: { set: 'Ionicons', name: 'star' },
+            createdAt: new Date(item.created_time).getTime(),
+            streak: typeof item.streak === 'number' ? item.streak : 0,
+            completedDates: [],
+            repeats: Array.isArray(item.repeats) ? item.repeats : undefined,
+            reminder: {
+              enabled: true,
+              time: item.target_time
+                ? `${new Date(item.target_time).getHours().toString().padStart(2, '0')}:${new Date(
+                    item.target_time
+                  ).getMinutes().toString().padStart(2, '0')}`
+                : '09:00',
+            },
+          }));
+
+          setHabits(mappedHabits);
+          await saveHabitsToCache(mappedHabits);
+        } else {
+          // fallback to cached
+          const cachedHabits = await loadCachedHabits();
+          if (cachedHabits?.length) {
+            setHabits(cachedHabits);
+            showToast('Using cached data', 'info');
+          } else {
+            showToast('Failed to load habits', 'error');
+          }
+        }
+      } catch (error) {
+        console.error('Error loading habits:', error);
         const cachedHabits = await loadCachedHabits();
         if (cachedHabits?.length) {
           setHabits(cachedHabits);
-          setLoading(false);
-          return;
+          showToast('Using cached data', 'info');
         }
+      } finally {
+        setLoading(false);
+        setRefreshing(false);
       }
+    };
 
-      // Fetch fresh data for today in UTC
-      const todayUTC = formatUTCDate(new Date());
-      const response = await fetchGet(`${API_BASE_URL}/habits?date=${todayUTC}`);
-      if (response?.success && response.data) {
-        // Filter by day in case backend returns all habits
-        const backendDay = getBackendDayIndex(todayUTC);
-        const filtered = (response.data as any[]).filter((item: any) => {
-          if (typeof item.day === 'number') return item.day === backendDay;
-          if (Array.isArray(item.repeats)) return item.repeats.includes(backendDay);
-          return false;
-        });
-
-        const mappedHabits: Habit[] = filtered.map((item: any) => ({
-          _id: item._id,
-          id: item._id,
-          name: item.name,
-          icon_id: item.icon_id || 1,
-          icon: { set: 'Ionicons', name: 'star' },
-          createdAt: new Date(item.created_time).getTime(),
-          streak: typeof item.streak === 'number' ? item.streak : 0,
-          completedDates: [],
-          repeats: Array.isArray(item.repeats) ? item.repeats : undefined,
-          reminder: {
-            enabled: true,
-            time: item.target_time
-              ? `${new Date(item.target_time).getHours().toString().padStart(2, '0')}:${new Date(
-                  item.target_time
-                ).getMinutes().toString().padStart(2, '0')}`
-              : '09:00',
-          },
-        }));
-
-        setHabits(mappedHabits);
-        await saveHabitsToCache(mappedHabits);
-      } else {
-        throw new Error('API request failed');
-      }
-    } catch (error) {
-      console.error('Error loading habits:', error);
-      // fallback to cached
-      const cachedHabits = await loadCachedHabits();
-      if (cachedHabits?.length) {
-        setHabits(cachedHabits);
-        showToast('Using cached data', 'info');
-      } else {
-        showToast('Failed to load habits', 'error');
-      }
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
-    }
-  };
-
-  /** ---------------- Effects ---------------- */
-  useEffect(() => {
     loadHabits();
-  }, []);
+  }, [data, isLoading]);
+
+  /** ---------------- Refresh Logic ---------------- */
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await mutate(); // re-fetch data
+    setRefreshing(false);
+  };
 
   useFocusEffect(
     useCallback(() => {
       if (needsRefresh) {
-        loadHabits(true);
+        mutate();
         setNeedsRefresh(false);
       }
     }, [needsRefresh])
   );
 
-  const onRefresh = async () => {
-    setRefreshing(true);
-    await loadHabits(true);
-  };
-
   /** ---------------- Helpers ---------------- */
   const addHabit = async (habit: Omit<Habit, 'id' | 'createdAt'>) => {
     await addHabitWithNotification(habit);
-    await loadHabits(true);
+    await mutate(); // reload SWR data
   };
 
   const getGreeting = () => {
@@ -222,17 +201,18 @@ export default function HomeScreen() {
         </View>
       </PageTransition>
 
+      {/* Section Header */}
+      <View style={styles.sectionHeader}>
+        <Text style={styles.sectionTitle}>Today's Habits</Text>
+        <TouchableOpacity
+          style={styles.viewAllButton}
+          onPress={() => router.push('/analytics')}
+        >
+          <Text style={styles.viewAllText}>View All</Text>
+          <Ionicons name="arrow-forward" size={16} color={colors.primary} />
+        </TouchableOpacity>
+      </View>
 
-          <View style={styles.sectionHeader}>
-              <Text style={styles.sectionTitle}>Today's Habits</Text>
-              <TouchableOpacity
-                style={styles.viewAllButton}
-                onPress={() => router.push('/analytics')}
-              >
-                <Text style={styles.viewAllText}>View All</Text>
-                <Ionicons name="arrow-forward" size={16} color={colors.primary} />
-              </TouchableOpacity>
-            </View>
       {/* Main Content */}
       <ScrollView
         style={styles.scrollView}
@@ -242,8 +222,6 @@ export default function HomeScreen() {
       >
         <PageTransition type="scale" duration={400} delay={300}>
           <View style={styles.habitsSection}>
-  
-
             {loading ? (
               <View style={styles.habitsList}>
                 {[1, 2, 3, 4].map((i) => (
@@ -290,12 +268,11 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors['bg-light'],
   },
-   header: {
+  header: {
     backgroundColor: colors.primary,
     paddingTop: 35,
     paddingBottom: 20,
     paddingHorizontal: 20,
-
   },
   headerContent: {
     flexDirection: 'row',
@@ -324,7 +301,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-around',
     paddingBottom: 20,
-    margin:20
+    margin: 20,
   },
   actionButton: {
     flex: 1,
@@ -352,8 +329,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginHorizontal:20,
-    marginBottom:10
+    marginHorizontal: 20,
+    marginBottom: 10,
   },
   sectionTitle: {
     fontSize: 24,
