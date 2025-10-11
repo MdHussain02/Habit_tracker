@@ -1,9 +1,8 @@
-import AnalyticsShimmer from '@/components/AnalyticsShimmer';
-import colors from '@/constants/Colors';
-import { useApi } from '@/hooks/useApi';
-import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
-import { useEffect, useState } from 'react';
+import AnalyticsShimmer from "@/components/AnalyticsShimmer";
+import colors from "@/constants/Colors";
+import useSwrApi from "@/hooks/useSwrApi";
+import { Ionicons } from "@expo/vector-icons";
+import { router } from "expo-router";
 import {
   Dimensions,
   FlatList,
@@ -11,70 +10,33 @@ import {
   StyleSheet,
   Text,
   TouchableOpacity,
-  View
-} from 'react-native';
+  View,
+} from "react-native";
 
-const { width } = Dimensions.get('window');
-
-interface AnalysisData {
-  analysis: {
-    strengths: string[];
-    gaps: string[];
-    recommendations: string[];
-    consistency_score: number;
-    balance_score: number;
-  };
-  metrics: {
-    totalHabits: number;
-    activeHabits: number;
-    averageFrequency: number;
-    consistencyScore: number;
-    balanceScore: number;
-  };
-  userProfile: {
-    age: number;
-    fitnessLevel: string;
-    primaryGoal: string;
-    motivationLevel: string;
-  };
-}
+const { width } = Dimensions.get("window");
 
 export default function AnalyticsScreen() {
-  const [isLoading, setIsLoading] = useState(true);
-  const [isRefreshing, setIsRefreshing] = useState(false);
-  const [analysisData, setAnalysisData] = useState<AnalysisData | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const { fetchGet } = useApi();
-  const router = useRouter();
-
-  const fetchAnalysisData = async () => {
-    try {
-      const response = await fetchGet('/suggestions/analysis');
-      if (response.success && response.data) {
-        setAnalysisData(response.data);
-        setError(null);
-      } else {
-        setError('Failed to load analysis data');
-      }
-    } catch (err) {
-      console.error('Error fetching analysis data:', err);
-      setError('An error occurred while loading analysis data');
-    } finally {
-      setIsLoading(false);
-      setIsRefreshing(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchAnalysisData();
-  }, []);
-
   const onRefresh = () => {
-    setIsRefreshing(true);
-    fetchAnalysisData();
+    mutate();
   };
 
-  const renderAnalysisItem = ({ item, index, color }: { item: string; index: number; color: string }) => (
+  const {
+    data: analysisData,
+    error,
+    isLoading,
+    mutate,
+  } = useSwrApi("/suggestions/analysis");
+
+  console.log(analysisData);
+  const renderAnalysisItem = ({
+    item,
+    index,
+    color,
+  }: {
+    item: string;
+    index: number;
+    color: string;
+  }) => (
     <View key={`analysis-${index}`} style={styles.analysisItem}>
       <View style={[styles.analysisItemDot, { backgroundColor: color }]} />
       <Text style={styles.analysisItemText}>{item}</Text>
@@ -98,26 +60,39 @@ export default function AnalyticsScreen() {
   if (error) {
     return (
       <View style={styles.errorContainer}>
-        <Ionicons name="warning-outline" size={48} color={colors["text-danger"]} />
+        <Ionicons
+          name="warning-outline"
+          size={48}
+          color={colors["text-danger"]}
+        />
         <Text style={styles.errorText}>{error}</Text>
         <TouchableOpacity
           style={styles.retryButton}
           onPress={() => {
-            setIsLoading(true);
-            fetchAnalysisData();
+            // setIsLoading(true);
+            mutate();
           }}
         >
-          <Ionicons name="refresh" size={18} color="#fff" style={styles.retryIcon} />
+          <Ionicons
+            name="refresh"
+            size={18}
+            color="#fff"
+            style={styles.retryIcon}
+          />
           <Text style={styles.retryButtonText}>Retry</Text>
         </TouchableOpacity>
       </View>
     );
   }
 
-  if (!analysisData) {
+  if (!analysisData?.data) {
     return (
       <View style={styles.errorContainer}>
-        <Ionicons name="help-circle-outline" size={48} color={colors["text-secondary"]} />
+        <Ionicons
+          name="help-circle-outline"
+          size={48}
+          color={colors["text-secondary"]}
+        />
         <Text style={styles.errorText}>No analysis data available</Text>
         <TouchableOpacity
           style={styles.retryButton}
@@ -129,7 +104,7 @@ export default function AnalyticsScreen() {
     );
   }
 
-  const { analysis, metrics, userProfile } = analysisData;
+  const { analysis, metrics, userProfile } = analysisData?.data;
 
   return (
     <View style={styles.container}>
@@ -137,15 +112,21 @@ export default function AnalyticsScreen() {
         <View style={styles.headerTop}>
           <View>
             <Text style={styles.greeting}>Analytics</Text>
-            <Text style={styles.headerDate}>Track your progress & insights</Text>
+            <Text style={styles.headerDate}>
+              Track your progress & insights
+            </Text>
           </View>
           <View style={styles.headerStats}>
             <View style={styles.headerStatItem}>
-              <Text style={styles.headerStatValue}>{metrics.consistencyScore}%</Text>
+              <Text style={styles.headerStatValue}>
+                {metrics.consistencyScore}%
+              </Text>
               <Text style={styles.headerStatLabel}>Consistency</Text>
             </View>
             <View style={styles.headerStatItem}>
-              <Text style={styles.headerStatValue}>{metrics.balanceScore}%</Text>
+              <Text style={styles.headerStatValue}>
+                {metrics.balanceScore}%
+              </Text>
               <Text style={styles.headerStatLabel}>Balance</Text>
             </View>
           </View>
@@ -160,35 +141,80 @@ export default function AnalyticsScreen() {
             <View style={styles.progressOverviewCard}>
               <View style={styles.sectionHeader}>
                 <View style={styles.sectionTitleContainer}>
-                  <View style={[styles.sectionIcon, { backgroundColor: `${colors.primary}10` }]}>
-                    <Ionicons name="stats-chart" size={24} color={colors.primary} />
+                  <View
+                    style={[
+                      styles.sectionIcon,
+                      { backgroundColor: `${colors.primary}10` },
+                    ]}
+                  >
+                    <Ionicons
+                      name="stats-chart"
+                      size={24}
+                      color={colors.primary}
+                    />
                   </View>
                   <View>
-                    <Text style={[styles.sectionTitle, { color: colors.primary }]}>Progress Overview</Text>
-                    <Text style={styles.sectionSubtitle}>Your weekly performance snapshot</Text>
+                    <Text
+                      style={[styles.sectionTitle, { color: colors.primary }]}
+                    >
+                      Progress Overview
+                    </Text>
+                    <Text style={styles.sectionSubtitle}>
+                      Your weekly performance snapshot
+                    </Text>
                   </View>
                 </View>
               </View>
               <View style={styles.progressStats}>
                 <View style={styles.progressStat}>
-                  <View style={[styles.progressCircle, { borderColor: colors.primary }]}>
-                    <Text style={[styles.progressPercentage, { color: colors.primary }]}>
+                  <View
+                    style={[
+                      styles.progressCircle,
+                      { borderColor: colors.primary },
+                    ]}
+                  >
+                    <Text
+                      style={[
+                        styles.progressPercentage,
+                        { color: colors.primary },
+                      ]}
+                    >
                       {metrics.consistencyScore}%
                     </Text>
                   </View>
                   <Text style={styles.progressLabel}>Consistency</Text>
                 </View>
                 <View style={styles.progressStat}>
-                  <View style={[styles.progressCircle, { borderColor: colors.primary }]}>
-                    <Text style={[styles.progressPercentage, { color: colors.primary }]}>
+                  <View
+                    style={[
+                      styles.progressCircle,
+                      { borderColor: colors.primary },
+                    ]}
+                  >
+                    <Text
+                      style={[
+                        styles.progressPercentage,
+                        { color: colors.primary },
+                      ]}
+                    >
                       {metrics.balanceScore}%
                     </Text>
                   </View>
                   <Text style={styles.progressLabel}>Balance</Text>
                 </View>
                 <View style={styles.progressStat}>
-                  <View style={[styles.progressCircle, { borderColor: colors.primary }]}>
-                    <Text style={[styles.progressPercentage, { color: colors.primary }]}>
+                  <View
+                    style={[
+                      styles.progressCircle,
+                      { borderColor: colors.primary },
+                    ]}
+                  >
+                    <Text
+                      style={[
+                        styles.progressPercentage,
+                        { color: colors.primary },
+                      ]}
+                    >
                       {metrics.activeHabits}
                     </Text>
                   </View>
@@ -199,28 +225,58 @@ export default function AnalyticsScreen() {
 
             <View style={styles.insightsGrid}>
               <View style={styles.insightCard}>
-                <View style={[styles.insightIcon, { backgroundColor: `${colors.primary}10` }]}>
-                  <Ionicons name="trending-up" size={24} color={colors.primary} />
+                <View
+                  style={[
+                    styles.insightIcon,
+                    { backgroundColor: `${colors.primary}10` },
+                  ]}
+                >
+                  <Ionicons
+                    name="trending-up"
+                    size={24}
+                    color={colors.primary}
+                  />
                 </View>
                 <Text style={styles.insightValue}>{metrics.totalHabits}</Text>
                 <Text style={styles.insightLabel}>Total Habits</Text>
               </View>
               <View style={styles.insightCard}>
-                <View style={[styles.insightIcon, { backgroundColor: `${colors.primary}10` }]}>
-                  <Ionicons name="checkmark-circle" size={24} color={colors.primary} />
+                <View
+                  style={[
+                    styles.insightIcon,
+                    { backgroundColor: `${colors.primary}10` },
+                  ]}
+                >
+                  <Ionicons
+                    name="checkmark-circle"
+                    size={24}
+                    color={colors.primary}
+                  />
                 </View>
                 <Text style={styles.insightValue}>{metrics.activeHabits}</Text>
                 <Text style={styles.insightLabel}>Active</Text>
               </View>
               <View style={styles.insightCard}>
-                <View style={[styles.insightIcon, { backgroundColor: `${colors.primary}10` }]}>
+                <View
+                  style={[
+                    styles.insightIcon,
+                    { backgroundColor: `${colors.primary}10` },
+                  ]}
+                >
                   <Ionicons name="calendar" size={24} color={colors.primary} />
                 </View>
-                <Text style={styles.insightValue}>{metrics.averageFrequency.toFixed(1)}x</Text>
+                <Text style={styles.insightValue}>
+                  {metrics.averageFrequency.toFixed(1)}x
+                </Text>
                 <Text style={styles.insightLabel}>Per Week</Text>
               </View>
               <View style={styles.insightCard}>
-                <View style={[styles.insightIcon, { backgroundColor: `${colors.primary}10` }]}>
+                <View
+                  style={[
+                    styles.insightIcon,
+                    { backgroundColor: `${colors.primary}10` },
+                  ]}
+                >
                   <Ionicons name="person" size={24} color={colors.primary} />
                 </View>
                 <Text style={styles.insightValue}>{userProfile.age}</Text>
@@ -231,28 +287,54 @@ export default function AnalyticsScreen() {
             <View style={styles.profileSummaryCard}>
               <View style={styles.sectionHeader}>
                 <View style={styles.sectionTitleContainer}>
-                  <View style={[styles.sectionIcon, { backgroundColor: `${colors.primary}10` }]}>
-                    <Ionicons name="person-circle" size={24} color={colors.primary} />
+                  <View
+                    style={[
+                      styles.sectionIcon,
+                      { backgroundColor: `${colors.primary}10` },
+                    ]}
+                  >
+                    <Ionicons
+                      name="person-circle"
+                      size={24}
+                      color={colors.primary}
+                    />
                   </View>
                   <View>
-                    <Text style={[styles.sectionTitle, { color: colors.primary }]}>Profile Summary</Text>
-                    <Text style={styles.sectionSubtitle}>Your fitness profile</Text>
+                    <Text
+                      style={[styles.sectionTitle, { color: colors.primary }]}
+                    >
+                      Profile Summary
+                    </Text>
+                    <Text style={styles.sectionSubtitle}>
+                      Your fitness profile
+                    </Text>
                   </View>
                 </View>
               </View>
               <View style={styles.profileInfo}>
                 <View style={styles.profileItem}>
                   <Text style={styles.profileLabel}>Fitness Level</Text>
-                  <Text style={styles.profileValue}>{userProfile.fitnessLevel}</Text>
+                  <Text style={styles.profileValue}>
+                    {userProfile.fitnessLevel}
+                  </Text>
                 </View>
                 <View style={styles.profileItem}>
                   <Text style={styles.profileLabel}>Primary Goal</Text>
-                  <Text style={styles.profileValue}>{userProfile.primaryGoal}</Text>
+                  <Text style={styles.profileValue}>
+                    {userProfile.primaryGoal}
+                  </Text>
                 </View>
                 <View style={styles.profileItem}>
                   <Text style={styles.profileLabel}>Motivation</Text>
-                  <View style={[styles.motivationBadge, { backgroundColor: `${colors.primary}10` }]}>
-                    <Text style={[styles.motivationText, { color: colors.primary }]}>
+                  <View
+                    style={[
+                      styles.motivationBadge,
+                      { backgroundColor: `${colors.primary}10` },
+                    ]}
+                  >
+                    <Text
+                      style={[styles.motivationText, { color: colors.primary }]}
+                    >
                       {userProfile.motivationLevel}
                     </Text>
                   </View>
@@ -264,18 +346,35 @@ export default function AnalyticsScreen() {
               <View style={styles.analysisCard}>
                 <View style={styles.sectionHeader}>
                   <View style={styles.sectionTitleContainer}>
-                    <View style={[styles.sectionIcon, { backgroundColor: `${colors.primary}10` }]}>
-                      <Ionicons name="thumbs-up" size={24} color={colors.primary} />
+                    <View
+                      style={[
+                        styles.sectionIcon,
+                        { backgroundColor: `${colors.primary}10` },
+                      ]}
+                    >
+                      <Ionicons
+                        name="thumbs-up"
+                        size={24}
+                        color={colors.primary}
+                      />
                     </View>
                     <View>
-                      <Text style={[styles.sectionTitle, { color: colors.primary }]}>Your Strengths</Text>
-                      <Text style={styles.sectionSubtitle}>Keep up the great work!</Text>
+                      <Text
+                        style={[styles.sectionTitle, { color: colors.primary }]}
+                      >
+                        Your Strengths
+                      </Text>
+                      <Text style={styles.sectionSubtitle}>
+                        Keep up the great work!
+                      </Text>
                     </View>
                   </View>
                 </View>
                 <FlatList
                   data={analysis.strengths}
-                  renderItem={({ item, index }) => renderAnalysisItem({ item, index, color: colors.primary })}
+                  renderItem={({ item, index }) =>
+                    renderAnalysisItem({ item, index, color: colors.primary })
+                  }
                   keyExtractor={(item, index) => `strength-${index}`}
                   scrollEnabled={false}
                 />
@@ -286,18 +385,35 @@ export default function AnalyticsScreen() {
               <View style={styles.analysisCard}>
                 <View style={styles.sectionHeader}>
                   <View style={styles.sectionTitleContainer}>
-                    <View style={[styles.sectionIcon, { backgroundColor: `${colors.primary}10` }]}>
-                      <Ionicons name="warning" size={24} color={colors.primary} />
+                    <View
+                      style={[
+                        styles.sectionIcon,
+                        { backgroundColor: `${colors.primary}10` },
+                      ]}
+                    >
+                      <Ionicons
+                        name="warning"
+                        size={24}
+                        color={colors.primary}
+                      />
                     </View>
                     <View>
-                      <Text style={[styles.sectionTitle, { color: colors.primary }]}>Areas for Improvement</Text>
-                      <Text style={styles.sectionSubtitle}>Focus on these opportunities</Text>
+                      <Text
+                        style={[styles.sectionTitle, { color: colors.primary }]}
+                      >
+                        Areas for Improvement
+                      </Text>
+                      <Text style={styles.sectionSubtitle}>
+                        Focus on these opportunities
+                      </Text>
                     </View>
                   </View>
                 </View>
                 <FlatList
                   data={analysis.gaps}
-                  renderItem={({ item, index }) => renderAnalysisItem({ item, index, color: colors.primary })}
+                  renderItem={({ item, index }) =>
+                    renderAnalysisItem({ item, index, color: colors.primary })
+                  }
                   keyExtractor={(item, index) => `gap-${index}`}
                   scrollEnabled={false}
                 />
@@ -308,18 +424,31 @@ export default function AnalyticsScreen() {
               <View style={[styles.analysisCard, { marginBottom: 40 }]}>
                 <View style={styles.sectionHeader}>
                   <View style={styles.sectionTitleContainer}>
-                    <View style={[styles.sectionIcon, { backgroundColor: `${colors.primary}10` }]}>
+                    <View
+                      style={[
+                        styles.sectionIcon,
+                        { backgroundColor: `${colors.primary}10` },
+                      ]}
+                    >
                       <Ionicons name="bulb" size={24} color={colors.primary} />
                     </View>
                     <View>
-                      <Text style={[styles.sectionTitle, { color: colors.primary }]}>Smart Recommendations</Text>
-                      <Text style={styles.sectionSubtitle}>AI-powered suggestions for you</Text>
+                      <Text
+                        style={[styles.sectionTitle, { color: colors.primary }]}
+                      >
+                        Smart Recommendations
+                      </Text>
+                      <Text style={styles.sectionSubtitle}>
+                        AI-powered suggestions for you
+                      </Text>
                     </View>
                   </View>
                 </View>
                 <FlatList
                   data={analysis.recommendations}
-                  renderItem={({ item, index }) => renderAnalysisItem({ item, index, color: colors.primary })}
+                  renderItem={({ item, index }) =>
+                    renderAnalysisItem({ item, index, color: colors.primary })
+                  }
                   keyExtractor={(item, index) => `rec-${index}`}
                   scrollEnabled={false}
                 />
@@ -330,7 +459,7 @@ export default function AnalyticsScreen() {
         style={styles.scrollView}
         refreshControl={
           <RefreshControl
-            refreshing={isRefreshing}
+            refreshing={isLoading}
             onRefresh={onRefresh}
             tintColor={colors.primary}
             colors={[colors.primary]}
@@ -345,7 +474,7 @@ export default function AnalyticsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors['bg-light'],
+    backgroundColor: colors["bg-light"],
   },
   header: {
     backgroundColor: colors.primary,
@@ -356,39 +485,39 @@ const styles = StyleSheet.create({
     // borderBottomRightRadius: 20,
   },
   headerTop: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
   },
   greeting: {
     fontSize: 24,
-    fontWeight: '700',
-    color: colors['text-light'],
+    fontWeight: "700",
+    color: colors["text-light"],
     marginBottom: 4,
   },
   headerDate: {
     fontSize: 14,
-    color: colors['text-light'],
-    fontWeight: '500',
+    color: colors["text-light"],
+    fontWeight: "500",
     opacity: 0.9,
   },
   headerStats: {
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: 16,
   },
   headerStatItem: {
-    alignItems: 'center',
+    alignItems: "center",
   },
   headerStatValue: {
     fontSize: 20,
-    fontWeight: '800',
-    color: colors['text-light'],
+    fontWeight: "800",
+    color: colors["text-light"],
     marginBottom: 4,
   },
   headerStatLabel: {
     fontSize: 12,
-    color: colors['text-light'],
-    fontWeight: '500',
+    color: colors["text-light"],
+    fontWeight: "500",
   },
   scrollView: {
     flex: 1,
@@ -404,35 +533,35 @@ const styles = StyleSheet.create({
   },
   errorContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     padding: 32,
     gap: 16,
-    backgroundColor: colors['bg-light'],
+    backgroundColor: colors["bg-light"],
   },
   errorText: {
-    color: colors['text-danger'],
+    color: colors["text-danger"],
     fontSize: 16,
-    textAlign: 'center',
+    textAlign: "center",
     lineHeight: 24,
   },
   retryButton: {
-    flexDirection: 'row',
-    backgroundColor: colors['bg-dark'],
+    flexDirection: "row",
+    backgroundColor: colors["bg-dark"],
     paddingHorizontal: 24,
     paddingVertical: 12,
     borderRadius: 24,
-    alignItems: 'center',
+    alignItems: "center",
     gap: 8,
   },
   retryIcon: {},
   retryButtonText: {
-    color: '#ffffff',
-    fontWeight: '600',
+    color: "#ffffff",
+    fontWeight: "600",
     fontSize: 16,
   },
   progressOverviewCard: {
-    backgroundColor: colors['bg-accent'],
+    backgroundColor: colors["bg-accent"],
     borderRadius: 24,
     padding: 20,
     marginBottom: 24,
@@ -442,107 +571,107 @@ const styles = StyleSheet.create({
     shadowRadius: 12,
     elevation: 5,
     borderWidth: 0.5,
-    borderColor: colors['border-light'],
+    borderColor: colors["border-light"],
   },
   sectionHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     marginBottom: 16,
   },
   sectionTitleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 12,
   },
   sectionIcon: {
     width: 48,
     height: 48,
     borderRadius: 24,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   sectionTitle: {
     fontSize: 22,
-    fontWeight: 'bold',
-    color: colors['text-primary'],
+    fontWeight: "bold",
+    color: colors["text-primary"],
   },
   sectionSubtitle: {
     fontSize: 14,
-    color: colors['text-secondary'],
+    color: colors["text-secondary"],
     opacity: 0.8,
   },
   progressStats: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
+    flexDirection: "row",
+    justifyContent: "space-around",
     gap: 16,
   },
   progressStat: {
-    alignItems: 'center',
+    alignItems: "center",
     flex: 1,
   },
   progressCircle: {
     width: 80,
     height: 80,
     borderRadius: 40,
-    backgroundColor: colors['bg-accent'],
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: colors["bg-accent"],
+    justifyContent: "center",
+    alignItems: "center",
     marginBottom: 12,
     borderWidth: 2,
   },
   progressPercentage: {
     fontSize: 24,
-    fontWeight: '800',
+    fontWeight: "800",
   },
   progressLabel: {
     fontSize: 14,
-    color: colors['text-secondary'],
-    fontWeight: '600',
-    textAlign: 'center',
+    color: colors["text-secondary"],
+    fontWeight: "600",
+    textAlign: "center",
   },
   insightsGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
+    flexDirection: "row",
+    flexWrap: "wrap",
     marginBottom: 24,
     gap: 16,
   },
   insightCard: {
-    backgroundColor: colors['bg-accent'],
+    backgroundColor: colors["bg-accent"],
     borderRadius: 16,
     padding: 16,
     width: (width - 64) / 2,
-    alignItems: 'center',
+    alignItems: "center",
     shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 8,
     elevation: 3,
     borderWidth: 0.5,
-    borderColor: colors['border-light'],
+    borderColor: colors["border-light"],
   },
   insightIcon: {
     width: 40,
     height: 40,
     borderRadius: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     marginBottom: 8,
   },
   insightValue: {
     fontSize: 20,
-    fontWeight: '700',
-    color: colors['text-primary'],
+    fontWeight: "700",
+    color: colors["text-primary"],
     marginBottom: 4,
   },
   insightLabel: {
     fontSize: 12,
-    color: colors['text-secondary'],
-    fontWeight: '500',
-    textAlign: 'center',
+    color: colors["text-secondary"],
+    fontWeight: "500",
+    textAlign: "center",
   },
   profileSummaryCard: {
-    backgroundColor: colors['bg-accent'],
+    backgroundColor: colors["bg-accent"],
     borderRadius: 24,
     padding: 20,
     marginBottom: 24,
@@ -552,26 +681,26 @@ const styles = StyleSheet.create({
     shadowRadius: 12,
     elevation: 5,
     borderWidth: 0.5,
-    borderColor: colors['border-light'],
+    borderColor: colors["border-light"],
   },
   profileInfo: {
     gap: 12,
   },
   profileItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
   },
   profileLabel: {
     fontSize: 16,
-    color: colors['text-secondary'],
-    fontWeight: '500',
+    color: colors["text-secondary"],
+    fontWeight: "500",
   },
   profileValue: {
     fontSize: 16,
-    color: colors['text-primary'],
-    fontWeight: '600',
-    textTransform: 'capitalize',
+    color: colors["text-primary"],
+    fontWeight: "600",
+    textTransform: "capitalize",
   },
   motivationBadge: {
     paddingHorizontal: 12,
@@ -580,11 +709,11 @@ const styles = StyleSheet.create({
   },
   motivationText: {
     fontSize: 14,
-    fontWeight: '600',
-    textTransform: 'capitalize',
+    fontWeight: "600",
+    textTransform: "capitalize",
   },
   analysisCard: {
-    backgroundColor: colors['bg-accent'],
+    backgroundColor: colors["bg-accent"],
     borderRadius: 24,
     padding: 20,
     marginBottom: 24,
@@ -594,11 +723,11 @@ const styles = StyleSheet.create({
     shadowRadius: 12,
     elevation: 5,
     borderWidth: 0.5,
-    borderColor: colors['border-light'],
+    borderColor: colors["border-light"],
   },
   analysisItem: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
+    flexDirection: "row",
+    alignItems: "flex-start",
     paddingVertical: 8,
   },
   analysisItemDot: {
@@ -612,8 +741,8 @@ const styles = StyleSheet.create({
   analysisItemText: {
     fontSize: 14,
     lineHeight: 20,
-    color: colors['text-secondary'],
+    color: colors["text-secondary"],
     flex: 1,
-    fontWeight: '500',
+    fontWeight: "500",
   },
 });
