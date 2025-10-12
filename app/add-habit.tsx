@@ -1,10 +1,11 @@
 import Button from '@/components/ui/Button';
+import InputField from '@/components/ui/InputField';
 import colors from '@/constants/Colors';
 import { useToast } from '@/hooks/useToast';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
-import { ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { mutate } from 'swr';
 import { ProtectedRoute } from '../components/ProtectedRoute';
 import CustomDateTimePicker from '../components/TimePicker';
@@ -126,11 +127,9 @@ export default function AddHabitPage() {
         </View>
 
         <ScrollView contentContainerStyle={styles.scrollContainer}>
-          <Text style={styles.label}>Habit Name</Text>
-          <TextInput
-            style={styles.input}
+          <InputField
+            label="Habit Name"
             placeholder="Enter habit name"
-            placeholderTextColor="#9ca3af"
             value={habitName}
             onChangeText={setHabitName}
           />

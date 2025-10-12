@@ -1,3 +1,4 @@
+import InputField from '@/components/ui/InputField';
 import colors from '@/constants/Colors';
 import { AntDesign, Feather, Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
@@ -62,12 +63,6 @@ const accordionSections: AccordionSection[] = [
         type: 'email',
         placeholder: 'Enter your email address'
       },
-      {
-        key: 'phone',
-        label: 'Phone Number',
-        type: 'text',
-        placeholder: 'Enter your phone number'
-      }
     ]
   },
 ];
@@ -190,15 +185,16 @@ const AccordionItem: React.FC<AccordionItemProps> = ({
         return (
           <View key={field.key} style={styles.inputGroup}>
             <Text style={styles.inputLabel}>{field.label}</Text>
-            <TextInput
-              style={commonStyle}
+            <InputField
+              // style={commonStyle}
               placeholder={field.placeholder}
-              placeholderTextColor={colors["text-secondary"]}
+              // placeholderTextColor={colors["text-secondary"]}
               value={form[field.key] || ''}
               onChangeText={v => onChange(field.key, v)}
-              editable={isEditing}
+              // editable={isEditing}
               keyboardType={field.type === 'email' ? 'email-address' : field.type === 'number' ? 'numeric' : 'default'}
               autoCapitalize={field.type === 'email' ? 'none' : 'words'}
+              disabled = {!isEditing}
             />
           </View>
         );

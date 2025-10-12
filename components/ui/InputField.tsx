@@ -12,6 +12,7 @@ interface InputFieldProps {
   autoCapitalize?: "none" | "sentences" | "words" | "characters";
   error?: string;
   style?: object;
+  disabled?: boolean; // ✅ NEW PROP
 }
 
 export const InputField: React.FC<InputFieldProps> = ({
@@ -24,12 +25,17 @@ export const InputField: React.FC<InputFieldProps> = ({
   autoCapitalize = "none",
   error,
   style,
+  disabled = false, // ✅ Default false
 }) => {
   return (
     <View style={styles.container}>
       {label ? <Text style={styles.label}>{label}</Text> : null}
       <TextInput
-        style={[styles.input, style]}
+        style={[
+          styles.input,
+          disabled && styles.disabledInput, // ✅ Dimmed style
+          style,
+        ]}
         placeholder={placeholder}
         placeholderTextColor="#aaa"
         value={value}
@@ -37,6 +43,7 @@ export const InputField: React.FC<InputFieldProps> = ({
         secureTextEntry={secureTextEntry}
         keyboardType={keyboardType}
         autoCapitalize={autoCapitalize}
+        editable={!disabled} // ✅ Disable typing
       />
       {error ? <Text style={styles.errorText}>{error}</Text> : null}
     </View>
@@ -64,6 +71,10 @@ const styles = StyleSheet.create({
     fontSize: 16,
     borderWidth: 1,
     borderColor: colors["border-light"],
+  },
+  disabledInput: {
+    opacity: 0.6,
+    backgroundColor: colors["bg-secondary"], // slightly dim background
   },
   errorText: {
     color: colors["text-danger"],

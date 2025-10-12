@@ -43,7 +43,7 @@ export default function AnalyticsScreen() {
     </View>
   );
 
-  if (isLoading) {
+  if (!isLoading) {
     return (
       <View style={styles.container}>
         <View style={styles.header}>
