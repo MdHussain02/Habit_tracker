@@ -5,9 +5,9 @@ import { useToast } from "@/hooks/useToast";
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { mutate as globalMutate } from "swr"; // ✅ Import global SWR mutate
 
 const DAY_NAMES = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-
 const ICON_MAP: Record<number, string> = {
   1: "water",
   2: "book",
@@ -27,9 +27,7 @@ export default function HabitDetailsScreen() {
   const { data, error: fetchError, isLoading, mutate } = useSwrApi(`/habits/${id}`);
   const habit = data?.data;
 
-  const { trigger: markHabit, isMutating: marking } = useSwrMutationApi(
-    `/habits/${id}/mark`
-  );
+  const { trigger: markHabit, isMutating: marking } = useSwrMutationApi(`/habits/${id}/mark`);
 
   const formatTime = (dateString: string | number | Date) => {
     if (!dateString) return "Not set";
@@ -70,7 +68,7 @@ export default function HabitDetailsScreen() {
       const response = await markHabit({ timestamp });
 
       if (response?.success) {
-        // Update local habit data
+        // ✅ Update local habit data
         mutate(
           (currentData: any) => ({
             ...currentData,
@@ -81,14 +79,35 @@ export default function HabitDetailsScreen() {
               streak: response?.data?.streak ?? currentData.data.streak ?? 0,
             },
           }),
-          false // don't revalidate immediately
+          false
         );
 
-        // Optional: update habit list cache for today
+        // ✅ Also update today's habit list optimistically
         const todayUTC = new Date().toISOString().split("T")[0];
-        mutate(`/habits?date=${todayUTC}`);
+        globalMutate(
+          `/habits?date=${todayUTC}`,
+          (current: any) => {
+            if (!current?.data) return current;
+            return {
+              ...current,
+              data: current.data.map((h: any) =>
+                h.id === habit.id
+                  ? {
+                      ...h,
+                      completed: true,
+                      last_completion: response?.data?.completion?.timestamp ?? timestamp,
+                      streak: response?.data?.streak ?? h.streak ?? 0,
+                    }
+                  : h
+              ),
+            };
+          },
+          false
+        );
 
+        // ✅ Navigate back to home or tab page
         router.replace("/(tabs)");
+
         showToast(
           `Marked habit as complete. Streak: ${response?.data?.streak ?? 0} days`,
           "success"
@@ -110,7 +129,7 @@ export default function HabitDetailsScreen() {
     );
   }
 
-  if (fetchError || !habit) {
+  if (fetchError) {
     return (
       <View style={styles.centered}>
         <Text>Habit not found or failed to load.</Text>
@@ -121,7 +140,7 @@ export default function HabitDetailsScreen() {
     );
   }
 
-  const iconName = ICON_MAP[habit.icon_id] || "help-circle";
+  const iconName = ICON_MAP[habit?.icon_id] || "help-circle";
 
   return (
     <View style={styles.container}>
@@ -188,7 +207,6 @@ export default function HabitDetailsScreen() {
   );
 }
 
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -205,42 +223,6 @@ const styles = StyleSheet.create({
     padding: 24,
     backgroundColor: "#ffffff",
   },
-  // Loading placeholders
-  actionButtonPlaceholder: {
-    width: 350,
-    height: 50,
-    borderRadius: 20,
-    backgroundColor: "#f0f0f0",
-    marginBottom: 16,
-  },
-  iconPlaceholder: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: "#f0f0f0",
-    marginBottom: 16,
-  },
-  titlePlaceholder: {
-    width: 200,
-    height: 24,
-    backgroundColor: "#f0f0f0",
-    borderRadius: 4,
-    marginBottom: 8,
-  },
-  detailLabelPlaceholder: {
-    width: 100,
-    height: 16,
-    backgroundColor: "#f0f0f0",
-    borderRadius: 4,
-    marginBottom: 4,
-  },
-  detailValuePlaceholder: {
-    width: 150,
-    height: 20,
-    backgroundColor: "#f0f0f0",
-    borderRadius: 4,
-  },
-  // Habit details
   header: {
     backgroundColor: colors["bg-primary"],
     paddingTop: 60,
@@ -249,22 +231,11 @@ const styles = StyleSheet.create({
     borderBottomLeftRadius: 20,
     borderBottomRightRadius: 20,
   },
-  headerTop: {
-    flexDirection: "row",
-    // justifyContent: 'space-between',
-    alignItems: "center",
-    gap: 10,
-  },
   greeting: {
     fontSize: 24,
     fontWeight: "700",
     color: "#ffffff",
     marginBottom: 4,
-  },
-  headerDate: {
-    fontSize: 14,
-    color: "#FFFFFF",
-    fontWeight: "500",
   },
   backButton: {
     width: 44,
@@ -306,50 +277,6 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     backgroundColor: "#f8f8f8",
   },
-  loadingText: {
-    marginTop: 16,
-    color: "#666666",
-    fontSize: 16,
-  },
-  errorIcon: {
-    marginBottom: 16,
-  },
-  errorText: {
-    color: "#e53e3e",
-    fontSize: 18,
-    textAlign: "center",
-    marginBottom: 24,
-    paddingHorizontal: 24,
-  },
-  emptyStateText: {
-    color: "#1a1a1a",
-    fontSize: 20,
-    fontWeight: "600",
-    marginBottom: 8,
-    textAlign: "center",
-  },
-  emptyStateSubtext: {
-    color: "#666666",
-    fontSize: 14,
-    textAlign: "center",
-    marginBottom: 24,
-    paddingHorizontal: 24,
-  },
-  retryButton: {
-    backgroundColor: colors.primary,
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-    borderRadius: 8,
-  },
-  retryButtonText: {
-    color: "#fff",
-    fontWeight: "600",
-    fontSize: 16,
-  },
-  habitTime: {
-    fontSize: 16,
-    color: "#888",
-  },
   detailsContainer: {
     padding: 16,
   },
@@ -367,28 +294,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.05,
     shadowRadius: 2,
     elevation: 1,
-  },
-  detailIcon: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: "#f8f8f8",
-    justifyContent: "center",
-    alignItems: "center",
-    marginRight: 16,
-  },
-  detailTextContainer: {
-    flex: 1,
-  },
-  detailLabel: {
-    fontSize: 14,
-    color: "#666666",
-    marginBottom: 4,
-  },
-  detailValue: {
-    fontSize: 16,
-    color: "#1a1a1a",
-    fontWeight: "500",
   },
   actionsContainer: {
     padding: 16,
