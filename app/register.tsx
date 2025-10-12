@@ -1,14 +1,14 @@
 import { DropdownButton } from "@/components/DropDownButton";
 import { DropdownModal } from "@/components/DropdownSelect";
 import Button from "@/components/ui/Button";
+import InputField from "@/components/ui/InputField";
 import colors from "@/constants/Colors";
 import { Ionicons } from "@expo/vector-icons";
 import {
   StyleSheet,
   Text,
-  TextInput,
   TouchableOpacity,
-  View,
+  View
 } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { ProtectedRoute } from "../components/ProtectedRoute";
@@ -119,34 +119,30 @@ export default function RegistrationScreen({
           {step === 0 && (
             <View style={styles.formSection}>
               <Text style={styles.sectionTitle}>Tell us about yourself</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="Full Name"
-                placeholderTextColor="#aaa"
+              <InputField
+                label="Full Name"
+                placeholder="Enter your Full Name"
                 value={form.name}
                 onChangeText={(v) => handleChange("name", v)}
               />
-              <TextInput
-                style={styles.input}
-                placeholder="Email Address"
-                placeholderTextColor="#aaa"
+              <InputField
+                label="Email"
+                placeholder="Enter your Email"
                 value={form.email}
                 onChangeText={(v) => handleChange("email", v)}
                 keyboardType="email-address"
                 autoCapitalize="none"
               />
-              <TextInput
-                style={styles.input}
-                placeholder="Password"
-                placeholderTextColor="#aaa"
+              <InputField
+                label="Password"
+                placeholder="Enter your Password"
                 value={form.password}
                 onChangeText={(v) => handleChange("password", v)}
                 secureTextEntry
               />
-              <TextInput
-                style={styles.input}
-                placeholder="Confirm Password"
-                placeholderTextColor="#aaa"
+              <InputField
+                label="Confirm Password"
+                placeholder="Confirm your Password"
                 value={form.confirmPassword}
                 onChangeText={(v) => handleChange("confirmPassword", v)}
                 secureTextEntry
@@ -164,28 +160,25 @@ export default function RegistrationScreen({
             <View style={styles.formSection}>
               <Text style={styles.sectionTitle}>Health & Fitness Goals</Text>
               <View style={styles.row}>
-                <TextInput
-                  style={[styles.input, styles.halfInput]}
-                  placeholder="Height (cm)"
-                  placeholderTextColor="#aaa"
+                <InputField
+                  placeholder="Enter your Height"
+                  label="Height (cm)"
                   value={form.height}
                   onChangeText={(v) => handleChange("height", v)}
                   keyboardType="numeric"
                 />
-                <TextInput
-                  style={[styles.input, styles.halfInput]}
-                  placeholder="Weight (kg)"
-                  placeholderTextColor="#aaa"
+                <InputField
+                  placeholder="Enter your Weight"
+                  label="Weight (kg)"
                   value={form.weight}
                   onChangeText={(v) => handleChange("weight", v)}
                   keyboardType="numeric"
                 />
               </View>
               <View style={styles.row}>
-                <TextInput
-                  style={[styles.input, styles.halfInput]}
-                  placeholder="Age"
-                  placeholderTextColor="#aaa"
+                <InputField
+                  label="Age"
+                  placeholder="Enter your Age"
                   value={form.age}
                   onChangeText={(v) => handleChange("age", v)}
                   keyboardType="numeric"
@@ -209,6 +202,7 @@ export default function RegistrationScreen({
                 disabled={
                   choicesLoading || getOptions("fitness_level").length === 0
                 }
+                title="Fitnes Level"
               />
               <DropdownButton
                 value={form.primaryGoal}
@@ -218,6 +212,7 @@ export default function RegistrationScreen({
                 disabled={
                   choicesLoading || getOptions("primary_goal").length === 0
                 }
+                title="Primary Goal"
               />
             </View>
           )}
@@ -229,16 +224,16 @@ export default function RegistrationScreen({
                 Daily Schedule & Preferences
               </Text>
               <CustomDateTimePicker
-                // title="Wake Up Time"
+                title="Wake Up Time"
                 value={form.wakeUpTime}
-                onValueChange={(time) => handleChange('wakeUpTime', time)}
+                onValueChange={(time) => handleChange("wakeUpTime", time)}
                 mode="time"
                 placeHolderText="Wake Up Time"
               />
               <CustomDateTimePicker
-                // title="Sleep Time"
+                title="Sleep Time"
                 value={form.sleepTime}
-                onValueChange={(time) => handleChange('sleepTime', time)}
+                onValueChange={(time) => handleChange("sleepTime", time)}
                 mode="time"
                 placeHolderText="Sleep Time"
               />
@@ -251,6 +246,7 @@ export default function RegistrationScreen({
                   choicesLoading ||
                   getOptions("preferred_workout_time").length === 0
                 }
+                title="Preferred Workout Time"
               />
               <DropdownButton
                 value={form.motivationLevel}
@@ -258,6 +254,7 @@ export default function RegistrationScreen({
                 placeholder="Select Motivation Level"
                 onPress={() => setShowMotivationDropdown(true)}
                 disabled={choicesLoading}
+                title="Motivation Level"
               />
             </View>
           )}
@@ -439,7 +436,7 @@ const styles = StyleSheet.create({
   },
   row: {
     flexDirection: "row",
-    flexWrap :"wrap",
+    flexWrap: "wrap",
     gap: 12,
   },
   halfInput: {

@@ -27,7 +27,7 @@ export default function AnalyticsScreen() {
     mutate,
   } = useSwrApi("/suggestions/analysis");
 
-  console.log(analysisData);
+
   const renderAnalysisItem = ({
     item,
     index,

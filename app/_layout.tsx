@@ -49,12 +49,6 @@ function AuthAwareNavigator() {
   const { isLoading, isAuthenticated } = useAuth();
   const colorScheme = useColorScheme();
 
-  console.log(
-    "🔐 Auth State - isLoading:",
-    isLoading,
-    "isAuthenticated:",
-    isAuthenticated
-  );
 
   // Show splash screen while checking authentication
   if (isLoading) {

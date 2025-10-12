@@ -35,7 +35,7 @@ export const DropdownModal = ({
               <TouchableOpacity
                 style={styles.dropdownItem}
                 onPress={() => {
-                  console.log(`Selected option:`, item);
+  
                   onSelect(item);
                   onClose();
                 }}

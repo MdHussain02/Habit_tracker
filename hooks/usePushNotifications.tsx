@@ -48,7 +48,7 @@ export function PushNotificationProvider({ children }: { children: ReactNode }) 
 
   // Configure notification handler
   useEffect(() => {
-    console.log('Configuring notification handler...');
+
     
     Notifications.setNotificationHandler({
       handleNotification: async () => ({
