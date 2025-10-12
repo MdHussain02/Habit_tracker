@@ -1,3 +1,4 @@
+import HabitCardShimmer from "@/components/HabitCardShimmer";
 import colors from "@/constants/Colors";
 import useSwrApi from "@/hooks/useSwrApi";
 import { useSwrMutationApi } from "@/hooks/useSwrMutation";
@@ -124,7 +125,7 @@ export default function HabitDetailsScreen() {
   if (isLoading) {
     return (
       <View style={styles.centered}>
-        <Text>Loading habit...</Text>
+      <HabitCardShimmer/>
       </View>
     );
   }
