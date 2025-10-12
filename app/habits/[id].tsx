@@ -230,6 +230,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     borderBottomLeftRadius: 20,
     borderBottomRightRadius: 20,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 16,
   },
   greeting: {
     fontSize: 24,
