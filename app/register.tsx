@@ -538,7 +538,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.12,
     shadowRadius: 16,
     elevation: 8,
-    minHeight: Dimensions.get("window").height * 0.6, // 👈 fixed visible height (~60% of screen)
+    minHeight: Dimensions.get("window").height * 0.65, // 👈 fixed visible height (~60% of screen)
     justifyContent: "space-between",
   },
   title: {
