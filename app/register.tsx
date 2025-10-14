@@ -2,20 +2,31 @@ import { DropdownButton } from "@/components/DropDownButton";
 import { DropdownModal } from "@/components/DropdownSelect";
 import Button from "@/components/ui/Button";
 import InputField from "@/components/ui/InputField";
-import colors from "@/constants/Colors";
 import { Ionicons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
+import { useEffect, useRef } from "react";
 import {
+  Animated,
+  Dimensions,
   StyleSheet,
   Text,
   TouchableOpacity,
-  View
+  View,
 } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { ProtectedRoute } from "../components/ProtectedRoute";
 import CustomDateTimePicker from "../components/TimePicker";
 import { useRegistrationForm } from "../hooks/useRegistrationForm";
 
-const steps = ["Personal Info", "Health & Goals", "Preferences"];
+const { width } = Dimensions.get("window");
+
+const steps = [
+  "Personal Info",
+  "Physical Details",
+  "Fitness Level",
+  "Goals",
+  "Preferences",
+];
 
 export default function RegistrationScreen({
   onRegister,
@@ -23,265 +34,313 @@ export default function RegistrationScreen({
   onRegister: (user: any) => void;
 }) {
   const {
-    // State
     step,
     form,
     choicesLoading,
     progress,
-
-    // Dropdown states
     showGenderDropdown,
     showFitnessDropdown,
     showGoalDropdown,
     showWorkoutTimeDropdown,
     showMotivationDropdown,
-
-    // Handlers
     handleChange,
     canNext,
     nextStep,
     prevStep,
     getOptions,
-
-    // Dropdown handlers
     setShowGenderDropdown,
     setShowFitnessDropdown,
     setShowGoalDropdown,
     setShowWorkoutTimeDropdown,
     setShowMotivationDropdown,
-
-    // Router
     router,
   } = useRegistrationForm(onRegister);
+
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    Animated.timing(fadeAnim, {
+      toValue: 1,
+      duration: 800,
+      useNativeDriver: true,
+    }).start();
+  }, [step]);
 
   return (
     <ProtectedRoute requireAuth={false}>
       <View style={styles.container}>
-        {/* Back Button */}
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => router.back()}
+        <LinearGradient
+          colors={["#f0fdf4", "#fef3f2", "#eff6ff"]}
+          style={styles.gradient}
         >
-          <Ionicons name="arrow-back" size={24} color="#4CAF50" />
-        </TouchableOpacity>
+          <View style={[styles.blurCircle, styles.blurCircle1]} />
+          <View style={[styles.blurCircle, styles.blurCircle2]} />
 
-        <KeyboardAwareScrollView
-          contentContainerStyle={styles.scrollContainer}
-          enableOnAndroid={true}
-          enableAutomaticScroll={true}
-          keyboardShouldPersistTaps="handled"
-          extraScrollHeight={100}
-        >
-          {/* Progress Bar */}
-          <View style={styles.progressContainer}>
-            <View style={styles.progressBar}>
-              <View style={[styles.progressFill, { width: `${progress}%` }]} />
-            </View>
-            <Text style={styles.progressText}>
-              {Math.round(progress)}% Complete
-            </Text>
-          </View>
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => router.back()}
+          >
+            <Ionicons name="arrow-back" size={24} color="#4CAF50" />
+          </TouchableOpacity>
 
-          {/* Step Indicator */}
-          <View style={styles.stepContainer}>
-            {steps.map((label, idx) => (
-              <View key={label} style={styles.stepItem}>
-                <View
+          <KeyboardAwareScrollView
+            contentContainerStyle={styles.scrollContainer}
+            enableOnAndroid={true}
+            enableAutomaticScroll={true}
+            keyboardShouldPersistTaps="handled"
+            extraScrollHeight={100}
+            showsVerticalScrollIndicator={false}
+          >
+            <View style={styles.progressContainer}>
+              <View style={styles.progressBar}>
+                <Animated.View
                   style={[
-                    styles.stepCircle,
-                    step >= idx && styles.stepCircleActive,
+                    styles.progressFill,
+                    {
+                      width: `${progress}%`,
+                      shadowColor: "#4CAF50",
+                      shadowOffset: { width: 0, height: 0 },
+                      shadowOpacity: 0.5,
+                      shadowRadius: 8,
+                      elevation: 5,
+                    },
                   ]}
-                >
+                />
+              </View>
+              <Text style={styles.progressText}>
+                {Math.round(progress)}% Complete
+              </Text>
+            </View>
+
+            <View style={styles.stepContainer}>
+              {steps.map((label, idx) => (
+                <View key={label} style={styles.stepItem}>
+                  <View style={styles.stepWrapper}>
+                    {idx > 0 && (
+                      <View
+                        style={[
+                          styles.stepConnector,
+                          step >= idx && styles.stepConnectorActive,
+                        ]}
+                      />
+                    )}
+                    <View
+                      style={[
+                        styles.stepCircle,
+                        step >= idx && styles.stepCircleActive,
+                        step === idx && styles.stepCircleCurrent,
+                      ]}
+                    >
+                      {step > idx ? (
+                        <Ionicons name="checkmark" size={16} color="#fff" />
+                      ) : (
+                        <Text
+                          style={[
+                            styles.stepNumber,
+                            step >= idx && styles.stepNumberActive,
+                          ]}
+                        >
+                          {idx + 1}
+                        </Text>
+                      )}
+                    </View>
+                  </View>
                   <Text
                     style={[
-                      styles.stepNumber,
-                      step >= idx && styles.stepNumberActive,
+                      styles.stepLabel,
+                      step >= idx && styles.stepLabelActive,
+                      step === idx && styles.stepLabelCurrent,
                     ]}
                   >
-                    {idx + 1}
+                    {label}
                   </Text>
                 </View>
-                <Text
-                  style={[
-                    styles.stepLabel,
-                    step >= idx && styles.stepLabelActive,
-                  ]}
-                >
-                  {label}
-                </Text>
-              </View>
-            ))}
-          </View>
+              ))}
+            </View>
 
-          <Text style={styles.title}>{steps[step]}</Text>
+            <Animated.View style={[styles.card, { opacity: fadeAnim }]}>
+              <Text style={styles.title}>{steps[step]}</Text>
 
-          {/* Step 0: Personal Info */}
-          {step === 0 && (
-            <View style={styles.formSection}>
-              <Text style={styles.sectionTitle}>Tell us about yourself</Text>
-              <InputField
-                label="Full Name"
-                placeholder="Enter your Full Name"
-                value={form.name}
-                onChangeText={(v) => handleChange("name", v)}
-              />
-              <InputField
-                label="Email"
-                placeholder="Enter your Email"
-                value={form.email}
-                onChangeText={(v) => handleChange("email", v)}
-                keyboardType="email-address"
-                autoCapitalize="none"
-              />
-              <InputField
-                label="Password"
-                placeholder="Enter your Password"
-                value={form.password}
-                onChangeText={(v) => handleChange("password", v)}
-                secureTextEntry
-              />
-              <InputField
-                label="Confirm Password"
-                placeholder="Confirm your Password"
-                value={form.confirmPassword}
-                onChangeText={(v) => handleChange("confirmPassword", v)}
-                secureTextEntry
-              />
-              {form.password &&
-                form.confirmPassword &&
-                form.password !== form.confirmPassword && (
-                  <Text style={styles.errorText}>Passwords don't match</Text>
+              {step === 0 && (
+                <View style={styles.formSection}>
+                  <Text style={styles.sectionTitle}>
+                    Tell us about yourself
+                  </Text>
+                  <InputField
+                    label="Full Name"
+                    placeholder="Enter your Full Name"
+                    value={form.name}
+                    onChangeText={(v) => handleChange("name", v)}
+                  />
+                  <InputField
+                    label="Email"
+                    placeholder="Enter your Email"
+                    value={form.email}
+                    onChangeText={(v) => handleChange("email", v)}
+                    keyboardType="email-address"
+                    autoCapitalize="none"
+                  />
+                  <InputField
+                    label="Password"
+                    placeholder="Enter your Password"
+                    value={form.password}
+                    onChangeText={(v) => handleChange("password", v)}
+                    secureTextEntry
+                  />
+                  <InputField
+                    label="Confirm Password"
+                    placeholder="Confirm your Password"
+                    value={form.confirmPassword}
+                    onChangeText={(v) => handleChange("confirmPassword", v)}
+                    secureTextEntry
+                  />
+                  {form.password &&
+                    form.confirmPassword &&
+                    form.password !== form.confirmPassword && (
+                      <Text style={styles.errorText}>
+                        Passwords don't match
+                      </Text>
+                    )}
+                </View>
+              )}
+
+              {step === 1 && (
+                <View style={styles.formSection}>
+                  <Text style={styles.sectionTitle}>Your Physical Details</Text>
+                  <View style={styles.row}>
+                    <InputField
+                      placeholder="Enter your Height"
+                      label="Height (cm)"
+                      value={form.height}
+                      onChangeText={(v) => handleChange("height", v)}
+                      keyboardType="numeric"
+                    />
+                    <InputField
+                      placeholder="Enter your Weight"
+                      label="Weight (kg)"
+                      value={form.weight}
+                      onChangeText={(v) => handleChange("weight", v)}
+                      keyboardType="numeric"
+                    />
+                  </View>
+                  <View style={styles.row}>
+                    <InputField
+                      label="Age"
+                      placeholder="Enter your Age"
+                      value={form.age}
+                      onChangeText={(v) => handleChange("age", v)}
+                      keyboardType="numeric"
+                    />
+                    <DropdownButton
+                      value={form.gender}
+                      options={getOptions("gender")}
+                      placeholder="Select Gender"
+                      onPress={() => setShowGenderDropdown(true)}
+                      disabled={
+                        choicesLoading || getOptions("gender").length === 0
+                      }
+                      title="gender"
+                    />
+                  </View>
+                </View>
+              )}
+
+              {step === 2 && (
+                <View style={styles.formSection}>
+                  <Text style={styles.sectionTitle}>Fitness Experience</Text>
+                  <DropdownButton
+                    value={form.fitnessLevel}
+                    options={getOptions("fitness_level")}
+                    placeholder="Select Fitness Level"
+                    onPress={() => setShowFitnessDropdown(true)}
+                    disabled={
+                      choicesLoading || getOptions("fitness_level").length === 0
+                    }
+                    title="Fitness Level"
+                  />
+                  <DropdownButton
+                    value={form.motivationLevel}
+                    options={getOptions("motivation_level")}
+                    placeholder="Select Motivation Level"
+                    onPress={() => setShowMotivationDropdown(true)}
+                    disabled={choicesLoading}
+                    title="Motivation Level"
+                  />
+                </View>
+              )}
+
+              {step === 3 && (
+                <View style={styles.formSection}>
+                  <Text style={styles.sectionTitle}>What's Your Goal?</Text>
+                  <DropdownButton
+                    value={form.primaryGoal}
+                    options={getOptions("primary_goal")}
+                    placeholder="Select Primary Goal"
+                    onPress={() => setShowGoalDropdown(true)}
+                    disabled={
+                      choicesLoading || getOptions("primary_goal").length === 0
+                    }
+                    title="Primary Goal"
+                  />
+                </View>
+              )}
+
+              {step === 4 && (
+                <View style={styles.formSection}>
+                  <Text style={styles.sectionTitle}>
+                    Daily Schedule & Preferences
+                  </Text>
+                  <CustomDateTimePicker
+                    title="Wake Up Time"
+                    value={form.wakeUpTime}
+                    onValueChange={(time) => handleChange("wakeUpTime", time)}
+                    mode="time"
+                    placeHolderText="Wake Up Time"
+                  />
+                  <CustomDateTimePicker
+                    title="Sleep Time"
+                    value={form.sleepTime}
+                    onValueChange={(time) => handleChange("sleepTime", time)}
+                    mode="time"
+                    placeHolderText="Sleep Time"
+                  />
+                  <DropdownButton
+                    value={form.preferredWorkoutTime}
+                    options={getOptions("preferred_workout_time")}
+                    placeholder="Select Preferred Workout Time"
+                    onPress={() => setShowWorkoutTimeDropdown(true)}
+                    disabled={
+                      choicesLoading ||
+                      getOptions("preferred_workout_time").length === 0
+                    }
+                    title="Preferred Workout Time"
+                  />
+                </View>
+              )}
+
+              <View style={styles.buttonRow}>
+                {step > 0 && (
+                  <Button
+                    onPress={prevStep}
+                    disabled={step === 0}
+                    type="secondary"
+                    size="large"
+                  >
+                    Back
+                  </Button>
                 )}
-            </View>
-          )}
-
-          {/* Step 1: Health & Goals */}
-          {step === 1 && (
-            <View style={styles.formSection}>
-              <Text style={styles.sectionTitle}>Health & Fitness Goals</Text>
-              <View style={styles.row}>
-                <InputField
-                  placeholder="Enter your Height"
-                  label="Height (cm)"
-                  value={form.height}
-                  onChangeText={(v) => handleChange("height", v)}
-                  keyboardType="numeric"
-                />
-                <InputField
-                  placeholder="Enter your Weight"
-                  label="Weight (kg)"
-                  value={form.weight}
-                  onChangeText={(v) => handleChange("weight", v)}
-                  keyboardType="numeric"
-                />
+                <Button
+                  onPress={nextStep}
+                  disabled={!canNext()}
+                  type="primary"
+                  size="large"
+                >
+                  {step === steps.length - 1 ? "Create Account" : "Next"}
+                </Button>
               </View>
-              <View style={styles.row}>
-                <InputField
-                  label="Age"
-                  placeholder="Enter your Age"
-                  value={form.age}
-                  onChangeText={(v) => handleChange("age", v)}
-                  keyboardType="numeric"
-                />
+            </Animated.View>
+          </KeyboardAwareScrollView>
 
-                <DropdownButton
-                  value={form.gender}
-                  options={getOptions("gender")}
-                  placeholder="Select Gender"
-                  onPress={() => setShowGenderDropdown(true)}
-                  style={[styles.halfInput]}
-                  disabled={choicesLoading || getOptions("gender").length === 0}
-                  title="gender"
-                />
-              </View>
-              <DropdownButton
-                value={form.fitnessLevel}
-                options={getOptions("fitness_level")}
-                placeholder="Select Fitness Level"
-                onPress={() => setShowFitnessDropdown(true)}
-                disabled={
-                  choicesLoading || getOptions("fitness_level").length === 0
-                }
-                title="Fitnes Level"
-              />
-              <DropdownButton
-                value={form.primaryGoal}
-                options={getOptions("primary_goal")}
-                placeholder="Select Primary Goal"
-                onPress={() => setShowGoalDropdown(true)}
-                disabled={
-                  choicesLoading || getOptions("primary_goal").length === 0
-                }
-                title="Primary Goal"
-              />
-            </View>
-          )}
-
-          {/* Step 2: Preferences */}
-          {step === 2 && (
-            <View style={styles.formSection}>
-              <Text style={styles.sectionTitle}>
-                Daily Schedule & Preferences
-              </Text>
-              <CustomDateTimePicker
-                title="Wake Up Time"
-                value={form.wakeUpTime}
-                onValueChange={(time) => handleChange("wakeUpTime", time)}
-                mode="time"
-                placeHolderText="Wake Up Time"
-              />
-              <CustomDateTimePicker
-                title="Sleep Time"
-                value={form.sleepTime}
-                onValueChange={(time) => handleChange("sleepTime", time)}
-                mode="time"
-                placeHolderText="Sleep Time"
-              />
-              <DropdownButton
-                value={form.preferredWorkoutTime}
-                options={getOptions("preferred_workout_time")}
-                placeholder="Select Preferred Workout Time"
-                onPress={() => setShowWorkoutTimeDropdown(true)}
-                disabled={
-                  choicesLoading ||
-                  getOptions("preferred_workout_time").length === 0
-                }
-                title="Preferred Workout Time"
-              />
-              <DropdownButton
-                value={form.motivationLevel}
-                options={getOptions("motivation_level")}
-                placeholder="Select Motivation Level"
-                onPress={() => setShowMotivationDropdown(true)}
-                disabled={choicesLoading}
-                title="Motivation Level"
-              />
-            </View>
-          )}
-
-          {/* Navigation Buttons */}
-          <View style={styles.buttonRow}>
-            {step > 0 && (
-              <Button
-                onPress={prevStep}
-                disabled={step === 0}
-                type="secondary"
-                size="large"
-              >
-                Back
-              </Button>
-            )}
-            <Button
-              onPress={nextStep}
-              disabled={!canNext()}
-              type="primary"
-              size="large"
-            >
-              {step === steps.length - 1 ? "Create Account" : "Next"}
-            </Button>
-          </View>
-
-          {/* Dropdown Modals */}
           <DropdownModal
             visible={showGenderDropdown}
             onClose={() => setShowGenderDropdown(false)}
@@ -317,7 +376,7 @@ export default function RegistrationScreen({
             onSelect={(option) => handleChange("motivationLevel", option)}
             title="Select Motivation Level"
           />
-        </KeyboardAwareScrollView>
+        </LinearGradient>
       </View>
     </ProtectedRoute>
   );
@@ -326,228 +385,198 @@ export default function RegistrationScreen({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors["bg-light"],
+  },
+  gradient: {
+    flex: 1,
+  },
+  blurCircle: {
+    position: "absolute",
+    width: 280,
+    height: 280,
+    borderRadius: 140,
+    opacity: 0.15,
+  },
+  blurCircle1: {
+    top: -80,
+    left: -80,
+    backgroundColor: "#4CAF50",
+  },
+  blurCircle2: {
+    bottom: -100,
+    right: -100,
+    backgroundColor: "#6366f1",
   },
   backButton: {
     position: "absolute",
     top: 50,
     left: 20,
-    zIndex: 10,
-    padding: 8,
-    borderRadius: 20,
-    backgroundColor: colors["bg-light"],
+    zIndex: 100,
+    padding: 12,
+    borderRadius: 24,
+    backgroundColor: "rgba(255, 255, 255, 0.95)",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 3,
   },
   scrollContainer: {
     flexGrow: 1,
-    padding: 24,
+    padding: 20,
     paddingTop: 100,
-    backgroundColor: colors["bg-light"],
   },
   progressContainer: {
-    marginBottom: 32,
+    marginBottom: 28,
+    paddingHorizontal: 4,
   },
   progressBar: {
-    height: 8,
-    backgroundColor: colors["bg-secondary"],
-    borderRadius: 4,
+    height: 10,
+    backgroundColor: "rgba(255, 255, 255, 0.8)",
+    borderRadius: 10,
     overflow: "hidden",
-    marginBottom: 8,
+    marginBottom: 10,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 2,
   },
   progressFill: {
     height: "100%",
-    backgroundColor: colors.primary,
-    borderRadius: 4,
+    backgroundColor: "#4CAF50",
+    borderRadius: 10,
   },
   progressText: {
-    color: colors["text-secondary"],
-    fontSize: 14,
+    color: "#666",
+    fontSize: 13,
     textAlign: "center",
+    fontWeight: "600",
   },
   stepContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
     marginBottom: 32,
-    paddingHorizontal: 20,
+    paddingHorizontal: 4,
+    position: "relative",
   },
   stepItem: {
     alignItems: "center",
     flex: 1,
   },
+  stepWrapper: {
+    position: "relative",
+    alignItems: "center",
+  },
+  stepConnector: {
+    position: "absolute",
+    right: "50%",
+    top: "50%",
+    width: width / 5 - 40,
+    height: 2,
+    backgroundColor: "#e0e0e0",
+    transform: [{ translateY: -1 }],
+  },
+  stepConnectorActive: {
+    backgroundColor: "#4CAF50",
+  },
   stepCircle: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: colors["bg-light"],
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: "#fff",
     justifyContent: "center",
     alignItems: "center",
     marginBottom: 8,
-    borderWidth: 1,
-    borderColor: colors["border-light"],
+    borderWidth: 2,
+    borderColor: "#e0e0e0",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
   stepCircleActive: {
-    backgroundColor: colors.primary,
-    borderColor: colors["border-light"],
+    backgroundColor: "#4CAF50",
+    borderColor: "#4CAF50",
+  },
+  stepCircleCurrent: {
+    shadowColor: "#4CAF50",
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.4,
+    shadowRadius: 8,
+    elevation: 5,
   },
   stepNumber: {
-    color: colors["text-secondary"],
-    fontSize: 16,
+    color: "#999",
+    fontSize: 14,
     fontWeight: "bold",
   },
   stepNumberActive: {
-    color: colors["text-light"],
+    color: "#fff",
   },
   stepLabel: {
-    color: colors["text-disabled"],
-    fontSize: 12,
+    color: "#999",
+    fontSize: 9,
     textAlign: "center",
-    fontWeight: "500",
+    fontWeight: "600",
+    maxWidth: 60,
   },
   stepLabelActive: {
-    color: colors["text-secondary"],
-    fontWeight: "600",
+    color: "#666",
+  },
+  stepLabelCurrent: {
+    color: "#4CAF50",
+    fontWeight: "700",
+  },
+  card: {
+    backgroundColor: "rgba(255, 255, 255, 0.95)",
+    borderRadius: 28,
+    padding: 24,
+    marginBottom: 20,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.12,
+    shadowRadius: 16,
+    elevation: 8,
+    minHeight: Dimensions.get("window").height * 0.6, // 👈 fixed visible height (~60% of screen)
+    justifyContent: "space-between",
   },
   title: {
-    fontSize: 32,
+    fontSize: 28,
     fontWeight: "bold",
-    color: colors["text-secondary"],
-    marginBottom: 24,
+    color: "#1a1a1a",
+    marginBottom: 20,
     textAlign: "center",
   },
   formSection: {
     width: "100%",
   },
   sectionTitle: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: "600",
-    color: colors["text-primary"],
-    marginBottom: 16,
+    color: "#666",
+    marginBottom: 20,
     textAlign: "center",
   },
-  input: {
-    width: "100%",
-    backgroundColor: colors["bg-light"],
-    color: colors["text-primary"],
-    borderRadius: 16,
-    padding: 16,
-    marginBottom: 16,
-    fontSize: 16,
-    borderWidth: 1,
-    borderColor: colors["border-light"],
-  },
   row: {
-    flexDirection: "row",
+    // flexDirection: "row",
     flexWrap: "wrap",
-    gap: 12,
+    // gap: 12,
   },
   halfInput: {
     flex: 1,
   },
   errorText: {
-    color: colors["text-danger"],
+    color: "#ef4444",
     fontSize: 14,
     marginBottom: 16,
     textAlign: "center",
+    fontWeight: "500",
   },
   buttonRow: {
     flexDirection: "row",
     justifyContent: "center",
     marginTop: 24,
     gap: 16,
-  },
-  button: {
-    backgroundColor: colors.primary,
-    borderRadius: 20,
-    paddingVertical: 16,
-    paddingHorizontal: 40,
-    alignItems: "center",
-    minWidth: 140,
-    shadowColor: colors.shadow,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    elevation: 4,
-  },
-  formBackButton: {
-    backgroundColor: "#f0f0f5",
-    shadowColor: "#999",
-  },
-  buttonText: {
-    color: "#fff",
-    fontWeight: "bold",
-    fontSize: 16,
-    textAlign: "center",
-  },
-  buttonDisabled: {
-    opacity: 0.5,
-    shadowOpacity: 0.1,
-  },
-  // Dropdown styles
-  dropdownButton: {
-    width: "100%",
-    borderRadius: 16,
-    padding: 18,
-    marginBottom: 10,
-    marginTop: 10,
-    borderWidth: 1,
-    minHeight: 50,
-    borderColor: "#e0e0e0",
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  dropdownButtonText: {
-    // color: '#333',
-    fontSize: 16,
-    flex: 1,
-  },
-  placeholderText: {
-    color: "#999",
-  },
-  dropdownArrow: {
-    color: "#666",
-    fontSize: 12,
-  },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.4)",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  modalContent: {
-    backgroundColor: "#ffffff",
-    borderRadius: 20,
-    padding: 24,
-    width: "90%",
-    maxHeight: "70%",
-    borderWidth: 1,
-    borderColor: "#e0e0e0",
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 5,
-  },
-  modalTitle: {
-    color: "#333",
-    fontSize: 18,
-    fontWeight: "bold",
-    marginBottom: 16,
-    textAlign: "center",
-  },
-  dropdownList: {
-    maxHeight: 300,
-  },
-  dropdownItem: {
-    paddingVertical: 16,
-    paddingHorizontal: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: "#f0f0f5",
-  },
-  dropdownItemText: {
-    color: "#333",
-    fontSize: 16,
   },
 });

@@ -4,7 +4,6 @@ import { useApi } from './useApi';
 import { useAuth } from './useAuth';
 import { useToast } from './useToast';
 
-// Interface for API choices
 interface ChoiceOption {
   value: string;
   label: string;
@@ -58,11 +57,8 @@ export const useRegistrationForm = (onRegister: (user: any) => void) => {
     weeklyGoal: '3',
   });
 
-  // API choices state
   const [apiChoices, setApiChoices] = useState<ApiChoices | null>(null);
   const [choicesLoading, setChoicesLoading] = useState(true);
-
-  // Dropdown states
   const [showGenderDropdown, setShowGenderDropdown] = useState(false);
   const [showFitnessDropdown, setShowFitnessDropdown] = useState(false);
   const [showGoalDropdown, setShowGoalDropdown] = useState(false);
@@ -76,8 +72,6 @@ export const useRegistrationForm = (onRegister: (user: any) => void) => {
   const router = useRouter();
 
   const handleChange = (key: string, value: string | boolean | { value: string; label: string }) => {
-    // If the value is an object with value/label (from a dropdown selection),
-    // we want to store the value, not the label
     if (value && typeof value === 'object' && 'value' in value) {
       setForm({ ...form, [key]: value.value });
     } else {
@@ -87,16 +81,14 @@ export const useRegistrationForm = (onRegister: (user: any) => void) => {
 
   const canNext = () => {
     if (step === 0) return form.name && form.email && form.password && form.password === form.confirmPassword;
-    if (step === 1) return form.height && form.weight && form.age && form.gender && form.fitnessLevel && form.primaryGoal;
-    if (step === 2) return form.wakeUpTime && form.sleepTime && form.preferredWorkoutTime;
+    if (step === 1) return form.height && form.weight && form.age && form.gender;
+    if (step === 2) return form.fitnessLevel && form.motivationLevel;
+    if (step === 3) return form.primaryGoal;
+    if (step === 4) return form.wakeUpTime && form.sleepTime && form.preferredWorkoutTime;
     return true;
   };
 
   const registerApi = async (form: FormData) => {
-    console.log('API Choices:', apiChoices);
-    console.log('Form Data:', form);
-
-    // The form values are the same as the API expects since label and value are identical
     const payload = {
       name: form.name,
       email: form.email,
@@ -116,7 +108,6 @@ export const useRegistrationForm = (onRegister: (user: any) => void) => {
       weeklyGoal: form.weeklyGoal,
     };
 
-    console.log('Final API Payload:', payload);
     try {
       const data = await fetchPost(`${API_BASE_URL}/auth/register`, payload, false);
       return data;
@@ -155,25 +146,20 @@ export const useRegistrationForm = (onRegister: (user: any) => void) => {
     getProfileChoices();
   }, []);
 
-  
-
   const nextStep = async () => {
-    if (step < 2) {
+    if (step < 4) {
       setStep(step + 1);
     } else {
       const apiResult = await registerApi(form);
       if (apiResult.success) {
         showToast('Registration successful!', 'success');
         router.replace('/login');
-        // If the API returns tokens, use them to log in immediately
         if (apiResult.access && apiResult.refresh) {
-          await login(form, apiResult.access,);
+          await login(form, apiResult.access);
           onRegister(form);
           router.replace('/(tabs)');
         } else {
-          // Otherwise, redirect to login
           onRegister(form);
-        
         }
       } else {
         showToast(apiResult.error || apiResult.message || 'Registration failed', 'error');
@@ -199,39 +185,30 @@ export const useRegistrationForm = (onRegister: (user: any) => void) => {
     return options;
   };
 
-  const progress = ((step + 1) / 3) * 100;
+  const progress = ((step + 1) / 5) * 100;
 
   return {
-    // State
     step,
     form,
     apiChoices,
     choicesLoading,
     loading,
     progress,
-    
-    // Dropdown states
     showGenderDropdown,
     showFitnessDropdown,
     showGoalDropdown,
     showWorkoutTimeDropdown,
     showMotivationDropdown,
-    
-    // Handlers
     handleChange,
     canNext,
     nextStep,
     prevStep,
     getOptions,
-    
-    // Dropdown handlers
     setShowGenderDropdown,
     setShowFitnessDropdown,
     setShowGoalDropdown,
     setShowWorkoutTimeDropdown,
     setShowMotivationDropdown,
-    
-    // Router
     router,
   };
 };

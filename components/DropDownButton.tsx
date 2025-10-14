@@ -54,20 +54,20 @@ export const DropdownButton = ({
 const styles = StyleSheet.create({
   // Dropdown styles
     container: {
-    marginVertical: 8,
+    // marginVertical: 8,
   },
     title: {
       fontSize: 15,
       fontWeight: "600",
       color: colors["text-secondary"],
-      marginBottom: 8,
+      marginBottom: 6,
       marginLeft:8,
     },
   dropdownButton: {
     width: "100%",
     backgroundColor: colors["bg-light"],
     borderRadius: 16,
-    padding: 18,
+    padding: 16,
     marginBottom: 0,
     borderWidth: 1,
     minHeight: 60,

@@ -214,7 +214,7 @@ export default function CustomDateTimePicker({
         disabled={!enabled}
       >
         <Ionicons name={iconName} size={20} color="#4CAF50" />
-        {placeHolderText &&!displayValue ? (
+        {placeHolderText && !displayValue ? (
           <Text style={styles.buttonText}>{placeHolderText}</Text>
         ) : (
           <Text style={styles.buttonText}>{displayValue}</Text>
@@ -318,24 +318,23 @@ export default function CustomDateTimePicker({
 
 const styles = StyleSheet.create({
   container: {
-    marginVertical: 8,
+    // marginVertical: 8,
   },
   title: {
-    fontSize: 15,
+    fontSize: 14,
     fontWeight: "600",
     color: colors["text-secondary"],
-    marginBottom: 8,
+    marginBottom: 6,
+    marginLeft: 4,
   },
   button: {
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: colors["bg-light"],
     borderRadius: 16,
-    paddingVertical: 12,
-    paddingHorizontal: 16,
     borderWidth: 1,
     borderColor: colors["border-light"],
-    padding: 18,
+    padding: 16,
     minHeight: 60,
   },
   buttonText: {
@@ -346,7 +345,6 @@ const styles = StyleSheet.create({
   },
   modalOverlay: {
     flex: 1,
-    // backgroundColor: 'rgba(0, 0, 0, 0.5)',
     justifyContent: "flex-end",
   },
   modalContent: {

@@ -53,7 +53,7 @@ export const InputField: React.FC<InputFieldProps> = ({
 const styles = StyleSheet.create({
   container: {
     width: "100%",
-    marginBottom: 16,
+    marginBottom: 6,
   },
   label: {
     fontSize: 14,
